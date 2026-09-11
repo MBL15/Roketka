@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1f2a" />
+    <meta
+      name="description"
+      content="Воздушный Шар — бонусная crash-игра с бустерами и турнирной механикой"
+    />
+    <title>Воздушный Шар — бонусная игра</title>
+    <style>
+      /* Заставка до загрузки бандла: без неё видно белую вспышку. */
+      #boot {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at 50% 20%, #123b4d, #071219 70%);
+        color: #dff3ff;
+        font: 500 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        z-index: 10;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="boot">Готовим небо…</div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

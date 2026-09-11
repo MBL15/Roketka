@@ -1,0 +1,80 @@
+server:
+  port: 8081
+  # Сжатие JSON-ответов: история и турнирная таблица отдаются целыми списками.
+  compression:
+    enabled: true
+    mime-types: application/json,text/html,text/css,application/javascript
+  shutdown: graceful
+
+spring:
+  application:
+    name: balloon-backend
+
+  # H2 в файловом режиме: состояние переживает перезапуск, внешних сервисов не нужно.
+  datasource:
+    url: jdbc:h2:file:${BALLOON_DATA_DIR:./data}/balloon;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ''
+    hikari:
+      pool-name: balloon-pool
+      maximum-pool-size: 16
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.jdbc.batch_size: 32
+      hibernate.order_inserts: true
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jackson:
+    # Пустые поля отдаются как null, а не вырезаются из ответа: контракт API
+    # должен читаться по самому ответу, без сверки с документацией. Для
+    # проверяющего это разница между «поля нет» и «значения ещё нет».
+    default-property-inclusion: always
+
+balloon:
+  # Путь к игровой конфигурации. Файл отслеживается и перечитывается на лету.
+  config-path: ${BALLOON_CONFIG_PATH:../config/game-config.yaml}
+  # Разрешить админке записывать изменения обратно в файл.
+  config-writable: true
+  # Симуляция соперников по турниру (живой рейтинг «дышит» даже с одним игроком).
+  simulation-enabled: ${SIMULATION_ENABLED:true}
+  # Режим разработки: непустое значение делает серверные зёрна детерминированными,
+  # и последовательность раундов повторяется от запуска к запуску. Нужно для
+  # отладки анимаций на одних и тех же исходах. В рабочем режиме оставить пустым.
+  dev-seed: ${DEV_SEED:}
+  # Демо-аккаунты, создаваемые при первом запуске: логин/пароль.
+  demo-users: demo:demo, expert:expert, judge:judge
+  # Источники, которым разрешён доступ к API при локальной разработке фронтенда.
+  cors-origins: http://localhost:5173, http://127.0.0.1:5173, http://localhost:8080, http://127.0.0.1:8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+    tags-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    ru.stoloto.balloon: INFO
+  pattern:
+    console: '%d{HH:mm:ss.SSS} %-5level [%thread] %logger{28} - %msg%n'

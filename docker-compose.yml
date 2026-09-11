@@ -1,0 +1,81 @@
+# =============================================================================
+#  «Воздушный шар» — полный стенд одной командой: docker compose up --build
+#
+#  Наружу открыт один порт (по умолчанию 8080): nginx отдаёт интерфейс и
+#  проксирует /api, /ws, /swagger-ui на backend. Проверяющему достаточно
+#  одного адреса.
+#
+#  Всё используемое ПО свободное: Eclipse Temurin (GPLv2+CE), Maven и Spring
+#  (Apache-2.0), H2 (MPL/EPL), PostgreSQL (PostgreSQL License), nginx (BSD),
+#  Node, React и Vite (MIT). Лицензионные ключи не нужны.
+# =============================================================================
+
+# Имя проекта задано явно, а не выведено из имени каталога: иначе клонирование
+# в папку с не-ASCII именем ломает запуск («project name must not be empty»).
+name: balloon
+
+services:
+  backend:
+    build:
+      # Контекст — корень репозитория: в образ нужно положить и config/.
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: balloon-backend
+    restart: unless-stopped
+    environment:
+      # Конфигурация игры монтируется с хоста — правки видны без пересборки.
+      BALLOON_CONFIG_PATH: /app/config/game-config.yaml
+      BALLOON_DATA_DIR: /app/data
+      DEMO_BONUS_BALANCE: ${DEMO_BONUS_BALANCE:-5000}
+      SIMULATION_ENABLED: ${SIMULATION_ENABLED:-true}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES:-default}
+    volumes:
+      # Bind mount, а не копия: изменил файл в редакторе — сервер перечитал его
+      # сам за секунду. На этом построен сценарий 5.
+      - ./config:/app/config
+      - balloon-data:/app/data
+    ports:
+      # Прямой доступ к API в обход nginx: удобно для curl и Swagger.
+      - '${API_PORT:-8081}:8081'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8081/actuator/health']
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: balloon-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - '${APP_PORT:-8080}:8080'
+
+  # Необязательный PostgreSQL. По умолчанию не запускается: базовый стенд
+  # работает на встроенной H2 и не требует ничего, кроме Docker.
+  #   docker compose --profile postgres up --build
+  postgres:
+    image: postgres:16-alpine
+    profiles: ['postgres']
+    container_name: balloon-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: balloon
+      POSTGRES_USER: balloon
+      POSTGRES_PASSWORD: balloon
+    volumes:
+      - balloon-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U balloon']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  balloon-data:
+  balloon-postgres:

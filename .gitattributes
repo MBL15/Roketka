@@ -1,0 +1,15 @@
+# Файлы конфигурации перезаписываются GameConfigYamlWriter'ом с переводами
+# строк \n. Без явного eol=lf Git на Windows отдал бы их в CRLF, и первое же
+# сохранение из админки показалось бы изменением всего файла целиком.
+*.yaml text eol=lf
+*.yml text eol=lf
+
+# Внутрь контейнеров эти файлы попадают как есть — только LF.
+Dockerfile text eol=lf
+*.conf text eol=lf
+
+*.java text
+*.ts text
+*.tsx text
+*.css text
+*.md text

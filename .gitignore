@@ -1,0 +1,29 @@
+# ---- Java / Maven ----
+target/
+*.class
+*.jar
+!**/.mvn/wrapper/maven-wrapper.jar
+*.log
+
+# ---- Node / frontend ----
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+
+# ---- Runtime data (H2 database files, generated at startup) ----
+data/
+*.mv.db
+*.trace.db
+
+# ---- IDE / OS ----
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# ---- Local environment overrides ----
+.env
+.env.local

@@ -1,0 +1,16 @@
+# Профиль для запуска на PostgreSQL вместо встроенной H2.
+# Схема и код не меняются — переключается только источник данных:
+#   SPRING_PROFILES_ACTIVE=postgres docker compose --profile postgres up --build
+spring:
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://postgres:5432/balloon}
+    driver-class-name: org.postgresql.Driver
+    username: ${POSTGRES_USER:balloon}
+    password: ${POSTGRES_PASSWORD:balloon}
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: false
