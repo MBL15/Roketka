@@ -1,30 +1,42 @@
 import type { RewardSetup } from '../api/types';
 import { formatNumber } from '../utils/format';
 
-/**
- * Прогресс коллекции «Карта неба» — дополнительной игровой награды.
- *
- * Показан на экране выбора ставки специально: незакрытые ячейки видны до
- * ставки, и именно они дают повод сыграть ещё раз. Без визуального прогресса
- * награда воспринималась бы как случайная иконка на экране результата.
- */
+const HELP_TEXT =
+  'Каждый раунд — и выигрышный, и проигрышный — даёт один фрагмент. Дубликат обменивается на игровые очки. Собранная коллекция приносит бонусные баллы и очки, после чего открывается следующая.';
+
+interface CollectionStripProps {
+  reward: RewardSetup;
+  highlight?: number | null;
+  variant?: 'compact' | 'profile';
+}
+
+/** Прогресс коллекции «Карта неба». */
 export function CollectionStrip({
   reward,
   highlight,
-}: {
-  reward: RewardSetup;
-  /** Только что полученный фрагмент подсвечивается отдельно. */
-  highlight?: number | null;
-}): JSX.Element | null {
+  variant = 'compact',
+}: CollectionStripProps): JSX.Element | null {
   if (!reward.enabled || reward.collectionSize === 0) {
     return null;
   }
 
   const owned = new Set(reward.ownedFragments);
   const cells = Array.from({ length: reward.collectionSize }, (_, index) => index + 1);
+  const progress = Math.round((owned.size / reward.collectionSize) * 100);
+
+  const helpDetail = `${HELP_TEXT} Награда за сбор: ${formatNumber(reward.completionBonusBalance)} бонусов и ${formatNumber(reward.completionBonusPoints)} очков.`;
 
   return (
-    <div className="collection">
+    <div className={`collection${variant === 'profile' ? ' collection--profile' : ''}`}>
+      <button
+        type="button"
+        className="collection__help"
+        title={helpDetail}
+        aria-label="Как работает коллекция"
+      >
+        ?
+      </button>
+
       <div className="row row--between collection__head">
         <div className="col collection__title">
           <span className="eyebrow">Награда · коллекция {reward.collectionLevel}</span>
@@ -34,6 +46,18 @@ export function CollectionStrip({
           {owned.size} / {reward.collectionSize}
         </span>
       </div>
+
+      {variant === 'profile' && (
+        <>
+          <div className="collection__progress" aria-hidden="true">
+            <span className="collection__progress-fill" style={{ width: `${progress}%` }} />
+          </div>
+          <p className="text-sm muted collection__rewards">
+            За полную сборку: <strong className="num">{formatNumber(reward.completionBonusBalance)}</strong> бонусов
+            и <strong className="num">{formatNumber(reward.completionBonusPoints)}</strong> очков
+          </p>
+        </>
+      )}
 
       <div className="collection__grid">
         {cells.map((index) => (
@@ -52,12 +76,6 @@ export function CollectionStrip({
           </span>
         ))}
       </div>
-
-      <p className="text-xs muted collection__note">
-        Каждый раунд — и выигрышный, и проигрышный — даёт один фрагмент. Дубликат обменивается на игровые
-        очки. Собранная коллекция приносит {formatNumber(reward.completionBonusBalance)} бонусных баллов и{' '}
-        {formatNumber(reward.completionBonusPoints)} очков, после чего открывается следующая.
-      </p>
     </div>
   );
 }

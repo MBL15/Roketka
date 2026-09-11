@@ -2,30 +2,20 @@ import { useEffect, useState } from 'react';
 import { Sky } from './components/Sky';
 import { Toasts } from './components/Toasts';
 import { TopBar } from './components/TopBar';
+import { APP_SKY_SEED } from './utils/skySeed';
 import { AdminScreen } from './screens/AdminScreen';
 import { BetSelectScreen } from './screens/BetSelectScreen';
 import { GameScreen } from './screens/GameScreen';
 import { LoginScreen } from './screens/LoginScreen';
+import { ProfileScreen } from './screens/ProfileScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { ThemeSelectScreen } from './screens/ThemeSelectScreen';
 import { useGame } from './state/GameContext';
+import { isExpertAccount } from './utils/access';
 
-/**
- * Оболочка приложения.
- *
- * Вместо маршрутизатора — конечный автомат фаз в GameContext: экранов шесть,
- * переходы между ними строго заданы игровым циклом, а адресная строка в
- * бонусной игре внутри личного кабинета всё равно не нужна. Единственное
- * исключение — админка: она открывается по якорю #admin, чтобы проверяющий
- * мог попасть в неё напрямую по ссылке.
- *
- * Тема (зелёная или красная) задаётся атрибутом data-theme на корне: все цвета
- * живут в CSS-переменных, поэтому смена темы не требует перерисовки логики.
- */
 export function App(): JSX.Element {
-  const { phase, theme, player } = useGame();
+  const { phase, theme, player, notify } = useGame();
   const [adminOpen, setAdminOpen] = useState(() => window.location.hash === '#admin');
-  const [skySeed, setSkySeed] = useState(() => Date.now());
 
   useEffect(() => {
     const onHashChange = () => setAdminOpen(window.location.hash === '#admin');
@@ -33,20 +23,27 @@ export function App(): JSX.Element {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
-  // Небо перерисовывается заново при каждой смене экрана: набор птиц и облаков
-  // не повторяется, и возврат на экран не выглядит возвратом к той же картинке.
-  useEffect(() => setSkySeed(Date.now()), [phase]);
-
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    if (!adminOpen || !player) {
+      return;
+    }
+    if (!isExpertAccount(player.nickname)) {
+      window.location.hash = '';
+      setAdminOpen(false);
+      notify({ tone: 'error', title: 'Нет доступа', body: 'Настройки доступны только аккаунту expert' });
+    }
+  }, [adminOpen, notify, player]);
 
   const closeAdmin = () => {
     window.location.hash = '';
     setAdminOpen(false);
   };
 
-  if (adminOpen && player) {
+  if (adminOpen && player && isExpertAccount(player.nickname)) {
     return (
       <div className="app app--admin">
         <div className="app__content">
@@ -58,10 +55,10 @@ export function App(): JSX.Element {
   }
 
   return (
-    <div className={`app app--${phase}`} data-theme={theme}>
-      {/* На игровом экране своё небо внутри Canvas полёта — второе было бы лишним слоем. */}
-      {phase !== 'game' && phase !== 'theme' && <Sky seed={skySeed} />}
-
+    <div className={`app app--${phase} app--sky`} data-theme={theme}>
+      <div className="app__sky-layer" aria-hidden="true">
+        <Sky seed={APP_SKY_SEED} fullPage />
+      </div>
       <div className="app__content">
         {player && phase !== 'boot' && phase !== 'login' && <TopBar />}
 
@@ -71,6 +68,7 @@ export function App(): JSX.Element {
         {phase === 'bet' && <BetSelectScreen />}
         {phase === 'game' && <GameScreen />}
         {phase === 'result' && <ResultScreen />}
+        {phase === 'profile' && <ProfileScreen />}
       </div>
 
       <Toasts />
@@ -82,7 +80,7 @@ function BootScreen(): JSX.Element {
   return (
     <div className="boot">
       <div className="boot__balloon" aria-hidden="true" />
-      <p className="text-sm muted">Готовим небо…</p>
+      <p className="text-sm muted">Загрузка…</p>
     </div>
   );
 }

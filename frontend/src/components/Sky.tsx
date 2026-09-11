@@ -46,12 +46,15 @@ interface SkyProps {
   stars?: boolean;
   /** Смещение неба вниз при подъёме шара: параллакс игрового экрана. */
   parallax?: number;
+  /** Облака по всей высоте viewport (фон приложения). */
+  fullPage?: boolean;
 }
 
 const randomBetween = (min: number, max: number): number => min + Math.random() * (max - min);
 const randomCount = (): number => 1 + Math.floor(Math.random() * 3);
+const randomCloudCount = (): number => 4 + Math.floor(Math.random() * 4);
 
-export function Sky({ seed, stars = true, parallax = 0 }: SkyProps): JSX.Element {
+export function Sky({ seed, stars = true, parallax = 0, fullPage = false }: SkyProps): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const parallaxRef = useRef(parallax);
   parallaxRef.current = parallax;
@@ -73,18 +76,22 @@ export function Sky({ seed, stars = true, parallax = 0 }: SkyProps): JSX.Element
     let starField: Star[] = [];
 
     const populate = () => {
-      clouds = Array.from({ length: randomCount() }, () => ({
+      const cloudCount = fullPage ? randomCloudCount() : randomCount();
+      const cloudYMin = fullPage ? 0.04 : 0.08;
+      const cloudYMax = fullPage ? 0.96 : 0.45;
+
+      clouds = Array.from({ length: cloudCount }, () => ({
         x: randomBetween(-0.2, 1.2),
-        y: randomBetween(0.08, 0.45),
-        scale: randomBetween(0.55, 1.35),
+        y: randomBetween(cloudYMin, cloudYMax),
+        scale: randomBetween(fullPage ? 0.65 : 0.55, fullPage ? 1.55 : 1.35),
         // Облака медленные: 0.006–0.018 экрана в секунду.
         speed: randomBetween(0.006, 0.018) * (Math.random() < 0.5 ? -1 : 1),
-        opacity: randomBetween(0.16, 0.36),
+        opacity: randomBetween(0.14, fullPage ? 0.32 : 0.36),
       }));
 
-      birds = Array.from({ length: randomCount() }, () => ({
+      birds = Array.from({ length: fullPage ? randomCloudCount() - 1 : randomCount() }, () => ({
         x: randomBetween(-0.2, 1.2),
-        y: randomBetween(0.12, 0.52),
+        y: randomBetween(fullPage ? 0.08 : 0.12, fullPage ? 0.88 : 0.52),
         scale: randomBetween(0.7, 1.25),
         // Птицы в 6–12 раз быстрее облаков — отсюда эффект глубины.
         speed: randomBetween(0.07, 0.16) * (Math.random() < 0.5 ? -1 : 1),
@@ -93,9 +100,9 @@ export function Sky({ seed, stars = true, parallax = 0 }: SkyProps): JSX.Element
         flapSpeed: randomBetween(5.5, 9),
       }));
 
-      starField = Array.from({ length: 70 }, () => ({
+      starField = Array.from({ length: fullPage ? 110 : 70 }, () => ({
         x: Math.random(),
-        y: Math.random() * 0.55,
+        y: Math.random() * (fullPage ? 0.92 : 0.55),
         radius: randomBetween(0.4, 1.5),
         twinklePhase: Math.random() * Math.PI * 2,
       }));
@@ -209,7 +216,7 @@ export function Sky({ seed, stars = true, parallax = 0 }: SkyProps): JSX.Element
       window.cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [seed, stars]);
+  }, [seed, stars, fullPage]);
 
   return <canvas ref={canvasRef} className="app__sky" aria-hidden="true" />;
 }

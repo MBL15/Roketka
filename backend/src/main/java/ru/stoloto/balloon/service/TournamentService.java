@@ -4,9 +4,12 @@ import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import ru.stoloto.balloon.config.GameConfig;
 import ru.stoloto.balloon.config.GameConfigService;
 import ru.stoloto.balloon.domain.Tournament;
@@ -58,14 +61,26 @@ public class TournamentService {
 
     private volatile long lastSimulationAt;
 
+    /**
+     * Очки кого-то из участников изменились и рейтинг ещё не разослан.
+     * Отдельный флаг, а не {@link #dirty}: тот набор вычищается сбросом в БД,
+     * и рассылка теряла бы изменения.
+     */
+    private volatile boolean ratingChanged;
+
+    /** Своя транзакция на каждого игрока при сбросе очков в БД. */
+    private final TransactionTemplate transactions;
+
     public TournamentService(UserAccountRepository users,
                              TournamentRepository tournaments,
                              GameConfigService configService,
-                             ApplicationEventPublisher events) {
+                             ApplicationEventPublisher events,
+                             PlatformTransactionManager transactionManager) {
         this.users = users;
         this.tournaments = tournaments;
         this.configService = configService;
         this.events = events;
+        this.transactions = new TransactionTemplate(transactionManager);
     }
 
     @PostConstruct
@@ -95,7 +110,25 @@ public class TournamentService {
             return livePoints(userId);
         }
         dirty.add(userId);
+        ratingChanged = true;
         return livePoints.computeIfAbsent(userId, id -> new AtomicLong()).addAndGet(delta);
+    }
+
+    /**
+     * Рассылка живого рейтинга.
+     *
+     * Постановка отводит на обновление позиции игрока не более 0.5 секунды,
+     * поэтому шаг — 400 мс. Событие не публикуется на каждое пересечение
+     * уровня: при нескольких одновременных полётах это давало бы всплеск
+     * рассылок, а игроку достаточно видеть итог за интервал.
+     */
+    @Scheduled(fixedDelay = 400L)
+    public void broadcastRating() {
+        if (!ratingChanged) {
+            return;
+        }
+        ratingChanged = false;
+        events.publishEvent(new GameEvents.RatingUpdated(liveRating(null)));
     }
 
     public long livePoints(long userId) {
@@ -109,9 +142,17 @@ public class TournamentService {
         dirty.remove(userId);
     }
 
-    /** Периодический сброс накопленных очков в БД: разгружает горячий путь. */
+    /**
+     * Периодический сброс накопленных очков в БД: разгружает горячий путь.
+     *
+     * Каждый игрок пишется отдельной транзакцией. Одна общая транзакция на всю
+     * пачку означала бы, что конфликт версий по одному игроку откатывает
+     * запись всех остальных, а Spring пишет в лог стек-трейс из планировщика.
+     * Конфликт здесь штатный: параллельно идущий расчёт раунда обновляет ту же
+     * строку. Источник правды — значение в памяти, поэтому игрока достаточно
+     * вернуть в очередь и повторить на следующем тике.
+     */
     @Scheduled(fixedDelay = 5000L)
-    @Transactional
     public void flushDirtyScores() {
         if (dirty.isEmpty()) {
             return;
@@ -123,7 +164,13 @@ public class TournamentService {
             if (points == null) {
                 continue;
             }
-            users.findById(userId).ifPresent(user -> user.setGamePoints(points.get()));
+            try {
+                transactions.executeWithoutResult(status ->
+                        users.findById(userId).ifPresent(user -> user.setGamePoints(points.get())));
+            } catch (OptimisticLockingFailureException e) {
+                dirty.add(userId);
+                log.debug("Очки игрока {} перезапишем на следующем тике: строку обновил расчёт раунда", userId);
+            }
         }
     }
 
@@ -272,7 +319,7 @@ public class TournamentService {
                 addLivePoints(botId, delta);
             }
         }
-        events.publishEvent(new GameEvents.RatingUpdated(liveRating(null)));
+        // Рассылку берёт на себя broadcastRating: addLivePoints уже взвёл флаг.
     }
 
     public long simulationTickCount() {

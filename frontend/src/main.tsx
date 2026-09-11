@@ -4,6 +4,7 @@ import { App } from './App';
 import { GameProvider } from './state/GameContext';
 import './styles/tokens.css';
 import './styles/global.css';
+import './styles/layout.css';
 import './styles/components.css';
 import './styles/screens.css';
 

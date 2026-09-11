@@ -2,16 +2,10 @@ import { useState } from 'react';
 import { audio } from '../audio/AudioEngine';
 import { useGame } from '../state/GameContext';
 import { formatNumber } from '../utils/format';
+import { isExpertAccount } from '../utils/access';
 
-/**
- * Верхняя панель: состояние игрока и сервисные действия.
- *
- * Три валюты показаны рядом и подписаны, потому что они принципиально разные:
- * бонусные баллы тратятся на ставки, игровые очки идут в турнир, билеты —
- * результат апсейла. Если не подписать, игрок будет считать их одним и тем же.
- */
 export function TopBar(): JSX.Element {
-  const { player, socketStatus, logout, topUp, phase } = useGame();
+  const { player, socketStatus, logout, topUp, phase, goTo } = useGame();
   const [soundOn, setSoundOn] = useState(audio.isEnabled);
 
   if (!player) {
@@ -28,44 +22,57 @@ export function TopBar(): JSX.Element {
     }
   };
 
+  const openProfile = () => {
+    audio.click();
+    if (phase === 'profile') {
+      goTo('bet');
+      return;
+    }
+    goTo('profile');
+  };
+
   const connection =
     socketStatus === 'open'
-      ? { label: 'реальное время', tone: 'positive' as const }
+      ? { label: 'онлайн', tone: 'positive' as const }
       : socketStatus === 'connecting'
-        ? { label: 'подключение', tone: 'warning' as const }
-        : { label: 'резервный опрос', tone: 'negative' as const };
+        ? { label: 'связь…', tone: 'warning' as const }
+        : { label: 'опрос', tone: 'negative' as const };
+
+  const expert = isExpertAccount(player.nickname);
+  const onProfile = phase === 'profile';
 
   return (
-    <header className="topbar panel panel--pad">
-      <div className="topbar__brand">
-        <span className="topbar__logo" aria-hidden="true">
+    <header className="crash-header">
+      <div className="crash-header__brand">
+        <span className="crash-header__logo" aria-hidden="true">
           ◓
         </span>
-        <span className="col topbar__title">
-          <strong>Воздушный Шар</strong>
-          <span className="text-xs muted">бонусная игра · Столото</span>
+        <span className="col" style={{ gap: 0 }}>
+          <span className="crash-header__name">Воздушный шар</span>
+          <span className="crash-header__tag">бонусная игра</span>
         </span>
       </div>
 
-      <div className="topbar__stats">
-        <Stat label="Бонусные баллы" value={formatNumber(player.bonusBalance)} accent />
-        <Stat label="Игровые очки" value={formatNumber(player.gamePoints)} />
-        <Stat label="Билеты" value={formatNumber(player.lotteryTickets)} />
-        <Stat label="Место в турнире" value={`#${player.tournamentPosition}`} />
+      <div className="crash-header__balance">
+        <span className="crash-header__balance-label">Баланс</span>
+        <span className="crash-header__balance-value num">{formatNumber(player.bonusBalance)}</span>
       </div>
 
-      <div className="topbar__actions">
-        <span
-          className={`chip chip--${connection.tone} topbar__connection`}
-          title="Коэффициент приходит по WebSocket; при обрыве интерфейс переходит на опрос REST"
-        >
-          <span className="topbar__dot" aria-hidden="true" />
+      <div className="crash-header__stats">
+        <Stat label="Очки" value={formatNumber(player.gamePoints)} />
+        <Stat label="Билеты" value={formatNumber(player.lotteryTickets)} />
+        <Stat label="Турнир" value={`#${player.tournamentPosition}`} />
+      </div>
+
+      <div className="crash-header__actions">
+        <span className={`crash-header__status chip chip--${connection.tone}`} title="Статус соединения">
+          <span className="crash-header__dot" aria-hidden="true" />
           {connection.label}
         </span>
 
         {player.bonusBalance < 500 && phase !== 'game' && (
-          <button type="button" className="btn btn--sm" onClick={() => void topUp()}>
-            +2000 бонусов
+          <button type="button" className="btn btn--sm btn--primary" onClick={() => void topUp()}>
+            +2000
           </button>
         )}
 
@@ -74,33 +81,57 @@ export function TopBar(): JSX.Element {
           className="btn btn--icon btn--ghost"
           onClick={toggleSound}
           aria-label={soundOn ? 'Выключить звук' : 'Включить звук'}
-          title={soundOn ? 'Выключить звук' : 'Включить звук'}
         >
           {soundOn ? '🔊' : '🔇'}
         </button>
 
-        <a
-          className="btn btn--icon btn--ghost"
-          href="#admin"
-          title="Административная панель: игровые параметры и симулятор"
-          aria-label="Административная панель"
-        >
-          ⚙
-        </a>
+        {phase !== 'game' && phase !== 'result' && (
+          <button
+            type="button"
+            className={`btn btn--icon btn--ghost${onProfile ? ' btn--icon-active' : ''}`}
+            onClick={openProfile}
+            aria-label="Профиль"
+            title="Профиль"
+          >
+            <ProfileIcon />
+          </button>
+        )}
+
+        {expert && (
+          <a className="btn btn--icon btn--ghost" href="#admin" title="Настройки" aria-label="Настройки">
+            ⚙
+          </a>
+        )}
 
         <button type="button" className="btn btn--sm btn--ghost" onClick={() => void logout()}>
-          {player.nickname} · выйти
+          Выйти
         </button>
       </div>
     </header>
   );
 }
 
-function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }): JSX.Element {
+function ProfileIcon(): JSX.Element {
   return (
-    <div className="stat">
-      <span className="stat__label">{label}</span>
-      <span className={`stat__value num${accent ? ' stat__value--accent' : ''}`}>{value}</span>
+    <svg className="topbar__profile-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+      <path
+        d="M5 20c0-3.3 3.1-6 7-6s7 2.7 7 6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }): JSX.Element {
+  return (
+    <div className="crash-header__stat">
+      <span className="crash-header__stat-label">{label}</span>
+      <span className="crash-header__stat-value num">{value}</span>
     </div>
   );
 }
+

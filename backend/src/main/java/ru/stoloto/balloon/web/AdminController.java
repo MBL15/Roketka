@@ -26,8 +26,8 @@ import java.util.List;
  * разойтись. Значения проходят ту же валидацию, что и при чтении файла: если
  * они некорректны, файл не изменяется и продолжает работать предыдущая версия.
  *
- * <p>Упрощение прототипа: отдельной роли администратора нет — достаточно
- * действующей игровой сессии. Ограничение зафиксировано в docs/FEATURES.md.
+ * <p>Доступ ограничен аккаунтом {@code expert}: демо-профили играют, но не
+ * меняют конфигурацию.
  */
 @RestController
 @RequestMapping("/api/admin")
@@ -59,6 +59,7 @@ public class AdminController {
     @Operation(summary = "Текущая игровая конфигурация",
             description = "Полный объект в том же виде, в каком он лежит в config/game-config.yaml")
     public GameConfig config(AuthContext context) {
+        AdminAccess.requireExpert(context);
         return configService.current();
     }
 
@@ -69,7 +70,8 @@ public class AdminController {
                     отклонённой попытки. Если поле `valid` равно false, значит на диске лежит
                     некорректная версия, а в игре работает предыдущая рабочая.
                     """)
-    public GameConfigService.ConfigStatus status() {
+    public GameConfigService.ConfigStatus status(AuthContext context) {
+        AdminAccess.requireExpert(context);
         return configService.status();
     }
 
@@ -77,6 +79,7 @@ public class AdminController {
     @Operation(summary = "Проверить черновик без сохранения",
             description = "Возвращает список ошибок на русском языке; пустой список означает, что значения допустимы")
     public ValidationResponse validate(AuthContext context, @RequestBody GameConfig candidate) {
+        AdminAccess.requireExpert(context);
         List<String> errors = configService.dryRun(candidate);
         return new ValidationResponse(errors.isEmpty(), errors);
     }
@@ -89,12 +92,14 @@ public class AdminController {
                     При ошибках валидации отвечает кодом 422 и не меняет файл.
                     """)
     public GameConfig save(AuthContext context, @RequestBody GameConfig candidate) {
+        AdminAccess.requireExpert(context);
         return configService.save(candidate, "admin:" + context.user().getNickname());
     }
 
     @PostMapping("/config/reset")
     @Operation(summary = "Вернуть заводские значения")
     public GameConfig reset(AuthContext context) {
+        AdminAccess.requireExpert(context);
         return configService.resetToDefaults();
     }
 
@@ -110,6 +115,7 @@ public class AdminController {
                     активная конфигурация. Поле `seed` делает серию воспроизводимой.
                     """)
     public RtpSimulator.SimulationReport simulate(AuthContext context, @RequestBody SimulateRequest request) {
+        AdminAccess.requireExpert(context);
         GameConfig config = request.config() != null ? request.config() : configService.current();
         if (request.config() != null) {
             List<String> errors = configService.dryRun(request.config());
@@ -131,6 +137,7 @@ public class AdminController {
     @Operation(summary = "Оперативные показатели прототипа",
             description = "Активные раунды, размеры таблиц и состояние симуляции соперников")
     public RuntimeStats stats(AuthContext context) {
+        AdminAccess.requireExpert(context);
         return new RuntimeStats(
                 engine.activeCount(),
                 rounds.count(),

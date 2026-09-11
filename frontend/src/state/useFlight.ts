@@ -49,7 +49,11 @@ export interface Popup {
 const POLL_INTERVAL_MS = 700;
 const POPUP_LIFETIME_MS = 1400;
 
-export function useFlight(flight: Flight, onFinished: () => void): FlightState & { cashout: () => void } {
+export function useFlight(
+  flight: Flight,
+  onFinished: () => void,
+  autoCashoutMultiplier: number | null = null,
+): FlightState & { cashout: () => void } {
   const [state, setState] = useState<FlightState>(() => initialState(flight));
 
   const finishedRef = useRef(false);
@@ -236,6 +240,8 @@ export function useFlight(flight: Flight, onFinished: () => void): FlightState &
     return () => window.clearTimeout(timer);
   }, [flight, finish]);
 
+  const autoTriggered = useRef(false);
+
   const cashout = useCallback(() => {
     setState((current) => {
       if (current.cashedOut || current.crashed) {
@@ -264,6 +270,27 @@ export function useFlight(flight: Flight, onFinished: () => void): FlightState &
         setState((current) => (current.cashoutMultiplier === null ? { ...current, cashedOut: false } : current));
       });
   }, [flight.roundId]);
+
+  // Автозабор: срабатывает после первого уровня, когда коэффициент достиг цели.
+  useEffect(() => {
+    if (autoCashoutMultiplier === null || autoTriggered.current) {
+      return;
+    }
+    if (state.cashedOut || state.crashed || state.levelsPassed < 1) {
+      return;
+    }
+    if (state.multiplier >= autoCashoutMultiplier) {
+      autoTriggered.current = true;
+      cashout();
+    }
+  }, [
+    autoCashoutMultiplier,
+    cashout,
+    state.cashedOut,
+    state.crashed,
+    state.levelsPassed,
+    state.multiplier,
+  ]);
 
   return { ...state, cashout };
 }

@@ -37,6 +37,11 @@ public class ApiExceptionHandler {
         return error(HttpStatus.UNAUTHORIZED, "authentication_failed", e.getMessage(), null);
     }
 
+    @ExceptionHandler(AdminAccess.AccessDeniedException.class)
+    public ResponseEntity<GameDtos.ApiError> onAdminDenied(AdminAccess.AccessDeniedException e) {
+        return error(HttpStatus.FORBIDDEN, "forbidden", e.getMessage(), null);
+    }
+
     @ExceptionHandler(UserAccount.InsufficientBalanceException.class)
     public ResponseEntity<GameDtos.ApiError> onInsufficientBalance(UserAccount.InsufficientBalanceException e) {
         return error(HttpStatus.CONFLICT, "insufficient_balance", "Не хватает бонусов",

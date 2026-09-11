@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, type CSSProperties } from 'react';
 
 /**
  * Воздушный шар — главный образ игры.
@@ -21,6 +21,8 @@ interface BalloonProps {
   deflated?: boolean;
   className?: string;
   title?: string;
+  /** Используется для передачи параметров анимации через CSS-переменные. */
+  style?: CSSProperties;
 }
 
 export function Balloon({
@@ -30,6 +32,7 @@ export function Balloon({
   deflated = false,
   className,
   title,
+  style,
 }: BalloonProps): JSX.Element {
   // useId возвращает значение с двоеточиями (:r1:), недопустимыми в ссылке
   // url(#...) — убираем их.
@@ -43,7 +46,7 @@ export function Balloon({
       viewBox="0 0 100 132"
       role={title ? 'img' : 'presentation'}
       aria-label={title}
-      style={{ overflow: 'visible' }}
+      style={{ overflow: 'visible', ...style }}
     >
       <defs>
         <radialGradient id={gradientId} cx="35%" cy="28%" r="78%">

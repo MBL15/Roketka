@@ -22,7 +22,7 @@ import type {
 } from '../api/types';
 import { flightFromStart, flightFromState, type Flight } from './flight';
 
-export type Phase = 'boot' | 'login' | 'theme' | 'bet' | 'game' | 'result';
+export type Phase = 'boot' | 'login' | 'theme' | 'bet' | 'game' | 'result' | 'profile';
 
 export interface Toast {
   id: number;
@@ -44,6 +44,8 @@ interface State {
   socketStatus: SocketStatus;
   toasts: Toast[];
   busy: boolean;
+  /** Коэффициент автозабора; null — только вручную. */
+  autoCashoutMultiplier: number | null;
 }
 
 type Action =
@@ -62,6 +64,7 @@ type Action =
   | { type: 'toast'; toast: Toast }
   | { type: 'dismiss'; id: number }
   | { type: 'busy'; busy: boolean }
+  | { type: 'autoCashout'; value: number | null }
   | { type: 'signedOut' };
 
 const initialState: State = {
@@ -77,6 +80,7 @@ const initialState: State = {
   socketStatus: 'closed',
   toasts: [],
   busy: false,
+  autoCashoutMultiplier: null,
 };
 
 function reducer(state: State, action: Action): State {
@@ -125,6 +129,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, toasts: state.toasts.filter((toast) => toast.id !== action.id) };
     case 'busy':
       return { ...state, busy: action.busy };
+    case 'autoCashout':
+      return { ...state, autoCashoutMultiplier: action.value };
     case 'signedOut':
       return { ...initialState, phase: 'login' };
     default:
@@ -152,6 +158,7 @@ interface GameContextValue extends State {
   refreshHistory: () => Promise<void>;
   notify: (toast: Omit<Toast, 'id'>) => void;
   dismissToast: (id: number) => void;
+  setAutoCashout: (value: number | null) => void;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -388,6 +395,10 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
 
   const goTo = useCallback((phase: Phase) => dispatch({ type: 'phase', phase }), []);
 
+  const setAutoCashout = useCallback((value: number | null) => {
+    dispatch({ type: 'autoCashout', value });
+  }, []);
+
   const startRound = useCallback(
     async (betOptionId: number) => {
       dispatch({ type: 'busy', busy: true });
@@ -494,6 +505,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       refreshHistory,
       notify,
       dismissToast,
+      setAutoCashout,
     }),
     [
       applyPurchase,
@@ -509,6 +521,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       refreshSetup,
       register,
       repeatBet,
+      setAutoCashout,
       startRound,
       state,
       switchTheme,
