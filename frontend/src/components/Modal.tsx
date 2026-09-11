@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 /**
  * Модальное окно.
@@ -55,7 +56,7 @@ export function Modal({
     return null;
   }
 
-  return (
+  return createPortal(
     <div
       className="modal"
       role="dialog"
@@ -98,6 +99,7 @@ export function Modal({
 
         {footer && <footer className="modal__foot">{footer}</footer>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

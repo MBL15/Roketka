@@ -14,7 +14,7 @@ export function ProfileScreen(): JSX.Element {
   const initial = player.nickname.slice(0, 1).toUpperCase();
 
   return (
-    <CrashShell rail={<RatingPanel />}>
+    <CrashShell fill rail={<RatingPanel />}>
       <div className="profile">
         <div className="profile-hero panel panel--pad">
           <div className="profile-hero__main">

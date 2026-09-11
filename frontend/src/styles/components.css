@@ -266,20 +266,26 @@
 .modal {
   position: fixed;
   inset: 0;
-  z-index: 70;
-  display: grid;
-  place-items: center;
-  padding: 20px;
+  z-index: 1000;
+  display: flex;
+  align-items: safe center;
+  justify-content: center;
+  padding: clamp(12px, 3vh, 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: rgba(4, 8, 14, 0.62);
   backdrop-filter: blur(10px);
   animation: fade-in 0.2s var(--ease-out);
 }
 
 .modal__sheet {
-  width: 100%;
-  max-height: min(86vh, 860px);
+  width: min(100%, 520px);
+  max-height: min(calc(100vh - 24px), 860px);
+  margin: auto;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   animation: pop-in 0.26s var(--ease-spring);
 }
 
@@ -288,6 +294,7 @@
 }
 
 .modal__head {
+  flex-shrink: 0;
   display: flex;
   align-items: flex-start;
   gap: 14px;
@@ -305,11 +312,14 @@
 }
 
 .modal__body {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 18px 22px;
   overflow-y: auto;
 }
 
 .modal__foot {
+  flex-shrink: 0;
   display: flex;
   gap: 10px;
   padding: 14px 22px 18px;
@@ -1060,14 +1070,15 @@
 .upsell {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .upsell__tickets {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   align-items: center;
-  font-size: 26px;
+  font-size: 24px;
 }
 
 .upsell__ticket {
@@ -1075,18 +1086,22 @@
 }
 
 .upsell__more {
-  font-size: 14px;
-  color: var(--ink-400);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ink-200);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .upsell__terms {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .upsell__terms div {
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.05);
 }
@@ -1099,20 +1114,41 @@
 }
 
 .upsell__terms dd {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 650;
-  margin-top: 3px;
+  margin-top: 4px;
+}
+
+.upsell__amount {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25em;
+  white-space: nowrap;
+}
+
+.upsell__unit {
+  font-size: 0.82em;
+  font-weight: 600;
+  color: var(--ink-400);
 }
 
 .upsell__timer {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+}
+
+.upsell__timer-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
 
 .upsell__timer-bar {
-  height: 3px;
-  border-radius: 2px;
+  display: block;
+  height: 100%;
+  border-radius: inherit;
   background: var(--accent);
   transform-origin: left;
   transition: transform 1s linear;
@@ -1122,6 +1158,10 @@
   display: flex;
   gap: 10px;
   width: 100%;
+}
+
+.upsell__foot .btn--lg {
+  min-height: 46px;
 }
 
 .upsell__done {
@@ -1164,12 +1204,15 @@
 
   .modal {
     padding: 0;
-    place-items: end stretch;
+    align-items: end;
+    justify-content: stretch;
   }
 
   .modal__sheet {
+    width: 100% !important;
     max-width: none !important;
-    max-height: 92vh;
+    max-height: min(92vh, calc(100dvh - env(safe-area-inset-bottom, 0px)));
+    margin: 0;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
     animation: rise-fade 0.3s var(--ease-spring);
@@ -1189,5 +1232,13 @@
 
   .tournament__podium {
     grid-template-columns: 1fr;
+  }
+
+  .upsell__foot {
+    flex-direction: column;
+  }
+
+  .upsell__foot .btn {
+    width: 100%;
   }
 }

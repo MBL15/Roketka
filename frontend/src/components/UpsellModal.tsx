@@ -66,6 +66,13 @@ export function UpsellModal({ offer, balance, onClose, onPurchased }: UpsellModa
 
   const progress = offer.popupTimeoutSeconds > 0 ? secondsLeft / offer.popupTimeoutSeconds : 0;
 
+  const bonusAmount = (value: number) => (
+    <span className="upsell__amount num">
+      {formatNumber(value)}
+      <span className="upsell__unit">б</span>
+    </span>
+  );
+
   return (
     <Modal
       open
@@ -128,22 +135,24 @@ export function UpsellModal({ offer, balance, onClose, onPurchased }: UpsellModa
             </div>
             <div>
               <dt>Цена билета</dt>
-              <dd className="num">{formatNumber(offer.price)} б</dd>
+              <dd>{bonusAmount(offer.price)}</dd>
             </div>
             <div>
               <dt>Итого</dt>
-              <dd className="num">{formatNumber(totalCost)} б</dd>
+              <dd>{bonusAmount(totalCost)}</dd>
             </div>
             <div>
               <dt>Останется</dt>
-              <dd className="num">{formatNumber(balanceAfter)} б</dd>
+              <dd>{bonusAmount(balanceAfter)}</dd>
             </div>
           </dl>
 
           {error && <p className="text-sm negative">{error}</p>}
 
           <div className="upsell__timer">
-            <span className="upsell__timer-bar" style={{ transform: `scaleX(${progress})` }} />
+            <div className="upsell__timer-track" aria-hidden="true">
+              <span className="upsell__timer-bar" style={{ transform: `scaleX(${progress})` }} />
+            </div>
             <span className="text-xs muted">Предложение закроется через {secondsLeft} с</span>
           </div>
         </div>

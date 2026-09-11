@@ -154,7 +154,7 @@ export function ResultScreen(): JSX.Element {
   );
 
   return (
-    <CrashShell rail={rail}>
+    <CrashShell fill rail={rail}>
       <div className={`result result--${result.won ? 'win' : 'loss'}`}>
         <section className="panel panel--strong panel--pad result__main">
           <header className="result__head">

@@ -8,17 +8,25 @@ interface CrashShellProps {
   rail?: ReactNode;
   hideSidebar?: boolean;
   bleed?: boolean;
+  /** Растянуть каркас на всю доступную высоту экрана. */
+  fill?: boolean;
 }
 
 /** Каркас crash-казино: история слева (на уровне контента), бегущая лента сверху. */
-export function CrashShell({ children, rail, hideSidebar = false, bleed = false }: CrashShellProps): JSX.Element {
+export function CrashShell({
+  children,
+  rail,
+  hideSidebar = false,
+  bleed = false,
+  fill = false,
+}: CrashShellProps): JSX.Element {
   const { history, setup } = useGame();
   const stageRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (hideSidebar) {
+    if (hideSidebar || fill) {
       return undefined;
     }
 
@@ -57,13 +65,13 @@ export function CrashShell({ children, rail, hideSidebar = false, bleed = false 
       observer.disconnect();
       window.removeEventListener('resize', sync);
     };
-  }, [hideSidebar, rail, bleed]);
+  }, [fill, hideSidebar, rail, bleed]);
 
   const showMarquee = !hideSidebar;
 
   return (
     <div
-      className={`crash${hideSidebar ? ' crash--solo' : ''}${bleed ? ' crash--bleed' : ''}${rail ? ' crash--rail' : ''}${showMarquee ? ' crash--marquee' : ''}`}
+      className={`crash${hideSidebar ? ' crash--solo' : ''}${bleed ? ' crash--bleed' : ''}${rail ? ' crash--rail' : ''}${showMarquee ? ' crash--marquee' : ''}${fill ? ' crash--fill' : ''}`}
     >
       {showMarquee && (
         <div className="crash__marquee">

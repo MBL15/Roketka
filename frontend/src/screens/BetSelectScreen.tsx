@@ -274,7 +274,7 @@ export function BetSelectScreen(): JSX.Element {
 
   return (
 
-    <CrashShell rail={rail}>
+    <CrashShell fill rail={rail}>
 
       <div className={`bet-stage${launching ? ' bet--launching' : ''}`}>
 

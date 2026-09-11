@@ -165,6 +165,58 @@
   min-height: calc(100vh - 72px);
 }
 
+/* Растягивает трёхколоночный каркас на всю высоту под шапкой. */
+.app__content > .crash--fill {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.crash--fill {
+  align-items: stretch;
+  min-height: 0;
+}
+
+.crash--fill.crash--marquee {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.crash--fill .crash__sidebar {
+  align-self: stretch;
+  height: auto !important;
+  max-height: none !important;
+}
+
+.crash--fill .crash__stage {
+  align-self: stretch;
+  min-height: 0;
+  height: 100%;
+}
+
+.crash--fill .crash__main {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.crash--fill .crash__rail {
+  min-height: 0;
+  height: 100%;
+}
+
+.crash--fill .crash__rail .panel {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.crash--fill .bet-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .crash__sidebar {
   grid-area: sidebar;
   display: flex;
