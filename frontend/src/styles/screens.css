@@ -15,8 +15,8 @@
   width: 54px;
   height: 64px;
   border-radius: 50% 50% 45% 45%;
-  background: linear-gradient(160deg, var(--balloon-light), var(--balloon-dark));
-  animation: bob 2.4s var(--ease-soft) infinite;
+  background: linear-gradient(160deg, var(--balloon-a), var(--balloon-b));
+  animation: bob 2.4s var(--ease-out) infinite;
 }
 
 /* ------------------------------------------------------------------ вход */
@@ -41,13 +41,13 @@
 .login__balloon--one {
   left: 16%;
   top: 6%;
-  animation: float-soft 7s var(--ease-soft) infinite;
+  animation: float-soft 7s var(--ease-out) infinite;
 }
 
 .login__balloon--two {
   left: 52%;
   top: 42%;
-  animation: float-soft 9.3s var(--ease-soft) infinite;
+  animation: float-soft 9.3s var(--ease-out) infinite;
   animation-delay: -2.1s;
 }
 
@@ -79,16 +79,16 @@
   border: none;
   border-radius: var(--radius-pill);
   background: transparent;
-  color: var(--ink-3);
+  color: var(--ink-400);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s var(--ease-soft), color 0.2s var(--ease-soft);
+  transition: background 0.2s var(--ease-out), color 0.2s var(--ease-out);
 }
 
 .login__tab--active {
   background: var(--accent);
-  color: var(--on-accent);
+  color: var(--accent-ink);
 }
 
 .login__form {
@@ -102,7 +102,7 @@
   flex-direction: column;
   gap: 8px;
   padding-top: 14px;
-  border-top: 1px solid var(--glass-line);
+  border-top: 1px solid var(--glass-border);
 }
 
 .login__demo-list {
@@ -118,12 +118,12 @@
   padding: 9px 11px;
   text-align: left;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--glass-line);
+  border: 1px solid var(--glass-border);
   background: rgba(255, 255, 255, 0.04);
-  color: var(--ink-2);
+  color: var(--ink-300);
   font-size: 12px;
   cursor: pointer;
-  transition: border-color 0.2s var(--ease-soft), background 0.2s var(--ease-soft);
+  transition: border-color 0.2s var(--ease-out), background 0.2s var(--ease-out);
 }
 
 .login__demo-item:hover {
@@ -139,7 +139,7 @@
   align-items: center;
   gap: 30px;
   padding: 24px 0 40px;
-  transition: opacity 0.4s var(--ease-soft);
+  transition: opacity 0.4s var(--ease-out);
 }
 
 .themes--leaving {
@@ -169,13 +169,13 @@
   gap: 18px;
   padding: 30px 24px 24px;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--glass-line);
-  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
   backdrop-filter: blur(18px);
-  color: var(--ink-1);
+  color: var(--ink-100);
   cursor: pointer;
   overflow: hidden;
-  transition: transform 0.3s var(--ease-out-back), box-shadow 0.3s var(--ease-soft), opacity 0.3s var(--ease-soft);
+  transition: transform 0.3s var(--ease-spring), box-shadow 0.3s var(--ease-out), opacity 0.3s var(--ease-out);
 }
 
 .theme-card--green {
@@ -200,11 +200,11 @@
 
 /* Оба шара покачиваются, но с разным периодом и фазой — синхронность выдала бы анимацию. */
 .theme-card__balloon-art--green {
-  animation: float-soft 6.2s var(--ease-soft) infinite;
+  animation: float-soft 6.2s var(--ease-out) infinite;
 }
 
 .theme-card__balloon-art--red {
-  animation: float-soft 7.9s var(--ease-soft) infinite;
+  animation: float-soft 7.9s var(--ease-out) infinite;
   animation-delay: -1.7s;
 }
 
@@ -235,7 +235,7 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .fact__value {
@@ -244,7 +244,7 @@
 }
 
 .theme-card__note {
-  color: var(--ink-2);
+  color: var(--ink-300);
   line-height: 1.55;
   max-width: 330px;
 }
@@ -260,7 +260,7 @@
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 22px;
   align-items: start;
-  transition: opacity 0.4s var(--ease-soft), transform 0.4s var(--ease-soft);
+  transition: opacity 0.4s var(--ease-out), transform 0.4s var(--ease-out);
 }
 
 .bet--launching {
@@ -329,7 +329,7 @@
 }
 
 .bet__theme-balloon {
-  animation: bob 5.5s var(--ease-soft) infinite;
+  animation: bob 5.5s var(--ease-out) infinite;
 }
 
 .bet__facts {
@@ -351,11 +351,11 @@
   min-height: 520px;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-lift);
+  box-shadow: var(--shadow-md);
 }
 
 .game--crashed {
-  animation: shake 0.42s var(--ease-soft);
+  animation: shake 0.42s var(--ease-out);
 }
 
 .game__overlay {
@@ -398,7 +398,7 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  transition: transform 0.4s var(--ease-out-back);
+  transition: transform 0.4s var(--ease-spring);
 }
 
 .multiplier__value {
@@ -406,7 +406,7 @@
   font-weight: 750;
   line-height: 1;
   letter-spacing: -0.03em;
-  transition: color 0.4s var(--ease-soft), text-shadow 0.4s var(--ease-soft), font-size 0.4s var(--ease-out-back);
+  transition: color 0.4s var(--ease-out), text-shadow 0.4s var(--ease-out), font-size 0.4s var(--ease-spring);
 }
 
 /* Оформление коэффициента по стадиям прогресса: до 1 уровня, 1–2, 2–3, 3+. */
@@ -462,7 +462,7 @@
   font-family: var(--font-mono);
   font-size: 22px;
   font-weight: 700;
-  animation: rise-fade 1.4s var(--ease-soft) forwards;
+  animation: rise-fade 1.4s var(--ease-out) forwards;
 }
 
 .popup--points {
@@ -479,8 +479,8 @@
   align-self: start;
   padding: 10px 12px;
   border-radius: var(--radius-md);
-  background: var(--glass);
-  border: 1px solid var(--glass-line);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(14px);
   max-height: 100%;
   overflow-y: auto;
@@ -500,8 +500,8 @@
   gap: 2px;
   padding: 8px 14px;
   border-radius: var(--radius-md);
-  background: var(--glass);
-  border: 1px solid var(--glass-line);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(14px);
 }
 
@@ -509,7 +509,7 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .hud-stat__value {
@@ -555,7 +555,7 @@
 }
 
 .cashout--live {
-  animation: glow-pulse 2.2s var(--ease-soft) infinite;
+  animation: glow-pulse 2.2s var(--ease-out) infinite;
 }
 
 .game__lock-note {
@@ -572,17 +572,17 @@
   gap: 8px;
   padding: 10px 14px;
   border-radius: var(--radius-md);
-  background: var(--glass-strong);
+  background: var(--glass-bg-strong);
   border: 1px solid var(--accent);
   backdrop-filter: blur(16px);
   white-space: nowrap;
-  animation: fade-in 0.3s var(--ease-soft);
+  animation: fade-in 0.3s var(--ease-out);
 }
 
 .onboarding__arrow {
   font-size: 20px;
   color: var(--accent);
-  animation: arrow-nudge 1s var(--ease-soft) infinite;
+  animation: arrow-nudge 1s var(--ease-out) infinite;
 }
 
 .onboarding__text {
@@ -612,7 +612,7 @@
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 20px;
   align-items: start;
-  animation: pop-in 0.4s var(--ease-out-back);
+  animation: pop-in 0.4s var(--ease-spring);
 }
 
 .result__main {
@@ -628,7 +628,7 @@
 }
 
 .result--win .result__balloon {
-  animation: float-soft 6s var(--ease-soft) infinite;
+  animation: float-soft 6s var(--ease-out) infinite;
 }
 
 .result__title {
@@ -649,7 +649,7 @@
 .result__title-unit {
   font-size: 13px;
   font-weight: 500;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .result__numbers {
@@ -665,14 +665,14 @@
   padding: 12px 14px;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--glass-line);
+  border: 1px solid var(--glass-border);
 }
 
 .metric__label {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .metric__value {
@@ -697,7 +697,7 @@
   border-radius: var(--radius-md);
   background: rgba(255, 209, 102, 0.12);
   border: 1px solid rgba(255, 209, 102, 0.32);
-  color: var(--ink-1);
+  color: var(--ink-100);
 }
 
 .result__actions {
@@ -741,7 +741,7 @@
   align-items: baseline;
   gap: 10px;
   padding: 5px 0;
-  border-bottom: 1px dashed var(--glass-line);
+  border-bottom: 1px dashed var(--glass-border);
   font-size: 13px;
 }
 
@@ -775,7 +775,7 @@
   font-weight: 700;
   background: linear-gradient(140deg, var(--accent-soft), rgba(255, 255, 255, 0.1));
   color: var(--accent);
-  animation: pop-in 0.5s var(--ease-out-back);
+  animation: pop-in 0.5s var(--ease-spring);
 }
 
 .result__fragment-grid {
@@ -795,7 +795,7 @@
 }
 
 .result__fragment-cell--new {
-  animation: flash 0.9s var(--ease-soft) 2;
+  animation: flash 0.9s var(--ease-out) 2;
 }
 
 .result__fairness summary {
@@ -811,7 +811,7 @@
 }
 
 .result__fairness-list dt {
-  color: var(--ink-3);
+  color: var(--ink-400);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -820,7 +820,7 @@
 .result__fairness-list dd {
   word-break: break-all;
   font-size: 11px;
-  color: var(--ink-2);
+  color: var(--ink-300);
 }
 
 /* ------------------------------------------------------------------ админка */
@@ -835,7 +835,7 @@
 .admin--loading {
   padding: 60px;
   text-align: center;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .admin__head {
@@ -889,7 +889,7 @@
   border: none;
   border-radius: var(--radius-pill);
   background: transparent;
-  color: var(--ink-3);
+  color: var(--ink-400);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -897,7 +897,7 @@
 
 .admin__tab--active {
   background: var(--accent);
-  color: var(--on-accent);
+  color: var(--accent-ink);
 }
 
 .admin__grid {
@@ -941,7 +941,7 @@
   padding: 10px;
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--glass-line);
+  border: 1px solid var(--glass-border);
 }
 
 .admin__sim {
@@ -968,8 +968,8 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--ink-3);
-  border-bottom: 1px solid var(--glass-line);
+  color: var(--ink-400);
+  border-bottom: 1px solid var(--glass-border);
   white-space: nowrap;
 }
 
@@ -981,7 +981,7 @@
 .admin__table td {
   padding: 9px 10px;
   text-align: right;
-  border-bottom: 1px solid var(--glass-line);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .admin__row--warn {

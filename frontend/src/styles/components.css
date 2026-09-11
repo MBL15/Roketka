@@ -30,7 +30,7 @@
   font-size: 20px;
   background: var(--accent-soft);
   color: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--glass-line);
+  box-shadow: inset 0 0 0 1px var(--glass-border);
 }
 
 .topbar__title strong {
@@ -56,7 +56,7 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .stat__value {
@@ -86,7 +86,7 @@
   height: 7px;
   border-radius: 50%;
   background: currentColor;
-  animation: glow-pulse 2.4s var(--ease-soft) infinite;
+  animation: glow-pulse 2.4s var(--ease-out) infinite;
 }
 
 /* --------------------------------------------------------------- уведомления */
@@ -109,11 +109,11 @@
   text-align: left;
   padding: 12px 14px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--glass-line);
-  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-strong);
   backdrop-filter: blur(18px);
-  box-shadow: var(--shadow-lift);
-  color: var(--ink-1);
+  box-shadow: var(--shadow-md);
+  color: var(--ink-100);
   cursor: pointer;
 }
 
@@ -153,7 +153,7 @@
 .toast__body {
   display: block;
   font-size: 12px;
-  color: var(--ink-3);
+  color: var(--ink-400);
   margin-top: 2px;
 }
 
@@ -168,7 +168,7 @@
   padding: 20px;
   background: rgba(4, 8, 14, 0.62);
   backdrop-filter: blur(10px);
-  animation: fade-in 0.2s var(--ease-soft);
+  animation: fade-in 0.2s var(--ease-out);
 }
 
 .modal__sheet {
@@ -176,11 +176,11 @@
   max-height: min(86vh, 860px);
   display: flex;
   flex-direction: column;
-  animation: pop-in 0.26s var(--ease-out-back);
+  animation: pop-in 0.26s var(--ease-spring);
 }
 
 .modal__sheet--accent {
-  box-shadow: var(--shadow-lift), 0 0 0 1px var(--accent-soft);
+  box-shadow: var(--shadow-md), 0 0 0 1px var(--accent-soft);
 }
 
 .modal__head {
@@ -188,7 +188,7 @@
   align-items: flex-start;
   gap: 14px;
   padding: 20px 22px 14px;
-  border-bottom: 1px solid var(--glass-line);
+  border-bottom: 1px solid var(--glass-border);
   position: relative;
 }
 
@@ -209,7 +209,7 @@
   display: flex;
   gap: 10px;
   padding: 14px 22px 18px;
-  border-top: 1px solid var(--glass-line);
+  border-top: 1px solid var(--glass-border);
 }
 
 /* -------------------------------------------------------------------- шар */
@@ -235,7 +235,7 @@
   gap: 12px;
   padding: 9px 8px;
   border-radius: var(--radius-sm);
-  border-bottom: 1px solid var(--glass-line);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .history__row:last-child {
@@ -303,8 +303,8 @@
   gap: 12px;
   padding: 8px 14px;
   border-radius: var(--radius-pill);
-  background: var(--glass);
-  border: 1px solid var(--glass-line);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(14px);
   overflow: hidden;
 }
@@ -333,11 +333,11 @@
   background: rgba(255, 255, 255, 0.06);
   font-size: 12px;
   white-space: nowrap;
-  transition: background 0.3s var(--ease-soft), box-shadow 0.3s var(--ease-soft);
+  transition: background 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
 }
 
 .rating__position {
-  color: var(--ink-3);
+  color: var(--ink-400);
   font-size: 10px;
 }
 
@@ -355,36 +355,40 @@
 
 /* Короткая подсветка — очки изменились, позиция та же. */
 .rating__item--flash-short {
-  animation: flash 0.45s var(--ease-soft);
+  animation: flash 0.45s var(--ease-out);
 }
 
 /* Длинная со свечением — игрок сдвинулся в таблице. */
 .rating__item--flash-long {
-  animation: glow-pulse 1.2s var(--ease-soft);
+  animation: glow-pulse 1.2s var(--ease-out);
   box-shadow: 0 0 0 1px var(--accent), 0 0 18px var(--accent-soft);
 }
 
 /* ------------------------------------------------------------- фрагменты */
 
 .puzzle {
+  /* Глубина выреза пазла. Вертикальный отступ равен ей плюс обычные 18px,
+     поэтому вырез всегда остаётся в поле отступа и не срезает текст. */
+  --puzzle-notch: 18px;
+
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
   min-height: 210px;
-  padding: 18px;
+  padding: calc(var(--puzzle-notch) + 18px) 18px;
   text-align: left;
-  color: var(--ink-1);
+  color: var(--ink-100);
   border: none;
-  background: var(--glass);
-  box-shadow: inset 0 0 0 1px var(--glass-line);
+  background: var(--glass-bg);
+  box-shadow: inset 0 0 0 1px var(--glass-border);
   cursor: pointer;
-  transition: transform 0.22s var(--ease-out-back), background 0.22s var(--ease-soft);
+  transition: transform 0.22s var(--ease-spring), background 0.22s var(--ease-out);
 }
 
 .puzzle:hover:not(.puzzle--locked) {
   transform: translateY(-4px);
-  background: var(--glass-strong);
+  background: var(--glass-bg-strong);
 }
 
 .puzzle--selected {
@@ -420,7 +424,7 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .puzzle__cost {
@@ -436,11 +440,11 @@
 
 .puzzle__cost-unit {
   font-size: 11px;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .puzzle__note {
-  color: var(--ink-2);
+  color: var(--ink-300);
   flex: 1;
 }
 
@@ -470,8 +474,8 @@
   padding: 5px 10px;
   border-radius: var(--radius-sm);
   font-size: 12px;
-  color: var(--ink-3);
-  transition: background 0.25s var(--ease-soft), color 0.25s var(--ease-soft);
+  color: var(--ink-400);
+  transition: background 0.25s var(--ease-out), color 0.25s var(--ease-out);
 }
 
 /* Подсветка «горячей зоны» бустера пропорциональна вероятности уровня. */
@@ -480,12 +484,12 @@
 }
 
 .ladder__step--passed {
-  color: var(--ink-1);
+  color: var(--ink-100);
   background: rgba(255, 255, 255, 0.07);
 }
 
 .ladder__step--next {
-  box-shadow: inset 0 0 0 1px var(--glass-line);
+  box-shadow: inset 0 0 0 1px var(--glass-border);
 }
 
 .ladder__step--boost-hit {
@@ -511,7 +515,7 @@
 .ladder__level {
   width: 18px;
   font-size: 10px;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .ladder__threshold {
@@ -521,7 +525,7 @@
 .ladder__chance {
   margin-left: auto;
   font-size: 10px;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .ladder__boost {
@@ -558,8 +562,8 @@
   display: grid;
   place-items: center;
   border-radius: var(--radius-sm);
-  border: 1px dashed var(--glass-line);
-  color: var(--ink-3);
+  border: 1px dashed var(--glass-border);
+  color: var(--ink-400);
   font-size: 11px;
 }
 
@@ -572,7 +576,7 @@
 }
 
 .collection__cell--new {
-  animation: pop-in 0.45s var(--ease-out-back);
+  animation: pop-in 0.45s var(--ease-spring);
   box-shadow: 0 0 0 2px var(--accent);
 }
 
@@ -612,7 +616,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  color: var(--ink-2);
+  color: var(--ink-300);
   line-height: 1.6;
   padding-left: 32px;
 }
@@ -654,12 +658,12 @@
   gap: 4px;
   padding: 14px 10px;
   border-radius: var(--radius-md);
-  background: var(--glass);
-  border: 1px solid var(--glass-line);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
 }
 
 .podium--1 {
-  background: linear-gradient(160deg, rgba(255, 209, 102, 0.22), var(--glass));
+  background: linear-gradient(160deg, rgba(255, 209, 102, 0.22), var(--glass-bg));
 }
 
 .podium--me {
@@ -672,7 +676,7 @@
 
 .podium__name {
   font-size: 12px;
-  color: var(--ink-2);
+  color: var(--ink-300);
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -688,7 +692,7 @@
   max-height: 280px;
   overflow-y: auto;
   border-radius: var(--radius-md);
-  border: 1px solid var(--glass-line);
+  border: 1px solid var(--glass-border);
 }
 
 .tournament__list {
@@ -702,7 +706,7 @@
   gap: 10px;
   padding: 9px 12px;
   font-size: 13px;
-  border-bottom: 1px solid var(--glass-line);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .tournament__row:last-child {
@@ -717,7 +721,7 @@
 
 .tournament__position {
   width: 26px;
-  color: var(--ink-3);
+  color: var(--ink-400);
   font-size: 11px;
 }
 
@@ -756,12 +760,12 @@
 }
 
 .upsell__ticket {
-  animation: pop-in 0.4s var(--ease-out-back) backwards;
+  animation: pop-in 0.4s var(--ease-spring) backwards;
 }
 
 .upsell__more {
   font-size: 14px;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .upsell__terms {
@@ -780,7 +784,7 @@
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--ink-3);
+  color: var(--ink-400);
 }
 
 .upsell__terms dd {
@@ -817,7 +821,7 @@
 
 .upsell__done-mark {
   font-size: 42px;
-  animation: pop-in 0.5s var(--ease-out-back);
+  animation: pop-in 0.5s var(--ease-spring);
 }
 
 /* --------------------------------------------------------- Canvas полёта */
@@ -857,7 +861,7 @@
     max-height: 92vh;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    animation: rise-fade 0.3s var(--ease-out-back);
+    animation: rise-fade 0.3s var(--ease-spring);
   }
 
   .modal__grip {
@@ -869,7 +873,7 @@
     width: 38px;
     height: 4px;
     border-radius: 2px;
-    background: var(--glass-line);
+    background: var(--glass-border);
   }
 
   .tournament__podium {
