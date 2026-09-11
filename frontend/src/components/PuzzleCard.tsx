@@ -56,7 +56,9 @@ export function PuzzleCard({
         {hasBoost ? (
           <span className="chip chip--boost puzzle__tier">бустер ×{option.boostValue.toFixed(0)}</span>
         ) : (
-          <span className="chip puzzle__tier">без усиления</span>
+          /* Постановка перечисляет множители как ×1…×4, поэтому ×1 назван
+             явно, а не только словами «без усиления». */
+          <span className="chip puzzle__tier">×1 · без усиления</span>
         )}
       </span>
 

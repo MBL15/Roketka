@@ -23,7 +23,7 @@ import { formatCountdown, formatMultiplier, formatNumber } from '../utils/format
  * бесшумным изменением числа в шапке.
  */
 export function BetSelectScreen(): JSX.Element {
-  const { setup, player, currentTheme: theme, history, startRound, switchTheme, notify } = useGame();
+  const { setup, player, currentTheme: theme, history, startRound, switchTheme, goTo, notify } = useGame();
   const [selected, setSelected] = useState<number | null>(null);
   const [launching, setLaunching] = useState(false);
   const [rulesOpen, setRulesOpen] = useState(false);
@@ -74,6 +74,19 @@ export function BetSelectScreen(): JSX.Element {
           </div>
 
           <div className="bet__head-actions">
+            {/* Возврат на стартовый экран, а не смена темы на месте: экран
+                выбора темы показывает обе версии рядом и их различия. */}
+            <button
+              type="button"
+              className="btn btn--ghost btn--sm"
+              onClick={() => {
+                audio.click();
+                setSelected(null);
+                goTo('theme');
+              }}
+            >
+              ← К выбору темы
+            </button>
             <button type="button" className="btn btn--ghost btn--sm" onClick={() => setRulesOpen(true)}>
               Правила игры
             </button>

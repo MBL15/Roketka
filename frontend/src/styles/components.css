@@ -401,21 +401,32 @@
   filter: saturate(0.4);
 }
 
-.puzzle--boosted .puzzle__glow {
+/* Свечение выведено из потока для всех карточек, а не только для карточек с
+   бустером: иначе у карточки без бустера пустой span остаётся flex-элементом
+   и добавляет лишний gap, из-за чего её цена опускается ниже соседних. */
+.puzzle__glow {
   position: absolute;
   inset: auto -30% -40% auto;
   width: 180px;
   height: 180px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(185, 140, 255, 0.35), transparent 70%);
   pointer-events: none;
 }
 
+.puzzle--boosted .puzzle__glow {
+  background: radial-gradient(circle, rgba(185, 140, 255, 0.35), transparent 70%);
+}
+
+/* Плашка множителя стоит под номером фрагмента, а не рядом с ним: строки
+   «×1 · без усиления» и «бустер ×2» сильно разной длины, и в одну строку с
+   номером первая переносилась только на одной карточке — цены переставали
+   совпадать по высоте. Отдельная строка выравнивает все четыре карточки и
+   заодно снимает обрезку плашки на узких экранах. */
 .puzzle__head {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .puzzle__index {
