@@ -23,24 +23,6 @@ interface PuzzleCardProps {
   onSelect: () => void;
 }
 
-/**
- * Каждый фрагмент имеет свой силуэт: набор читается как собираемый пазл.
- *
- * Глубина выреза задана в пикселях, а не в процентах, и совпадает с
- * вертикальным отступом карточки (см. --puzzle-notch в components.css).
- * Так вырез гарантированно попадает в поле отступа: clip-path обрезает не
- * только фон, но и содержимое, и при глубине в процентах вырез съедал шапку
- * карточки — у третьего фрагмента исчезала плашка бустера, у четвёртого
- * номер фрагмента.
- */
-const NOTCH = 'var(--puzzle-notch)';
-const FRAGMENT_SHAPES = [
-  `polygon(0 0, 100% 0, 100% calc(100% - ${NOTCH}), 62% calc(100% - ${NOTCH}), 62% 100%, 0 100%)`,
-  `polygon(0 0, 100% 0, 100% 100%, 38% 100%, 38% calc(100% - ${NOTCH}), 0 calc(100% - ${NOTCH}))`,
-  `polygon(0 0, 62% 0, 62% ${NOTCH}, 100% ${NOTCH}, 100% 100%, 0 100%)`,
-  `polygon(38% 0, 100% 0, 100% 100%, 0 100%, 0 ${NOTCH}, 38% ${NOTCH})`,
-];
-
 export function PuzzleCard({
   option,
   index,
@@ -66,7 +48,6 @@ export function PuzzleCard({
       ]
         .filter(Boolean)
         .join(' ')}
-      style={{ clipPath: FRAGMENT_SHAPES[index % FRAGMENT_SHAPES.length] }}
     >
       <span className="puzzle__glow" aria-hidden="true" />
 

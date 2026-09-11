@@ -367,22 +367,20 @@
 /* ------------------------------------------------------------- фрагменты */
 
 .puzzle {
-  /* Глубина выреза пазла. Вертикальный отступ равен ей плюс обычные 18px,
-     поэтому вырез всегда остаётся в поле отступа и не срезает текст. */
-  --puzzle-notch: 18px;
-
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
   min-height: 210px;
-  padding: calc(var(--puzzle-notch) + 18px) 18px;
+  padding: 18px;
   text-align: left;
   color: var(--ink-100);
   border: none;
+  border-radius: var(--radius-lg);
   background: var(--glass-bg);
   box-shadow: inset 0 0 0 1px var(--glass-border);
   cursor: pointer;
+  overflow: hidden;
   transition: transform 0.22s var(--ease-spring), background 0.22s var(--ease-out);
 }
 
