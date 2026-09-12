@@ -102,7 +102,7 @@ public class GameConfigService {
     public ConfigStatus status() {
         return new ConfigStatus(
                 configPath.toString(),
-                properties.configWritable(),
+                properties.configWritable() && isConfigFileWritable(),
                 loadedAt,
                 reloadCount,
                 lastErrors.isEmpty(),
@@ -215,6 +215,15 @@ public class GameConfigService {
         } catch (IOException e) {
             observedSize = -1;
         }
+    }
+
+    /** Фактическая возможность записи YAML (bind mount с хоста может быть только для чтения). */
+    private boolean isConfigFileWritable() {
+        Path parent = configPath.getParent();
+        if (parent != null && Files.exists(parent)) {
+            return Files.isWritable(parent) && (!Files.exists(configPath) || Files.isWritable(configPath));
+        }
+        return Files.exists(configPath) && Files.isWritable(configPath);
     }
 
     private String defaultYaml() {

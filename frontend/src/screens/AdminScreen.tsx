@@ -212,6 +212,14 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
             текущие полёты не прервутся.
           </p>
 
+          {status && !status.writable && (
+            <div className="admin__banner admin__banner--error" role="alert">
+              <strong>Конфигурация только для чтения.</strong> Сохранение в файл недоступно — после
+              перезагрузки сервера настройки вернутся к значениям из репозитория. Проверьте права на
+              каталог <span className="mono">config/</span> на сервере.
+            </div>
+          )}
+
           {status && (
             <details className="admin__meta">
               <summary>Техническая информация</summary>
@@ -297,7 +305,12 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
           <button type="button" className="btn" onClick={() => void validate()} disabled={busy || !dirty}>
             Проверить
           </button>
-          <button type="button" className="btn btn--primary" onClick={() => void save()} disabled={busy || !dirty}>
+          <button
+            type="button"
+            className="btn btn--primary"
+            onClick={() => void save()}
+            disabled={busy || !dirty || (status !== null && !status.writable)}
+          >
             Сохранить
           </button>
         </div>

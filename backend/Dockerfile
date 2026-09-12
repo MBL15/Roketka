@@ -24,16 +24,16 @@ RUN mvn -B -ntp -DskipTests package
 FROM eclipse-temurin:21-jre-alpine AS runtime
 WORKDIR /app
 
-# Приложение работает не от root.
-RUN addgroup -S balloon && adduser -S balloon -G balloon \
+RUN apk add --no-cache su-exec wget \
+    && addgroup -S balloon && adduser -S balloon -G balloon \
     && mkdir -p /app/data /app/config \
     && chown -R balloon:balloon /app
 
 COPY --from=build /build/target/balloon-backend.jar /app/balloon-backend.jar
 # Конфигурация по умолчанию: подменяется монтированием каталога config/.
 COPY --chown=balloon:balloon config/game-config.yaml /app/config/game-config.yaml
-
-USER balloon
+COPY backend/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 ENV BALLOON_CONFIG_PATH=/app/config/game-config.yaml \
     BALLOON_DATA_DIR=/app/data \
@@ -44,4 +44,5 @@ EXPOSE 8081
 HEALTHCHECK --interval=10s --timeout=3s --start-period=40s --retries=6 \
     CMD wget -qO- http://127.0.0.1:8081/actuator/health | grep -q '"status":"UP"'
 
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/balloon-backend.jar"]
+# Стартует от root, entrypoint выравнивает права bind mount и сбрасывает привилегии.
+ENTRYPOINT ["/docker-entrypoint.sh"]
