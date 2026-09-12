@@ -287,6 +287,8 @@ public class GameConfigYamlWriter {
                 "длина общей истории завершённых раундов");
         line(out, "  ", "demoBonusBalance", String.valueOf(session.demoBonusBalance()),
                 "стартовый баланс демо-аккаунтов");
+        line(out, "  ", "playerStartingBalance", String.valueOf(session.playerStartingBalance()),
+                "стартовый баланс зарегистрированных игроков");
     }
 
     // --------------------------------------------------------------- helpers

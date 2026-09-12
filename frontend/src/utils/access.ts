@@ -23,7 +23,7 @@ export function isExpertAccount(nickname: string | undefined | null): boolean {
   return resolveAccountKind(nickname) === 'admin';
 }
 
-/** Кнопка пополнения баланса недоступна судье. */
+/** Пополнение доступно только демо и админ-аккаунтам. */
 export function canTopUpAccount(kind: AccountKind): boolean {
-  return kind !== 'judge';
+  return kind === 'demo' || kind === 'admin';
 }

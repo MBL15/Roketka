@@ -876,6 +876,15 @@ function SessionEditor({
           suffix="б"
           onChange={(value) => patch('session', { ...config.session, demoBonusBalance: value })}
         />
+        <Num
+          fieldId="session.playerStartingBalance"
+          label="Стартовый баланс новых игроков"
+          code="playerStartingBalance"
+          value={config.session.playerStartingBalance}
+          step={100}
+          suffix="б"
+          onChange={(value) => patch('session', { ...config.session, playerStartingBalance: value })}
+        />
       </Card>
     </div>
   );

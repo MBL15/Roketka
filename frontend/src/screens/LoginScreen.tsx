@@ -57,7 +57,13 @@ export function LoginScreen(): JSX.Element {
               role="tab"
               aria-selected={mode === 'register'}
               className={`login__tab${mode === 'register' ? ' login__tab--active' : ''}`}
-              onClick={() => setMode('register')}
+              onClick={() => {
+                setMode('register');
+                if (nickname === 'demo' || nickname === 'judge' || nickname === 'expert') {
+                  setNickname('');
+                  setPassword('');
+                }
+              }}
             >
               Регистрация
             </button>
@@ -117,7 +123,7 @@ export function LoginScreen(): JSX.Element {
               ))}
             </div>
             <p className="text-xs muted">
-              Три типа аккаунта: demo и admin пополняются при нехватке баллов, у судьи — фиксированные 500.
+              Регистрация создаёт обычный игровой профиль. Демо и admin можно пополнять, судья — нет.
             </p>
           </div>
         </div>

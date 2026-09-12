@@ -33,6 +33,17 @@ public final class AccountProfiles {
         };
     }
 
+    /** Зарезервированы для служебных аккаунтов, создаваемых при старте сервера. */
+    public static boolean isReservedNickname(String nickname) {
+        if (nickname == null) {
+            return false;
+        }
+        return switch (nickname.trim().toLowerCase()) {
+            case "demo", "judge", "expert", "admin" -> true;
+            default -> false;
+        };
+    }
+
     public static String kindCode(Kind kind) {
         return switch (kind) {
             case DEMO -> "demo";
@@ -47,9 +58,9 @@ public final class AccountProfiles {
         return kind == Kind.DEMO || kind == Kind.ADMIN;
     }
 
-    /** Кнопка «+2000» и POST /api/auth/top-up. */
+    /** Кнопка «+2000» и POST /api/auth/top-up — только демо и админ. */
     public static boolean manualTopUpAllowed(Kind kind) {
-        return kind != Kind.JUDGE;
+        return kind == Kind.DEMO || kind == Kind.ADMIN;
     }
 
     public static long startingBonus(Kind kind, long demoBalance) {

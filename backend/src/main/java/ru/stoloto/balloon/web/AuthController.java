@@ -37,7 +37,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Регистрация",
-            description = "Новый игрок получает стартовый баланс из session.demoBonusBalance")
+            description = "Новый игрок (accountKind=player) получает session.playerStartingBalance без пополнения как у demo")
     public GameDtos.AuthResponse register(@RequestBody GameDtos.LoginRequest request) {
         AuthSession session = authService.register(request.nickname(), request.password());
         UserAccount user = authService.resolve(session.getToken()).orElseThrow();

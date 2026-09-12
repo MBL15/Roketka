@@ -213,7 +213,8 @@ public record GameConfig(
             int resultIdleTimeoutSeconds,
             int onboardingHintSeconds,
             int historySize,
-            long demoBonusBalance
+            long demoBonusBalance,
+            long playerStartingBalance
     ) {
     }
 }

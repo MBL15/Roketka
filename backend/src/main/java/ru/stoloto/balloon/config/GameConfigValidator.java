@@ -268,6 +268,7 @@ public class GameConfigValidator {
         inRange("session.onboardingHintSeconds", session.onboardingHintSeconds(), 1, 60, errors);
         inRange("session.historySize", session.historySize(), 5, 500, errors);
         inRange("session.demoBonusBalance", session.demoBonusBalance(), 0, 10_000_000, errors);
+        inRange("session.playerStartingBalance", session.playerStartingBalance(), 0, 10_000_000, errors);
     }
 
     private void inRange(String path, double value, double min, double max, List<String> errors) {

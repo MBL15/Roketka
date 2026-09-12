@@ -263,3 +263,4 @@ session:
   onboardingHintSeconds: 4        # длительность подсказки «Нажми Забрать»
   historySize: 30                 # длина общей истории завершённых раундов
   demoBonusBalance: 5000          # стартовый баланс демо-аккаунтов
+  playerStartingBalance: 500      # стартовый баланс зарегистрированных игроков

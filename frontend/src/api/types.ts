@@ -383,6 +383,7 @@ export interface AdminConfig {
     onboardingHintSeconds: number;
     historySize: number;
     demoBonusBalance: number;
+    playerStartingBalance: number;
   };
 }
 

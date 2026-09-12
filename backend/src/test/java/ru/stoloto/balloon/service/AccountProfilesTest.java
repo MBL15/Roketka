@@ -30,5 +30,22 @@ class AccountProfilesTest {
 
         UserAccount expert = new UserAccount("expert", "hash", 100, false);
         assertThat(AccountProfiles.autoRefillOnBootstrap(AccountProfiles.kindOf(expert))).isTrue();
+        assertThat(AccountProfiles.manualTopUpAllowed(AccountProfiles.kindOf(expert))).isTrue();
+    }
+
+    @Test
+    void registeredPlayerIsOrdinaryAccount() {
+        UserAccount player = new UserAccount("alice", "hash", 500, false);
+        assertThat(AccountProfiles.kindOf(player)).isEqualTo(AccountProfiles.Kind.PLAYER);
+        assertThat(AccountProfiles.manualTopUpAllowed(AccountProfiles.kindOf(player))).isFalse();
+        assertThat(AccountProfiles.autoRefillOnBootstrap(AccountProfiles.kindOf(player))).isFalse();
+    }
+
+    @Test
+    void reservedNicknamesBlockedForRegistration() {
+        assertThat(AccountProfiles.isReservedNickname("demo")).isTrue();
+        assertThat(AccountProfiles.isReservedNickname("Judge")).isTrue();
+        assertThat(AccountProfiles.isReservedNickname("expert")).isTrue();
+        assertThat(AccountProfiles.isReservedNickname("alice")).isFalse();
     }
 }

@@ -66,7 +66,10 @@ public class AuthService {
         if (users.findByNicknameIgnoreCase(trimmed).isPresent()) {
             throw new AuthenticationFailedException("Такое имя уже занято");
         }
-        long startingBalance = configService.current().session().demoBonusBalance();
+        if (AccountProfiles.isReservedNickname(trimmed)) {
+            throw new AuthenticationFailedException("Это имя зарезервировано системой");
+        }
+        long startingBalance = configService.current().session().playerStartingBalance();
         UserAccount created = users.save(
                 new UserAccount(trimmed, passwordHasher.hash(password), startingBalance, false));
         tournamentService.track(created);
