@@ -22,6 +22,8 @@ services:
       dockerfile: backend/Dockerfile
     container_name: balloon-backend
     restart: unless-stopped
+    # host-сеть обходит сломанный bridge в некоторых VM; порты 8080/8081 на localhost.
+    network_mode: host
     environment:
       # Конфигурация игры монтируется с хоста — правки видны без пересборки.
       BALLOON_CONFIG_PATH: /app/config/game-config.yaml
@@ -36,9 +38,6 @@ services:
       # сам за секунду. На этом построен сценарий 5.
       - ./config:/app/config
       - balloon-data:/app/data
-    ports:
-      # Прямой доступ к API в обход nginx: удобно для curl и Swagger.
-      - '${API_PORT:-8081}:8081'
     healthcheck:
       test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:8081/actuator/health']
       interval: 15s
@@ -52,11 +51,12 @@ services:
       dockerfile: Dockerfile
     container_name: balloon-frontend
     restart: unless-stopped
+    network_mode: host
     depends_on:
       backend:
         condition: service_healthy
-    ports:
-      - '${APP_PORT:-8080}:8080'
+    volumes:
+      - ./frontend/nginx.host.conf:/etc/nginx/conf.d/default.conf:ro
 
   # Необязательный PostgreSQL. По умолчанию не запускается: базовый стенд
   # работает на встроенной H2 и не требует ничего, кроме Docker.
