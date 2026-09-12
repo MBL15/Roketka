@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { HomeIcon } from '../components/HomeButton';
 import { ThemeToggleButton } from '../components/ThemeToggleButton';
 import { TAB_GROUPS, type AdminTab } from './adminSettingsSearch';
 
@@ -83,8 +84,14 @@ export function AdminTopMenu({
 
           <ThemeToggleButton />
 
-          <button type="button" className="btn btn--primary btn--sm" onClick={onExit}>
-            К игре
+          <button
+            type="button"
+            className="btn btn--icon btn--ghost"
+            onClick={onExit}
+            aria-label="К игре"
+            title="К игре"
+          >
+            <HomeIcon />
           </button>
         </div>
       </header>

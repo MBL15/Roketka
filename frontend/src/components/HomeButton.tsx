@@ -43,7 +43,7 @@ export function HomeButton({ className = '', variant = 'text', onNavigate }: Hom
   );
 }
 
-function HomeIcon(): JSX.Element {
+export function HomeIcon(): JSX.Element {
   return (
     <svg className="home-button__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path
