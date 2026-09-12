@@ -66,4 +66,9 @@ public final class GameEvents {
     /** Применена новая игровая конфигурация. */
     public record ConfigApplied(long revision, String source) {
     }
+
+    /** Игрок разблокировал достижение. */
+    public record AchievementUnlocked(long userId, String achievementId, String title,
+                                      String description, String icon) {
+    }
 }

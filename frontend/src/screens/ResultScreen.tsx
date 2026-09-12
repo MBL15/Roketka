@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AchievementBadgeList } from '../components/AchievementPanel';
 import { Balloon } from '../components/Balloon';
 import { CrashShell } from '../components/CrashShell';
 import { UpsellModal } from '../components/UpsellModal';
@@ -84,6 +85,12 @@ export function ResultScreen(): JSX.Element {
           Очки идут в турнир: сейчас {formatPoints(result.gamePoints)}, место #{result.tournamentPosition}.
         </p>
       </div>
+
+      {result.newAchievements?.length > 0 && (
+        <div className="panel panel--pad result__achievements">
+          <AchievementBadgeList achievements={result.newAchievements} />
+        </div>
+      )}
 
       {result.reward.enabled && result.reward.fragmentIndex !== null && (
         <div className={`panel panel--pad result__reward${result.reward.collectionCompleted ? ' result__reward--complete' : ''}`}>

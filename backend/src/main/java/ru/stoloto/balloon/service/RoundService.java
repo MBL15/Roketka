@@ -48,6 +48,7 @@ public class RoundService {
     private final RewardService rewardService;
     private final UpsellService upsellService;
     private final PlayerProgressionService playerProgressionService;
+    private final AchievementService achievementService;
     private final ApplicationEventPublisher events;
 
     public RoundService(GameConfigService configService,
@@ -59,6 +60,7 @@ public class RoundService {
                         RewardService rewardService,
                         UpsellService upsellService,
                         PlayerProgressionService playerProgressionService,
+                        AchievementService achievementService,
                         ApplicationEventPublisher events) {
         this.configService = configService;
         this.fairness = fairness;
@@ -69,6 +71,7 @@ public class RoundService {
         this.rewardService = rewardService;
         this.upsellService = upsellService;
         this.playerProgressionService = playerProgressionService;
+        this.achievementService = achievementService;
         this.events = events;
     }
 
@@ -169,6 +172,8 @@ public class RoundService {
 
         PlayerProgressionService.AwardResult progression = playerProgressionService.awardForCashout(
                 user, round.getTheme(), outcome.multiplier());
+        List<GameDtos.AchievementDto> newAchievements = achievementService.onCashout(
+                user, round, outcome.multiplier(), progression.levelUp());
 
         events.publishEvent(new GameEvents.CashoutAccepted(roundId, user.getId(),
                 outcome.multiplier(), outcome.payout(), user.getBonusBalance(), outcome.totalPoints()));
@@ -178,7 +183,7 @@ public class RoundService {
                 "Могли бы забрать больше",
                 progression.snapshot().playerLevel(), progression.snapshot().playerXp(),
                 progression.snapshot().xpToNextLevel(), progression.snapshot().displayProfitBonus(),
-                progression.xpGained(), progression.levelUp());
+                progression.xpGained(), progression.levelUp(), newAchievements);
     }
 
     // ------------------------------------------------------- состояние раунда
@@ -259,6 +264,7 @@ public class RoundService {
         boolean won = round.getStatus() == RoundStatus.WON;
         RewardService.CollectionState collection = rewardService.state(user);
         PlayerProgressionService.Snapshot progression = playerProgressionService.snapshot(user);
+        List<GameDtos.AchievementDto> roundAchievements = achievementService.unlockedInRound(user, roundId);
 
         return new GameDtos.RoundResultDto(
                 round.getId(), round.getStatus().name(), won, round.getTheme(),
@@ -284,6 +290,7 @@ public class RoundService {
                 tournamentService.positionOf(user.getId()),
                 progression.playerLevel(), progression.playerXp(), progression.xpToNextLevel(),
                 progression.displayProfitBonus(),
+                roundAchievements,
                 upsellService.prepareOffer(sessionToken, user, round),
                 round.getStartedAt(), round.getFinishedAt());
     }

@@ -12,6 +12,7 @@ import { ApiError, api, setToken } from '../api/client';
 import { gameSocket, type SocketStatus } from '../api/socket';
 import { audio } from '../audio/AudioEngine';
 import type {
+  Achievement,
   CashoutResult,
   GameSetup,
   HistoryEntry,
@@ -69,6 +70,7 @@ type Action =
       displayProfitBonus: number;
     }
   | { type: 'tickets'; tickets: number; balance: number }
+  | { type: 'achievements'; achievements: Achievement[] }
   | { type: 'toast'; toast: Toast }
   | { type: 'dismiss'; id: number }
   | { type: 'busy'; busy: boolean }
@@ -144,6 +146,13 @@ function reducer(state: State, action: Action): State {
             player: { ...state.player, lotteryTickets: action.tickets, bonusBalance: action.balance },
           }
         : state;
+    case 'achievements':
+      return state.player
+        ? {
+            ...state,
+            player: { ...state.player, achievements: action.achievements },
+          }
+        : state;
     case 'toast':
       return { ...state, toasts: [...state.toasts, action.toast].slice(-4) };
     case 'dismiss':
@@ -177,7 +186,14 @@ interface GameContextValue extends State {
   applyPurchase: (totalTickets: number, balance: number) => void;
   applyCashoutProgression: (result: Pick<
     CashoutResult,
-    'balance' | 'playerLevel' | 'playerXp' | 'xpToNextLevel' | 'displayProfitBonus' | 'levelUp' | 'xpGained'
+    | 'balance'
+    | 'playerLevel'
+    | 'playerXp'
+    | 'xpToNextLevel'
+    | 'displayProfitBonus'
+    | 'levelUp'
+    | 'xpGained'
+    | 'newAchievements'
   >) => void;
   refreshSetup: () => Promise<void>;
   refreshHistory: () => Promise<void>;
@@ -194,6 +210,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
   const [state, dispatch] = useReducer(reducer, initialState);
   const phaseRef = useRef<Phase>(state.phase);
   phaseRef.current = state.phase;
+  const toastedAchievementsRef = useRef<Set<string>>(new Set());
 
   const notify = useCallback((toast: Omit<Toast, 'id'>) => {
     toastSequence += 1;
@@ -201,6 +218,30 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
     dispatch({ type: 'toast', toast: { ...toast, id } });
     window.setTimeout(() => dispatch({ type: 'dismiss', id }), 4200);
   }, []);
+
+  const notifyAchievements = useCallback(
+    (items: Achievement[] | undefined, mergeIntoPlayer = true) => {
+      if (!items || items.length === 0) {
+        return;
+      }
+      if (mergeIntoPlayer) {
+        dispatch({ type: 'achievements', achievements: mergeAchievements(state.player?.achievements ?? [], items) });
+      }
+      for (const achievement of items) {
+        if (toastedAchievementsRef.current.has(achievement.id)) {
+          continue;
+        }
+        toastedAchievementsRef.current.add(achievement.id);
+        audio.reward();
+        notify({
+          tone: 'success',
+          title: `${achievement.icon} ${achievement.title}`,
+          body: achievement.description,
+        });
+      }
+    },
+    [notify, state.player?.achievements],
+  );
 
   const dismissToast = useCallback((id: number) => dispatch({ type: 'dismiss', id }), []);
 
@@ -331,11 +372,24 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
               notify({ tone: 'info', title: 'Параметры игры обновлены', body: 'Новые настройки применены' });
             }
             break;
+          case 'achievement.unlocked':
+            notifyAchievements([
+              {
+                id: message.achievementId,
+                title: message.title,
+                description: message.description,
+                icon: message.icon,
+                category: 'flight',
+                unlocked: true,
+                unlockedAt: new Date().toISOString(),
+              },
+            ]);
+            break;
           default:
             break;
         }
       }),
-    [notify, refreshHistory, refreshSetup, state.player?.id],
+    [notify, notifyAchievements, refreshHistory, refreshSetup, state.player?.id],
   );
 
   // ------------------------------------------------------------- действия
@@ -429,6 +483,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       dispatch({ type: 'busy', busy: true });
       try {
         const round = await api.startRound(state.theme, betOptionId);
+        toastedAchievementsRef.current.clear();
         audio.launch();
         dispatch({ type: 'lastBet', optionId: betOptionId });
         dispatch({ type: 'flight', flight: flightFromStart(round) });
@@ -464,6 +519,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
           if (result.reward.collectionCompleted) {
             audio.reward();
           }
+          notifyAchievements(result.newAchievements);
           void refreshHistory();
           void refreshSetup();
           return;
@@ -483,7 +539,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       dispatch({ type: 'flight', flight: null });
       dispatch({ type: 'phase', phase: 'bet' });
     },
-    [notify, refreshHistory, refreshSetup, reportError],
+    [notify, notifyAchievements, refreshHistory, refreshSetup, reportError],
   );
 
   const playAgain = useCallback(() => {
@@ -504,7 +560,14 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
     (
       result: Pick<
         CashoutResult,
-        'balance' | 'playerLevel' | 'playerXp' | 'xpToNextLevel' | 'displayProfitBonus' | 'levelUp' | 'xpGained'
+        | 'balance'
+        | 'playerLevel'
+        | 'playerXp'
+        | 'xpToNextLevel'
+        | 'displayProfitBonus'
+        | 'levelUp'
+        | 'xpGained'
+        | 'newAchievements'
       >,
     ) => {
       dispatch({ type: 'balance', balance: result.balance });
@@ -515,6 +578,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
         xpToNextLevel: result.xpToNextLevel,
         displayProfitBonus: result.displayProfitBonus,
       });
+      notifyAchievements(result.newAchievements);
       if (result.levelUp) {
         notify({
           tone: 'success',
@@ -529,7 +593,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
         });
       }
     },
-    [notify],
+    [notify, notifyAchievements],
   );
 
   const repeatBet = useCallback(async () => {
@@ -605,4 +669,15 @@ export function useGame(): GameContextValue {
     throw new Error('useGame должен вызываться внутри GameProvider');
   }
   return context;
+}
+
+function mergeAchievements(current: Achievement[], unlocked: Achievement[]): Achievement[] {
+  const patch = new Map(unlocked.map((item) => [item.id, item]));
+  if (current.length === 0) {
+    return unlocked;
+  }
+  return current.map((item) => {
+    const update = patch.get(item.id);
+    return update ? { ...item, ...update, unlocked: true } : item;
+  });
 }

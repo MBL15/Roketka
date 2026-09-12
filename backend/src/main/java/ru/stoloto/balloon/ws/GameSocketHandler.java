@@ -174,6 +174,15 @@ public class GameSocketHandler extends TextWebSocketHandler {
     }
 
     @EventListener
+    public void onAchievement(GameEvents.AchievementUnlocked event) {
+        sendToUser(event.userId(), message("achievement.unlocked", Map.of(
+                "achievementId", event.achievementId(),
+                "title", event.title(),
+                "description", event.description(),
+                "icon", event.icon())), false);
+    }
+
+    @EventListener
     public void onHistory(GameEvents.HistoryUpdated event) {
         broadcast(message("history.updated", Map.of("roundId", event.roundId())), false);
     }

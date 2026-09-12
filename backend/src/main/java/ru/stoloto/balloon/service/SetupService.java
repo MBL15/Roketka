@@ -27,15 +27,18 @@ public class SetupService {
     private final RewardService rewardService;
     private final TournamentService tournamentService;
     private final PlayerProgressionService playerProgressionService;
+    private final AchievementService achievementService;
 
     public SetupService(GameConfigService configService,
                         RewardService rewardService,
                         TournamentService tournamentService,
-                        PlayerProgressionService playerProgressionService) {
+                        PlayerProgressionService playerProgressionService,
+                        AchievementService achievementService) {
         this.configService = configService;
         this.rewardService = rewardService;
         this.tournamentService = tournamentService;
         this.playerProgressionService = playerProgressionService;
+        this.achievementService = achievementService;
     }
 
     @Transactional(readOnly = true)
@@ -108,6 +111,7 @@ public class SetupService {
                 user.getRoundsPlayed(), user.isOnboardingSeen(),
                 tournamentService.positionOf(user.getId()), user.getCollectionLevel(),
                 progression.playerLevel(), progression.playerXp(), progression.xpToNextLevel(),
-                progression.displayProfitBonus());
+                progression.displayProfitBonus(),
+                achievementService.catalogFor(user));
     }
 }

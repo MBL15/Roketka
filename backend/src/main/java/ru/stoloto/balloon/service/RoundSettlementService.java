@@ -35,17 +35,20 @@ public class RoundSettlementService {
     private final UserAccountRepository users;
     private final RewardService rewardService;
     private final TournamentService tournamentService;
+    private final AchievementService achievementService;
     private final ApplicationEventPublisher events;
 
     public RoundSettlementService(GameRoundRepository rounds,
                                   UserAccountRepository users,
                                   RewardService rewardService,
                                   TournamentService tournamentService,
+                                  AchievementService achievementService,
                                   ApplicationEventPublisher events) {
         this.rounds = rounds;
         this.users = users;
         this.rewardService = rewardService;
         this.tournamentService = tournamentService;
+        this.achievementService = achievementService;
         this.events = events;
     }
 
@@ -80,6 +83,9 @@ public class RoundSettlementService {
         round.settle(activeRound.levelsPassed(), activeRound.boostApplied(), totalPoints, Instant.now());
         round.attachReward(reward.collectionLevel(), reward.fragmentIndex(),
                 reward.duplicate(), reward.collectionCompleted());
+
+        achievementService.onSettlement(
+                user, round, won, reward, round.getParameters().levelMultipliers().size());
 
         events.publishEvent(new GameEvents.RoundCrashed(
                 round.getId(), user.getId(), round.getCrashMultiplier(), won));

@@ -1,3 +1,4 @@
+import { AchievementPanel } from '../components/AchievementPanel';
 import { CollectionStrip } from '../components/CollectionStrip';
 import { CrashShell } from '../components/CrashShell';
 import { PlayerLevelBar } from '../components/PlayerLevelBar';
@@ -47,6 +48,10 @@ export function ProfileScreen(): JSX.Element {
 
         <div className="panel panel--pad profile__level-panel">
           <PlayerLevelBar player={player} />
+        </div>
+
+        <div className="panel panel--pad profile__achievements-panel">
+          <AchievementPanel achievements={player.achievements ?? []} />
         </div>
 
         {setup.reward.enabled && (

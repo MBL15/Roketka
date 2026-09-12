@@ -64,7 +64,14 @@ export type SocketMessage =
         bot: boolean;
       }>;
     }
-  | { type: 'config.updated'; revision: number; source: string };
+  | { type: 'config.updated'; revision: number; source: string }
+  | {
+      type: 'achievement.unlocked';
+      achievementId: string;
+      title: string;
+      description: string;
+      icon: string;
+    };
 
 export type SocketStatus = 'connecting' | 'open' | 'closed';
 

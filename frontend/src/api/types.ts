@@ -8,6 +8,16 @@ export type ThemeKey = 'green' | 'red';
 
 export type RoundStatus = 'FLYING' | 'CASHED_OUT' | 'WON' | 'LOST';
 
+export interface Achievement {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  category: 'flight' | 'collection' | 'progression' | 'milestone';
+  unlocked: boolean;
+  unlockedAt: string | null;
+}
+
 export interface Player {
   id: number;
   nickname: string;
@@ -22,6 +32,7 @@ export interface Player {
   playerXp: number;
   xpToNextLevel: number;
   displayProfitBonus: number;
+  achievements: Achievement[];
 }
 
 export interface AuthResponse {
@@ -170,6 +181,7 @@ export interface CashoutResult {
   displayProfitBonus: number;
   xpGained: number;
   levelUp: boolean;
+  newAchievements: Achievement[];
 }
 
 export interface PointsBreakdown {
@@ -241,6 +253,7 @@ export interface RoundResult {
   playerXp: number;
   xpToNextLevel: number;
   displayProfitBonus: number;
+  newAchievements: Achievement[];
   upsell: UpsellOffer;
   startedAt: string;
   finishedAt: string;
