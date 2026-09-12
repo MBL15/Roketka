@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { ThemeToggleButton } from '../components/ThemeToggleButton';
 import { TAB_GROUPS, type AdminTab } from './adminSettingsSearch';
 
 function themeTone(tab: AdminTab): 'green' | 'red' | 'global' {
@@ -31,27 +32,30 @@ export function AdminTopMenu({
   }, [tab]);
 
   return (
-    <header className="admin__topmenu">
-      <div className="admin__topmenu-inner">
-        <div className="admin__topmenu-brand">
-          <span className="admin__topmenu-logo" aria-hidden="true">
+    <div className="admin-header-wrap">
+      <header className="crash-header admin-header">
+        <div className="crash-header__brand">
+          <span className="crash-header__logo" aria-hidden="true">
             ◓
           </span>
-          <span className="admin__topmenu-title">Админ-панель</span>
+          <span className="col" style={{ gap: 0 }}>
+            <span className="crash-header__name">Воздушный шар</span>
+            <span className="crash-header__tag">админ-панель</span>
+          </span>
         </div>
 
-        <nav className="admin__topmenu-nav" aria-label="Разделы настроек">
+        <nav className="admin-header__nav" aria-label="Разделы настроек">
           {TAB_GROUPS.map((group) => (
-            <div key={group.label} className="admin__topmenu-group">
-              <span className="admin__topmenu-group-label">{group.label}</span>
-              <div className="admin__topmenu-links">
+            <div key={group.label} className="admin-header__group">
+              <span className="admin-header__group-label">{group.label}</span>
+              <div className="admin-header__tabs">
                 {group.tabs.map(([key, label]) => (
                   <button
                     key={key}
                     ref={tab === key ? activeRef : undefined}
                     type="button"
-                    className={`admin__topmenu-link admin__topmenu-link--${themeTone(key)}${
-                      tab === key ? ' admin__topmenu-link--active' : ''
+                    className={`admin-header__tab admin-header__tab--${themeTone(key)}${
+                      tab === key ? ' admin-header__tab--active' : ''
                     }`}
                     onClick={() => onTabChange(key)}
                     aria-current={tab === key ? 'page' : undefined}
@@ -64,18 +68,26 @@ export function AdminTopMenu({
           ))}
         </nav>
 
-        <div className="admin__topmenu-actions">
+        <div className="crash-header__actions">
+          <span className="crash-header__status chip chip--positive" title="Режим администратора">
+            <span className="crash-header__dot" aria-hidden="true" />
+            админ
+          </span>
+
           <button type="button" className="btn btn--ghost btn--sm" onClick={onReload} disabled={busy}>
             Обновить
           </button>
           <button type="button" className="btn btn--danger btn--sm" onClick={onReset} disabled={busy}>
             Сброс
           </button>
+
+          <ThemeToggleButton />
+
           <button type="button" className="btn btn--primary btn--sm" onClick={onExit}>
             К игре
           </button>
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }

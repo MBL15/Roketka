@@ -118,6 +118,129 @@
   background: currentColor;
 }
 
+/* --- админ-шапка (на базе crash-header) ------------------------------ */
+
+.admin-header-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+  padding: 0 clamp(16px, 3vw, 32px) 6px;
+  background: color-mix(in srgb, var(--surface-base) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.admin-header {
+  width: min(100%, 1280px);
+  margin: 0 auto;
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+.admin-header__nav {
+  flex: 1 1 320px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 0 12px;
+  border-left: 1px solid var(--surface-border);
+  border-right: 1px solid var(--surface-border);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(46, 204, 113, 0.35) transparent;
+}
+
+.admin-header__nav::-webkit-scrollbar {
+  height: 4px;
+}
+
+.admin-header__nav::-webkit-scrollbar-thumb {
+  background: rgba(46, 204, 113, 0.35);
+  border-radius: 999px;
+}
+
+.admin-header__group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.admin-header__group-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-500);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.admin-header__tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.admin-header__tab {
+  padding: 6px 11px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink-300);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out),
+    border-color var(--t-fast) var(--ease-out);
+}
+
+.admin-header__tab:hover {
+  background: var(--fill-hover);
+  color: var(--ink-100);
+}
+
+.admin-header__tab--active {
+  color: var(--action-ink);
+  box-shadow: 0 6px 18px -12px var(--positive);
+}
+
+.admin-header__tab--green.admin-header__tab--active {
+  background: linear-gradient(145deg, var(--action), var(--action-hover));
+}
+
+.admin-header__tab--red.admin-header__tab--active {
+  background: linear-gradient(145deg, #ff7b7b, #d63b3b);
+  color: var(--text-on-vivid);
+}
+
+.admin-header__tab--global.admin-header__tab--active {
+  background: linear-gradient(145deg, var(--action), var(--action-hover));
+}
+
+@media (max-width: 1100px) {
+  .admin-header__nav {
+    order: 3;
+    flex-basis: 100%;
+    border-left: none;
+    border-right: none;
+    padding: 8px 0 0;
+    border-top: 1px solid var(--surface-border);
+  }
+
+  .admin-header .crash-header__actions {
+    margin-left: auto;
+  }
+}
+
 /* --- трёхколоночный каркас ------------------------------------------- */
 
 .crash {

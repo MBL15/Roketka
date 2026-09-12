@@ -307,6 +307,7 @@ function ThemeSection({
       <Card
         title="Основное"
         hint="Как тема называется в интерфейсе и доступна ли игрокам."
+        centered
       >
         <Text
           fieldId={`${pid}.gameName`}
@@ -1017,12 +1018,14 @@ function Card({
   title,
   hint,
   wide = false,
+  centered = false,
   fieldId,
   children,
 }: {
   title: string;
   hint?: string;
   wide?: boolean;
+  centered?: boolean;
   fieldId?: string;
   children: React.ReactNode;
 }): JSX.Element {
@@ -1030,7 +1033,7 @@ function Card({
   return (
     <section
       id={fieldId ? `admin-field-${fieldId}` : undefined}
-      className={`panel panel--pad admin__card${wide ? ' admin__card--wide' : ''}${highlighted ? ' field--highlight' : ''}`}
+      className={`panel panel--pad admin__card${wide ? ' admin__card--wide' : ''}${centered ? ' admin__card--centered' : ''}${highlighted ? ' field--highlight' : ''}`}
     >
       <header className="admin__card-head">
         <h3 className="h3 admin__card-title">{title}</h3>
