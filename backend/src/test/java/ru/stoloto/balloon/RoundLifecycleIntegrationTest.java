@@ -330,6 +330,35 @@ class RoundLifecycleIntegrationTest {
     }
 
     @Test
+    @DisplayName("Отключённая тема скрыта из setup и не принимает новые раунды")
+    void disabledThemeIsHiddenAndRejected() throws Exception {
+        String expert = login("expert", "expert");
+        String demo = login("demo", "demo");
+
+        JsonNode config = readJson(get("/api/admin/config"), expert);
+        Map<String, Object> mutated = json.convertValue(config, LinkedHashMap.class);
+        themeOf(mutated, "red").put("active", false);
+        readJson(put("/api/admin/config")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(mutated)), expert);
+
+        JsonNode setup = readJson(get("/api/game/setup"), demo);
+        assertThat(setup.get("themes").findValues("key"))
+                .noneMatch(node -> "red".equals(node.asText()));
+
+        MvcResult rejected = mockMvc.perform(authorized(post("/api/rounds")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"theme\":\"red\",\"betOptionId\":1}"), demo))
+                .andReturn();
+        assertThat(rejected.getResponse().getStatus()).isEqualTo(409);
+
+        themeOf(mutated, "red").put("active", true);
+        readJson(put("/api/admin/config")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json.writeValueAsString(mutated)), expert);
+    }
+
+    @Test
     @DisplayName("Без токена игровые методы недоступны")
     void apiRequiresAuthentication() throws Exception {
         mockMvc.perform(get("/api/game/setup"))
@@ -402,9 +431,14 @@ class RoundLifecycleIntegrationTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<String, Object> themeOf(Map<String, Object> config) {
+    private static Map<String, Object> themeOf(Map<String, Object> config, String key) {
         Map<String, Object> themes = (Map<String, Object>) config.get("themes");
-        return (Map<String, Object>) themes.get("green");
+        return (Map<String, Object>) themes.get(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> themeOf(Map<String, Object> config) {
+        return themeOf(config, "green");
     }
 
     @SuppressWarnings("unchecked")

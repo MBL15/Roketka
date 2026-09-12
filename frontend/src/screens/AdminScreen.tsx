@@ -357,7 +357,7 @@ function ThemeSection({
         <Toggle
           fieldId={`${pid}.active`}
           label="Тема доступна игрокам"
-          hint="Если выключить, тему нельзя будет выбрать на экране входа."
+          hint="Если выключить, тема исчезнет из выбора и новые раунды в ней начать нельзя."
           value={theme.active}
           onChange={(value) => onChange({ active: value })}
         />

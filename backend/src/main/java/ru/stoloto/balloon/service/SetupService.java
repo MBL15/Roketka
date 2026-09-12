@@ -48,6 +48,9 @@ public class SetupService {
 
         List<GameDtos.ThemeDto> themes = new ArrayList<>();
         config.orderedThemes().forEach((key, theme) -> {
+            if (!theme.active()) {
+                return;
+            }
             List<GameDtos.BetOptionDto> options = theme.betOptions().stream()
                     .map(option -> new GameDtos.BetOptionDto(
                             option.id(), option.cost(), option.boostTier(),

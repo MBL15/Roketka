@@ -95,6 +95,10 @@ const initialState: State = {
   autoCashoutMultiplier: null,
 };
 
+function isThemeAvailable(setup: GameSetup | null, theme: ThemeKey): boolean {
+  return setup?.themes.some((item) => item.key === theme) ?? false;
+}
+
 function reducer(state: State, action: Action): State {
   switch (action.type) {
     case 'phase':
@@ -291,6 +295,25 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       reportError(error, 'Не удалось обновить параметры игры');
     }
   }, [reportError]);
+
+  /** Если текущая тема отключена в конфиге — возвращаем игрока к выбору неба. */
+  useEffect(() => {
+    if (!state.setup) {
+      return;
+    }
+    if (state.phase !== 'bet' && state.phase !== 'result') {
+      return;
+    }
+    if (isThemeAvailable(state.setup, state.theme)) {
+      return;
+    }
+    dispatch({ type: 'phase', phase: 'theme' });
+    notify({
+      tone: 'info',
+      title: 'Тема недоступна',
+      body: 'Эта тема отключена администратором. Выберите другую.',
+    });
+  }, [notify, state.phase, state.setup, state.theme]);
 
   const refreshHistory = useCallback(async () => {
     try {
@@ -502,16 +525,39 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
     }
   }, [notify, refreshSetup, reportError]);
 
-  const chooseTheme = useCallback((theme: ThemeKey) => {
-    audio.waterDrop();
-    dispatch({ type: 'theme', theme });
-    dispatch({ type: 'phase', phase: 'bet' });
-  }, []);
+  const chooseTheme = useCallback(
+    (theme: ThemeKey) => {
+      if (!isThemeAvailable(state.setup, theme)) {
+        notify({
+          tone: 'error',
+          title: 'Тема недоступна',
+          body: 'Эта тема отключена администратором.',
+        });
+        dispatch({ type: 'phase', phase: 'theme' });
+        return;
+      }
+      audio.waterDrop();
+      dispatch({ type: 'theme', theme });
+      dispatch({ type: 'phase', phase: 'bet' });
+    },
+    [notify, state.setup],
+  );
 
-  const switchTheme = useCallback((theme: ThemeKey) => {
-    audio.click();
-    dispatch({ type: 'theme', theme });
-  }, []);
+  const switchTheme = useCallback(
+    (theme: ThemeKey) => {
+      if (!isThemeAvailable(state.setup, theme)) {
+        notify({
+          tone: 'error',
+          title: 'Тема недоступна',
+          body: 'Эта тема отключена администратором.',
+        });
+        return;
+      }
+      audio.click();
+      dispatch({ type: 'theme', theme });
+    },
+    [notify, state.setup],
+  );
 
   const goTo = useCallback((phase: Phase) => dispatch({ type: 'phase', phase }), []);
 
@@ -596,8 +642,12 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
   const playAgain = useCallback(() => {
     audio.click();
     dispatch({ type: 'result', result: null });
+    if (!isThemeAvailable(state.setup, state.theme)) {
+      dispatch({ type: 'phase', phase: 'theme' });
+      return;
+    }
     dispatch({ type: 'phase', phase: 'bet' });
-  }, []);
+  }, [state.setup, state.theme]);
 
   const applyPurchase = useCallback(
     (totalTickets: number, balance: number) => {
@@ -665,7 +715,10 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
   // --------------------------------------------------------------- контекст
 
   const themeOf = useCallback(
-    (key: ThemeKey) => state.setup?.themes.find((theme) => theme.key === key) ?? null,
+    (key: ThemeKey) =>
+      isThemeAvailable(state.setup, key)
+        ? (state.setup?.themes.find((theme) => theme.key === key) ?? null)
+        : null,
     [state.setup],
   );
 
