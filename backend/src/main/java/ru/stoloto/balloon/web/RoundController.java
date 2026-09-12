@@ -37,10 +37,10 @@ public class RoundController {
     public GameDtos.StartRoundResponse start(AuthContext context,
                                              @RequestBody GameDtos.StartRoundRequest request) {
         String theme = request.theme() == null ? GameConfig.THEME_GREEN : request.theme();
-        if (request.betOptionId() == null) {
-            throw new IllegalArgumentException("Не выбран вариант ставки (betOptionId)");
+        if (request.betOptionId() == null && request.betAmount() == null) {
+            throw new IllegalArgumentException("Укажите вариант ставки (betOptionId) или сумму (betAmount)");
         }
-        return roundService.start(context.user(), theme, request.betOptionId(), request.clientSeed());
+        return roundService.start(context.user(), theme, request.betOptionId(), request.betAmount(), request.clientSeed());
     }
 
     @GetMapping("/active")

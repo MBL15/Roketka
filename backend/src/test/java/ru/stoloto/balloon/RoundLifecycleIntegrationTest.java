@@ -113,6 +113,21 @@ class RoundLifecycleIntegrationTest {
     }
 
     @Test
+    @DisplayName("Произвольная сумма ставки принимается без бустера")
+    void customBetAmountStartsRound() throws Exception {
+        String token = login("judge", "judge");
+        long balanceBefore = readJson(get("/api/auth/me"), token).get("bonusBalance").asLong();
+
+        JsonNode round = startRoundWithAmount(token, "green", 175);
+        assertThat(round.get("betAmount").asLong()).isEqualTo(175);
+        assertThat(round.get("boostTier").asInt()).isEqualTo(1);
+        assertThat(round.get("boostValue").asDouble()).isEqualTo(1.0);
+        assertThat(round.get("balance").asLong()).isEqualTo(balanceBefore - 175);
+
+        waitForRoundToFinish(token, round.get("roundId").asLong());
+    }
+
+    @Test
     @DisplayName("История завершённых раундов доступна и пополняется")
     void sharedHistoryIsPopulated() throws Exception {
         String token = login("demo", "demo");
@@ -336,6 +351,12 @@ class RoundLifecycleIntegrationTest {
         return readJson(post("/api/rounds")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"theme\":\"" + theme + "\",\"betOptionId\":" + betOptionId + "}"), token);
+    }
+
+    private JsonNode startRoundWithAmount(String token, String theme, long betAmount) throws Exception {
+        return readJson(post("/api/rounds")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"theme\":\"" + theme + "\",\"betAmount\":" + betAmount + "}"), token);
     }
 
     /** Ждёт крах шара и возвращает экран результата. */

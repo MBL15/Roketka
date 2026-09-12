@@ -21,6 +21,13 @@ body {
   font-family: var(--font-ui);
   color: var(--ink-100);
   background: var(--sky-top);
+  background-image: linear-gradient(
+    180deg,
+    var(--sky-top) 0%,
+    var(--sky-mid) 42%,
+    var(--sky-low) 72%,
+    var(--sky-horizon) 100%
+  );
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overscroll-behavior: none;

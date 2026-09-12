@@ -128,10 +128,10 @@
   --shadow-lg: 0 16px 40px rgba(24, 33, 47, 0.14);
   --shadow-glow: 0 0 0 1px var(--surface-border);
 
-  --sky-top: #dfe6ee;
-  --sky-mid: #d4dce6;
-  --sky-low: #c8d4e0;
-  --sky-horizon: #bcc9d8;
+  --sky-top: #c8d4e0;
+  --sky-mid: #dce4ec;
+  --sky-low: #e8eef4;
+  --sky-horizon: #f4f7fb;
 
   --fill-faint: rgba(24, 33, 47, 0.03);
   --fill-muted: rgba(24, 33, 47, 0.04);
@@ -155,17 +155,17 @@
 }
 
 [data-color-scheme='light'][data-theme='green'] {
-  --sky-top: #dce8e4;
-  --sky-mid: #d0e0d8;
-  --sky-low: #c4d8cc;
-  --sky-horizon: #b8cfc0;
+  --sky-top: #c8ddd4;
+  --sky-mid: #dceae4;
+  --sky-low: #eaf2ee;
+  --sky-horizon: #f4faf7;
 }
 
 [data-color-scheme='light'][data-theme='red'] {
-  --sky-top: #e8e0e4;
-  --sky-mid: #e0d4da;
-  --sky-low: #d8c8d0;
-  --sky-horizon: #d0bcc4;
+  --sky-top: #ddd0d8;
+  --sky-mid: #ebe2e8;
+  --sky-low: #f2ecf0;
+  --sky-horizon: #f8f4f6;
 }
 
 [data-theme='red'] {

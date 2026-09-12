@@ -4,6 +4,7 @@ import { CrashShell } from '../components/CrashShell';
 import { FlightCanvas } from '../components/FlightCanvas';
 import { LevelLadder } from '../components/LevelLadder';
 import { LiveRating } from '../components/LiveRating';
+import { useColorScheme } from '../hooks/useColorScheme';
 import { useGame } from '../state/GameContext';
 import { multiplierStage, type Flight } from '../state/flight';
 import { useFlight } from '../state/useFlight';
@@ -39,6 +40,7 @@ interface FlyingProps {
 
 function Flying({ flight, setup, player, rating, onFinished }: FlyingProps): JSX.Element {
   const { autoCashoutMultiplier, applyCashoutProgression } = useGame();
+  const { isLight } = useColorScheme();
   const [hintVisible, setHintVisible] = useState(false);
   const state = useFlight(flight, onFinished, autoCashoutMultiplier, applyCashoutProgression);
 
@@ -83,7 +85,7 @@ function Flying({ flight, setup, player, rating, onFinished }: FlyingProps): JSX
   return (
     <CrashShell bleed rail={rail}>
       <div className={`game game--${flight.theme}${state.crashed ? ' game--crashed' : ''}`}>
-        <FlightCanvas flight={flight} stateRef={stateRef} theme={flight.theme} />
+        <FlightCanvas flight={flight} stateRef={stateRef} theme={flight.theme} lightScheme={isLight} />
 
         <div className="game__overlay game__overlay--crash">
           <div className="game__center">

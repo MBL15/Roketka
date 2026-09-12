@@ -41,6 +41,7 @@ interface State {
   flight: Flight | null;
   result: RoundResult | null;
   lastBetOptionId: number | null;
+  lastBetAmount: number | null;
   history: HistoryEntry[];
   rating: RatingEntry[];
   socketStatus: SocketStatus;
@@ -57,7 +58,7 @@ type Action =
   | { type: 'theme'; theme: ThemeKey }
   | { type: 'flight'; flight: Flight | null }
   | { type: 'result'; result: RoundResult | null }
-  | { type: 'lastBet'; optionId: number | null }
+  | { type: 'lastBet'; optionId: number | null; amount: number | null }
   | { type: 'history'; history: HistoryEntry[] }
   | { type: 'rating'; rating: RatingEntry[] }
   | { type: 'socket'; status: SocketStatus }
@@ -85,6 +86,7 @@ const initialState: State = {
   flight: null,
   result: null,
   lastBetOptionId: null,
+  lastBetAmount: null,
   history: [],
   rating: [],
   socketStatus: 'closed',
@@ -108,7 +110,7 @@ function reducer(state: State, action: Action): State {
     case 'result':
       return { ...state, result: action.result };
     case 'lastBet':
-      return { ...state, lastBetOptionId: action.optionId };
+      return { ...state, lastBetOptionId: action.optionId, lastBetAmount: action.amount };
     case 'history':
       return { ...state, history: action.history };
     case 'rating':
@@ -168,6 +170,8 @@ function reducer(state: State, action: Action): State {
   }
 }
 
+export type StartBetParams = { betOptionId: number } | { betAmount: number };
+
 interface GameContextValue extends State {
   currentTheme: ThemeSetup | null;
   themeOf: (key: ThemeKey) => ThemeSetup | null;
@@ -178,7 +182,7 @@ interface GameContextValue extends State {
   chooseTheme: (theme: ThemeKey) => void;
   switchTheme: (theme: ThemeKey) => void;
   goTo: (phase: Phase) => void;
-  startRound: (betOptionId: number) => Promise<void>;
+  startRound: (bet: StartBetParams) => Promise<void>;
   finishRound: (roundId: number) => Promise<void>;
   playAgain: () => void;
   repeatBet: () => Promise<void>;
@@ -479,13 +483,17 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
   }, []);
 
   const startRound = useCallback(
-    async (betOptionId: number) => {
+    async (bet: StartBetParams) => {
       dispatch({ type: 'busy', busy: true });
       try {
-        const round = await api.startRound(state.theme, betOptionId);
+        const round = await api.startRound(state.theme, bet);
         toastedAchievementsRef.current.clear();
         audio.launch();
-        dispatch({ type: 'lastBet', optionId: betOptionId });
+        if ('betOptionId' in bet) {
+          dispatch({ type: 'lastBet', optionId: bet.betOptionId, amount: null });
+        } else {
+          dispatch({ type: 'lastBet', optionId: null, amount: bet.betAmount });
+        }
         dispatch({ type: 'flight', flight: flightFromStart(round) });
         dispatch({ type: 'result', result: null });
         dispatch({ type: 'balance', balance: round.balance });
@@ -597,13 +605,19 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
   );
 
   const repeatBet = useCallback(async () => {
-    if (state.lastBetOptionId === null) {
+    if (state.lastBetOptionId === null && state.lastBetAmount === null) {
       dispatch({ type: 'phase', phase: 'bet' });
       return;
     }
     dispatch({ type: 'result', result: null });
-    await startRound(state.lastBetOptionId);
-  }, [startRound, state.lastBetOptionId]);
+    if (state.lastBetOptionId !== null) {
+      await startRound({ betOptionId: state.lastBetOptionId });
+      return;
+    }
+    if (state.lastBetAmount !== null) {
+      await startRound({ betAmount: state.lastBetAmount });
+    }
+  }, [startRound, state.lastBetAmount, state.lastBetOptionId]);
 
   // --------------------------------------------------------------- контекст
 

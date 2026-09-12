@@ -77,25 +77,33 @@ public class RoundService {
 
     // ------------------------------------------------------------ старт раунда
 
+    /** Идентификатор «произвольной» ставки без бустера (своя сумма или весь баланс). */
+    private static final int CUSTOM_BET_OPTION_ID = 0;
+
+    private record ResolvedBet(int betOptionId, long cost, int boostTier, double alphaShift) {
+    }
+
     @Transactional
-    public GameDtos.StartRoundResponse start(UserAccount account, String themeKey, int betOptionId, String clientSeed) {
+    public GameDtos.StartRoundResponse start(UserAccount account, String themeKey,
+                                             Integer betOptionId, Long betAmount, String clientSeed) {
         GameConfig config = configService.current();
         GameConfig.ThemeConfig theme = config.theme(themeKey);
         if (!theme.active()) {
             throw new RoundRejectedException("Тема «" + theme.gameName() + "» отключена в конфигурации");
         }
-        GameConfig.BetOptionConfig option = theme.betOption(betOptionId);
 
         UserAccount user = users.findById(account.getId()).orElseThrow();
         if (engine.findByUser(user.getId()).isPresent()) {
             throw new RoundRejectedException("У вас уже есть незавершённый раунд");
         }
-        if (user.getBonusBalance() < option.cost()) {
-            throw new UserAccount.InsufficientBalanceException(user.getBonusBalance(), option.cost());
+
+        ResolvedBet bet = resolveBet(theme, betOptionId, betAmount, user.getBonusBalance());
+        if (user.getBonusBalance() < bet.cost()) {
+            throw new UserAccount.InsufficientBalanceException(user.getBonusBalance(), bet.cost());
         }
 
         boolean showOnboarding = !user.isOnboardingSeen();
-        user.debitBonus(option.cost());
+        user.debitBonus(bet.cost());
         user.markOnboardingSeen();
 
         String serverSeed = fairness.newServerSeed();
@@ -104,14 +112,14 @@ public class RoundService {
         long nonce = rounds.countByUserIdAndStatusIn(user.getId(), TERMINAL) + 1;
 
         GameConfig.MathConfig math = theme.math();
-        double alpha = math.alpha() + option.alphaShift();
+        double alpha = math.alpha() + bet.alphaShift();
         double crashMultiplier = CrashMath.sampleCrashPoint(
                 fairness.uniform(serverSeed, usedClientSeed, nonce, FairnessService.NAMESPACE_CRASH),
                 alpha, math.houseEdge(), math.minCrashMultiplier(), math.maxMultiplier(), math.delta());
 
-        double boostValue = theme.boostValue(option.boostTier());
+        double boostValue = theme.boostValue(bet.boostTier());
         Integer boostLevel = null;
-        if (option.boostTier() > 1) {
+        if (bet.boostTier() > 1) {
             boostLevel = CrashMath.pickBoostLevel(
                     fairness.uniform(serverSeed, usedClientSeed, nonce, FairnessService.NAMESPACE_LOOT),
                     theme.lootProbabilities());
@@ -126,11 +134,11 @@ public class RoundService {
                 math.multiplierGrowthRate(), math.delta(), math.fps(), math.maxFlightSeconds(),
                 theme.levelMultipliers(), theme.lootProbabilities(),
                 theme.points().perLine(), theme.points().cashoutBonus(),
-                theme.points().boostBonus(option.boostTier()));
+                theme.points().boostBonus(bet.boostTier()));
 
         GameRound round = rounds.save(new GameRound(
-                user.getId(), user.getNickname(), themeKey, option.id(), option.cost(),
-                option.boostTier(), boostValue, boostLevel,
+                user.getId(), user.getNickname(), themeKey, bet.betOptionId(), bet.cost(),
+                bet.boostTier(), boostValue, boostLevel,
                 crashMultiplier, maxReachable,
                 serverSeed, seedHash, usedClientSeed, nonce,
                 parameters, Instant.now()));
@@ -138,8 +146,8 @@ public class RoundService {
         engine.register(round);
 
         return new GameDtos.StartRoundResponse(
-                round.getId(), themeKey, option.cost(),
-                option.boostTier(), boostValue,
+                round.getId(), themeKey, bet.cost(),
+                bet.boostTier(), boostValue,
                 normalizedChances(theme.lootProbabilities()),
                 theme.levelCount(), theme.levelMultipliers(),
                 math.multiplierGrowthRate(), math.delta(), math.maxMultiplier(),
@@ -149,6 +157,23 @@ public class RoundService {
                 user.getBonusBalance(), showOnboarding,
                 new GameDtos.PointsDto(theme.points().perLine(), theme.points().cashoutBonus(),
                         theme.points().boostBonusPerTier()));
+    }
+
+    private ResolvedBet resolveBet(GameConfig.ThemeConfig theme, Integer betOptionId, Long betAmount, long balance) {
+        if (betAmount != null) {
+            if (betAmount <= 0) {
+                throw new IllegalArgumentException("Сумма ставки должна быть больше 0");
+            }
+            if (balance < betAmount) {
+                throw new UserAccount.InsufficientBalanceException(balance, betAmount);
+            }
+            return new ResolvedBet(CUSTOM_BET_OPTION_ID, betAmount, 1, 0.0);
+        }
+        if (betOptionId == null) {
+            throw new IllegalArgumentException("Не выбран вариант ставки");
+        }
+        GameConfig.BetOptionConfig option = theme.betOption(betOptionId);
+        return new ResolvedBet(option.id(), option.cost(), option.boostTier(), option.alphaShift());
     }
 
     // ---------------------------------------------------------------- cashout

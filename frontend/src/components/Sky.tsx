@@ -149,7 +149,8 @@ export function Sky({ seed, stars = true, parallax = 0, fullPage = false }: SkyP
       const flap = Math.sin(time * bird.flapSpeed + bird.flapPhase);
 
       context.save();
-      context.strokeStyle = 'rgba(12, 28, 38, 0.55)';
+      const light = document.documentElement.dataset.colorScheme === 'light';
+      context.strokeStyle = light ? 'rgba(24, 33, 47, 0.42)' : 'rgba(12, 28, 38, 0.55)';
       context.lineWidth = 1.7 * bird.scale;
       context.lineCap = 'round';
       context.beginPath();

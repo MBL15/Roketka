@@ -89,7 +89,7 @@ public final class GameDtos {
 
     // ----------------------------------------------------------------- раунд
 
-    public record StartRoundRequest(String theme, Integer betOptionId, String clientSeed) {
+    public record StartRoundRequest(String theme, Integer betOptionId, Long betAmount, String clientSeed) {
     }
 
     /**

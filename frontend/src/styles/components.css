@@ -611,6 +611,24 @@
   flex: 1;
 }
 
+.puzzle--flex {
+  text-align: left;
+}
+
+.puzzle__custom-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.puzzle__custom-input {
+  min-height: 40px;
+  padding: 0 12px;
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .puzzle__foot {
   margin-top: auto;
 }

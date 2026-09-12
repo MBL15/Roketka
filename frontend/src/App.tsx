@@ -10,11 +10,13 @@ import { LoginScreen } from './screens/LoginScreen';
 import { ProfileScreen } from './screens/ProfileScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { ThemeSelectScreen } from './screens/ThemeSelectScreen';
+import { useColorScheme } from './hooks/useColorScheme';
 import { useGame } from './state/GameContext';
 import { isExpertAccount } from './utils/access';
 
 export function App(): JSX.Element {
   const { phase, theme, player, notify } = useGame();
+  const { isLight } = useColorScheme();
   const [adminOpen, setAdminOpen] = useState(() => window.location.hash === '#admin');
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export function App(): JSX.Element {
   return (
     <div className={`app app--${phase} app--sky`} data-theme={theme}>
       <div className="app__sky-layer" aria-hidden="true">
-        <Sky seed={APP_SKY_SEED} fullPage />
+        <Sky seed={APP_SKY_SEED} fullPage stars={!isLight} />
       </div>
       <div className="app__content">
         {player && phase !== 'boot' && phase !== 'login' && <TopBar />}

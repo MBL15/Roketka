@@ -154,10 +154,14 @@ export const api = {
   myHistory: (limit = 0) => request<HistoryEntry[]>(`/api/game/history/my?limit=${limit}`),
 
   // ----------------------------------------------------------------- раунд
-  startRound: (theme: ThemeKey, betOptionId: number, clientSeed?: string) =>
+  startRound: (
+    theme: ThemeKey,
+    bet: { betOptionId: number } | { betAmount: number },
+    clientSeed?: string,
+  ) =>
     request<StartedRound>('/api/rounds', {
       method: 'POST',
-      body: { theme, betOptionId, clientSeed },
+      body: { theme, ...bet, clientSeed },
     }),
 
   activeRound: () => request<RoundState | undefined>('/api/rounds/active'),

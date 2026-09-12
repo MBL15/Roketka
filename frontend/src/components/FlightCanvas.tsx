@@ -23,6 +23,7 @@ interface FlightCanvasProps {
   flight: Flight;
   stateRef: MutableRefObject<FlightState>;
   theme: 'green' | 'red';
+  lightScheme?: boolean;
 }
 
 interface Cloud {
@@ -46,7 +47,7 @@ interface Particle {
 const PIXELS_PER_LN = 210;
 const MAX_DPR = 2;
 
-export function FlightCanvas({ flight, stateRef, theme }: FlightCanvasProps): JSX.Element {
+export function FlightCanvas({ flight, stateRef, theme, lightScheme = false }: FlightCanvasProps): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -89,8 +90,11 @@ export function FlightCanvas({ flight, stateRef, theme }: FlightCanvasProps): JS
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
 
-    const palette =
-      theme === 'green'
+    const palette = lightScheme
+      ? theme === 'green'
+        ? { top: '#c8ddd4', mid: '#dceae4', horizon: '#f4faf7', balloonA: '#a7f3c3', balloonB: '#128c4b' }
+        : { top: '#ddd0d8', mid: '#ebe2e8', horizon: '#f8f4f6', balloonA: '#ffc2b4', balloonB: '#c02626' }
+      : theme === 'green'
         ? { top: '#052b1e', mid: '#0c5c3a', horizon: '#8ce0b0', balloonA: '#a7f3c3', balloonB: '#0f8f4d' }
         : { top: '#2c0710', mid: '#7a1224', horizon: '#ffb59f', balloonA: '#ffc2b4', balloonB: '#c02626' };
 
@@ -111,7 +115,7 @@ export function FlightCanvas({ flight, stateRef, theme }: FlightCanvasProps): JS
         spawnBurst(particles, width / 2, height * 0.44, theme);
       }
 
-      drawSky(context, width, height, palette, altitude);
+      drawSky(context, width, height, palette, altitude, lightScheme);
       drawClouds(context, clouds, width, height, scroll, time);
       drawLevelMarkers(context, flight, state, width, height, scroll);
 
@@ -134,7 +138,7 @@ export function FlightCanvas({ flight, stateRef, theme }: FlightCanvasProps): JS
       window.cancelAnimationFrame(frame);
       observer.disconnect();
     };
-  }, [flight, stateRef, theme]);
+  }, [flight, stateRef, theme, lightScheme]);
 
   return <canvas ref={canvasRef} className="flight-canvas" aria-hidden="true" />;
 }
@@ -147,11 +151,24 @@ function drawSky(
   height: number,
   palette: { top: string; mid: string; horizon: string },
   altitude: number,
+  lightScheme: boolean,
 ): void {
+  const gradient = context.createLinearGradient(0, 0, 0, height);
+
+  if (lightScheme) {
+    // В светлой теме небо остаётся молочным: с высотой светлеет, а не темнеет.
+    const lift = Math.min(1, altitude / 5);
+    gradient.addColorStop(0, palette.top);
+    gradient.addColorStop(0.45 - lift * 0.08, palette.mid);
+    gradient.addColorStop(1, palette.horizon);
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+    return;
+  }
+
   // Чем выше шар, тем темнее и «космичнее» небо: это второй, независимый от
   // цифр индикатор прогресса.
   const darkness = Math.min(1, altitude / 4);
-  const gradient = context.createLinearGradient(0, 0, 0, height);
   gradient.addColorStop(0, palette.top);
   gradient.addColorStop(0.55 - darkness * 0.2, palette.mid);
   gradient.addColorStop(1, palette.horizon);
