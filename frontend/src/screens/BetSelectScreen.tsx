@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Balloon } from '../components/Balloon';
 import { CrashShell } from '../components/CrashShell';
 import { FlexibleBetCard } from '../components/FlexibleBetCard';
@@ -39,12 +39,65 @@ export function BetSelectScreen(): JSX.Element {
   const [tournamentOpen, setTournamentOpen] = useState(false);
   const [autoValue, setAutoValue] = useState(() => autoCashoutMultiplier?.toFixed(2) ?? '');
 
+  const selectedCost = selected?.kind === 'preset' ? selected.cost : selected?.amount ?? 0;
+  const balance = player?.bonusBalance ?? 0;
+  const canStart = selected !== null && selectedCost > 0 && balance >= selectedCost && !launching;
+  const unlockMultiplier = theme?.levelMultipliers[0] ?? 1.2;
+  const maxMultiplier = theme?.maxMultiplier ?? unlockMultiplier;
+
+  const startBetParams = useMemo((): StartBetParams | null => {
+    if (!selected || selectedCost <= 0 || balance < selectedCost) {
+      return null;
+    }
+    if (selected.kind === 'preset') {
+      return { betOptionId: selected.optionId };
+    }
+    return { betAmount: selected.amount };
+  }, [balance, selected, selectedCost]);
+
+  const start = useCallback(() => {
+    if (!canStart || !startBetParams || !theme) {
+      return;
+    }
+
+    const trimmed = autoValue.trim();
+    if (trimmed) {
+      const parsed = Number.parseFloat(trimmed.replace(',', '.'));
+      if (!Number.isFinite(parsed) || parsed < unlockMultiplier) {
+        notify({
+          tone: 'error',
+          title: 'Некорректный автозабор',
+          body: `Укажите коэффициент от ${formatMultiplier(unlockMultiplier)}`,
+        });
+        return;
+      }
+      setAutoCashout(Math.min(parsed, maxMultiplier));
+    } else {
+      setAutoCashout(null);
+    }
+
+    audio.unlock();
+    audio.launch();
+    setLaunching(true);
+    window.setTimeout(() => {
+      void startRound(startBetParams).finally(() => setLaunching(false));
+    }, 620);
+  }, [
+    autoValue,
+    canStart,
+    maxMultiplier,
+    notify,
+    setAutoCashout,
+    startBetParams,
+    startRound,
+    theme,
+    unlockMultiplier,
+  ]);
+
   if (!setup || !player || !theme) {
     return <></>;
   }
 
-  const selectedCost = selected?.kind === 'preset' ? selected.cost : selected?.amount ?? 0;
-  const canStart = selected !== null && selectedCost > 0 && player.bonusBalance >= selectedCost && !launching;
   const otherTheme = setup.themes.find((item) => item.key !== theme.key && item.active);
 
   const presetOption = selected?.kind === 'preset'
@@ -105,7 +158,6 @@ export function BetSelectScreen(): JSX.Element {
     setSelected({ kind: 'full', amount: player.bonusBalance });
   };
 
-  const unlockMultiplier = theme.levelMultipliers[0] ?? 1.2;
   const autoPresets = theme.levelMultipliers.slice(0, Math.min(4, theme.levelCount));
 
   const applyAutoCashout = (raw: string) => {
@@ -120,45 +172,6 @@ export function BetSelectScreen(): JSX.Element {
       return;
     }
     setAutoCashout(Math.min(parsed, theme.maxMultiplier));
-  };
-
-  const startBetParams = useMemo((): StartBetParams | null => {
-    if (!selected || selectedCost <= 0 || player.bonusBalance < selectedCost) {
-      return null;
-    }
-    if (selected.kind === 'preset') {
-      return { betOptionId: selected.optionId };
-    }
-    return { betAmount: selected.amount };
-  }, [player.bonusBalance, selected, selectedCost]);
-
-  const start = () => {
-    if (!canStart || !startBetParams) {
-      return;
-    }
-
-    const trimmed = autoValue.trim();
-    if (trimmed) {
-      const parsed = Number.parseFloat(trimmed.replace(',', '.'));
-      if (!Number.isFinite(parsed) || parsed < unlockMultiplier) {
-        notify({
-          tone: 'error',
-          title: 'Некорректный автозабор',
-          body: `Укажите коэффициент от ${formatMultiplier(unlockMultiplier)}`,
-        });
-        return;
-      }
-      setAutoCashout(Math.min(parsed, theme.maxMultiplier));
-    } else {
-      setAutoCashout(null);
-    }
-
-    audio.unlock();
-    audio.launch();
-    setLaunching(true);
-    window.setTimeout(() => {
-      void startRound(startBetParams).finally(() => setLaunching(false));
-    }, 620);
   };
 
   const rail = (
@@ -269,6 +282,7 @@ export function BetSelectScreen(): JSX.Element {
               }
             }}
             onSelect={selectCustom}
+            onCustomSubmit={start}
           />
 
           <FlexibleBetCard

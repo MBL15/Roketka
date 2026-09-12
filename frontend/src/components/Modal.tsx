@@ -19,6 +19,7 @@ interface ModalProps {
   footer?: ReactNode;
   width?: number;
   tone?: 'default' | 'accent';
+  closeOnBackdrop?: boolean;
 }
 
 export function Modal({
@@ -30,6 +31,7 @@ export function Modal({
   footer,
   width = 620,
   tone = 'default',
+  closeOnBackdrop = true,
 }: ModalProps): JSX.Element | null {
   const sheetRef = useRef<HTMLDivElement>(null);
   const touchStartY = useRef<number | null>(null);
@@ -63,7 +65,7 @@ export function Modal({
       aria-modal="true"
       aria-label={title}
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
+        if (closeOnBackdrop && event.target === event.currentTarget) {
           onClose();
         }
       }}

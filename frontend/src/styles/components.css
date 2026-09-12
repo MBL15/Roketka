@@ -615,6 +615,15 @@
   text-align: left;
 }
 
+.puzzle--custom {
+  cursor: default;
+}
+
+.puzzle--custom:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .puzzle__custom-field {
   display: flex;
   flex-direction: column;

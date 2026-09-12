@@ -27,7 +27,6 @@ export function ProfileScreen(): JSX.Element {
               <h1 className="profile-hero__name">{player.nickname}</h1>
               <div className="profile-hero__meta">
                 <span className="chip chip--accent num">#{player.tournamentPosition} в турнире</span>
-                <span className="text-sm muted">{player.roundsPlayed} раундов</span>
               </div>
             </div>
           </div>
@@ -37,6 +36,12 @@ export function ProfileScreen(): JSX.Element {
             <StatCard label="Очки" value={formatNumber(player.gamePoints)} />
             <StatCard label="Билеты" value={formatNumber(player.lotteryTickets)} />
             <StatCard label="Коллекция" value={`ур. ${player.collectionLevel}`} />
+          </div>
+
+          <div className="profile-hero__stats profile-hero__stats--secondary">
+            <StatCard label="Игры" value={formatNumber(player.roundsPlayed)} />
+            <StatCard label="Побед" value={formatNumber(player.roundsWon ?? 0)} accent />
+            <StatCard label="Поражений" value={formatNumber(player.roundsLost ?? 0)} />
           </div>
 
           {player.bonusBalance < 500 && (

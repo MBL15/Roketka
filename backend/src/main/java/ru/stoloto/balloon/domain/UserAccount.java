@@ -57,6 +57,12 @@ public class UserAccount {
     @Column(nullable = false)
     private int roundsPlayed;
 
+    @Column(nullable = false)
+    private int roundsWon;
+
+    @Column(nullable = false)
+    private int roundsLost;
+
     /** Мини-онбординг у кнопки «Забрать» показывается только перед первым полётом. */
     @Column(nullable = false)
     private boolean onboardingSeen;
@@ -107,8 +113,13 @@ public class UserAccount {
         lotteryTickets += Math.max(0, amount);
     }
 
-    public void registerRoundPlayed() {
+    public void registerRoundResult(boolean won) {
         roundsPlayed++;
+        if (won) {
+            roundsWon++;
+        } else {
+            roundsLost++;
+        }
     }
 
     public void markOnboardingSeen() {
@@ -153,6 +164,14 @@ public class UserAccount {
 
     public int getRoundsPlayed() {
         return roundsPlayed;
+    }
+
+    public int getRoundsWon() {
+        return roundsWon;
+    }
+
+    public int getRoundsLost() {
+        return roundsLost;
     }
 
     public boolean isOnboardingSeen() {

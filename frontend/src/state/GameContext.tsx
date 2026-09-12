@@ -530,6 +530,12 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
           notifyAchievements(result.newAchievements);
           void refreshHistory();
           void refreshSetup();
+          try {
+            const freshPlayer = await api.me();
+            dispatch({ type: 'player', player: freshPlayer });
+          } catch {
+            /* профиль обновится при следующем запросе */
+          }
           return;
         } catch (error) {
           // Расчёт раунда идёт в отдельном потоке: короткая пауза и повтор.

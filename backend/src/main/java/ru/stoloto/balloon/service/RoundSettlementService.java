@@ -78,7 +78,7 @@ public class RoundSettlementService {
         long points = tournamentService.livePoints(user.getId());
         user.setGamePoints(points);
         tournamentService.syncFromDatabase(user.getId(), points);
-        user.registerRoundPlayed();
+        user.registerRoundResult(won);
 
         round.settle(activeRound.levelsPassed(), activeRound.boostApplied(), totalPoints, Instant.now());
         round.attachReward(reward.collectionLevel(), reward.fragmentIndex(),

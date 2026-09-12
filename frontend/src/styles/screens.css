@@ -1661,6 +1661,40 @@
   gap: 5px;
 }
 
+.profile-hero__stats--secondary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.login-rules__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.login-rules__dismiss {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-300);
+  cursor: pointer;
+  user-select: none;
+}
+
+.login-rules__dismiss input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+
+.rules__intro {
+  margin: 0 0 12px;
+  color: var(--ink-300);
+}
+
 .profile-stat {
   display: flex;
   flex-direction: column;

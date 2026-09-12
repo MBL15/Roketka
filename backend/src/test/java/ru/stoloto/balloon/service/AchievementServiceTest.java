@@ -63,7 +63,7 @@ class AchievementServiceTest {
     @Test
     void settlementUnlocksFirstWinAndNearMiss() {
         UserAccount user = player(1L);
-        user.registerRoundPlayed();
+        user.registerRoundResult(false);
         GameRound round = round(11L, GameConfig.THEME_GREEN);
         round.settle(6, false, 40, Instant.now());
 
@@ -99,7 +99,7 @@ class AchievementServiceTest {
             throw new RuntimeException(e);
         }
         for (int i = 0; i < 9; i++) {
-            user.registerRoundPlayed();
+            user.registerRoundResult(false);
         }
         return user;
     }

@@ -17,9 +17,12 @@ interface RulesModalProps {
   onClose: () => void;
   setup: GameSetup;
   theme: ThemeSetup;
+  intro?: string;
+  footer?: React.ReactNode;
+  closeOnBackdrop?: boolean;
 }
 
-export function RulesModal({ open, onClose, setup, theme }: RulesModalProps): JSX.Element {
+export function RulesModal({ open, onClose, setup, theme, intro, footer, closeOnBackdrop }: RulesModalProps): JSX.Element {
   const unlock = theme.levelMultipliers[0] ?? 1.2;
   const boostValues = theme.betOptions.filter((option) => option.boostTier > 1).map((option) => option.boostValue);
 
@@ -30,19 +33,25 @@ export function RulesModal({ open, onClose, setup, theme }: RulesModalProps): JS
       title="Правила игры"
       subtitle={`${theme.gameName} · ${theme.levelCount} уровней`}
       width={720}
+      closeOnBackdrop={closeOnBackdrop}
       footer={
-        <button type="button" className="btn btn--primary" onClick={onClose}>
-          Понятно
-        </button>
+        footer ?? (
+          <button type="button" className="btn btn--primary" onClick={onClose}>
+            Понятно
+          </button>
+        )
       }
     >
       <div className="rules">
+        {intro && <p className="rules__intro text-sm">{intro}</p>}
+
         <Section index={1} title="Ставка">
           <p>
-            Выберите один из четырёх фрагментов пазла. Стоимость фрагмента сразу списывается с бонусного
-            баланса — это и есть ваша ставка. Доступные суммы в этой версии:{' '}
+            Выберите фрагмент пазла или укажите свою сумму. Стоимость сразу списывается с бонусного баланса —
+            это и есть ваша ставка. Готовые фрагменты:{' '}
             <strong className="num">{theme.betOptions.map((option) => formatNumber(option.cost)).join(' · ')}</strong>{' '}
-            бонусных баллов. Если баланса не хватает, фрагмент помечен и ставку сделать нельзя.
+            бонусных баллов. Также можно ввести любую сумму от 1 до баланса или поставить весь баланс сразу.
+            Если баллов не хватает, вариант помечен и ставку сделать нельзя.
           </p>
         </Section>
 

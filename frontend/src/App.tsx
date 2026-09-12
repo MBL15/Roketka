@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { LoginRulesModal } from './components/LoginRulesModal';
 import { Sky } from './components/Sky';
 import { Toasts } from './components/Toasts';
 import { TopBar } from './components/TopBar';
@@ -13,11 +14,14 @@ import { ThemeSelectScreen } from './screens/ThemeSelectScreen';
 import { useColorScheme } from './hooks/useColorScheme';
 import { useGame } from './state/GameContext';
 import { isExpertAccount } from './utils/access';
+import { isLoginRulesDismissed } from './utils/loginRules';
 
 export function App(): JSX.Element {
-  const { phase, theme, player, notify } = useGame();
+  const { phase, theme, player, notify, setup, themeOf } = useGame();
   const { isLight } = useColorScheme();
   const [adminOpen, setAdminOpen] = useState(() => window.location.hash === '#admin');
+  const [loginRulesOpen, setLoginRulesOpen] = useState(false);
+  const loginRulesShownForRef = useRef<number | null>(null);
 
   useEffect(() => {
     const onHashChange = () => setAdminOpen(window.location.hash === '#admin');
@@ -28,6 +32,28 @@ export function App(): JSX.Element {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  useEffect(() => {
+    if (!player || !setup) {
+      return;
+    }
+    if (phase === 'login' || phase === 'boot') {
+      loginRulesShownForRef.current = null;
+      setLoginRulesOpen(false);
+      return;
+    }
+    if (phase === 'game') {
+      return;
+    }
+    if (isLoginRulesDismissed(player.id)) {
+      return;
+    }
+    if (loginRulesShownForRef.current === player.id) {
+      return;
+    }
+    loginRulesShownForRef.current = player.id;
+    setLoginRulesOpen(true);
+  }, [phase, player, setup]);
 
   useEffect(() => {
     if (!adminOpen || !player) {
@@ -72,6 +98,16 @@ export function App(): JSX.Element {
         {phase === 'result' && <ResultScreen />}
         {phase === 'profile' && <ProfileScreen />}
       </div>
+
+      {player && setup && (
+        <LoginRulesModal
+          open={loginRulesOpen}
+          playerId={player.id}
+          setup={setup}
+          theme={themeOf(theme) ?? setup.themes[0]!}
+          onClose={() => setLoginRulesOpen(false)}
+        />
+      )}
 
       <Toasts />
     </div>

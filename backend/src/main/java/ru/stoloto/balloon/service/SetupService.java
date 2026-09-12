@@ -108,7 +108,8 @@ public class SetupService {
         return new GameDtos.PlayerDto(
                 user.getId(), user.getNickname(), user.getBonusBalance(),
                 tournamentService.livePoints(user.getId()), user.getLotteryTickets(),
-                user.getRoundsPlayed(), user.isOnboardingSeen(),
+                user.getRoundsPlayed(), user.getRoundsWon(), user.getRoundsLost(),
+                user.isOnboardingSeen(),
                 tournamentService.positionOf(user.getId()), user.getCollectionLevel(),
                 progression.playerLevel(), progression.playerXp(), progression.xpToNextLevel(),
                 progression.displayProfitBonus(),

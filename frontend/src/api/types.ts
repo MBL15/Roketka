@@ -25,6 +25,8 @@ export interface Player {
   gamePoints: number;
   lotteryTickets: number;
   roundsPlayed: number;
+  roundsWon: number;
+  roundsLost: number;
   onboardingSeen: boolean;
   tournamentPosition: number;
   collectionLevel: number;
