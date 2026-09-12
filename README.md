@@ -20,6 +20,20 @@
 docker compose up --build
 ```
 
+Если появляется **`permission denied`** при обращении к `/var/run/docker.sock`,
+пользователь не в группе `docker` (типично для Linux). Один раз:
+
+```bash
+./scripts/setup-docker-access.sh
+newgrp docker
+```
+
+Либо сразу запуск через обёртку (сама подберёт `sg docker` или `sudo`):
+
+```bash
+./scripts/docker-compose.sh up --build
+```
+
 Первая сборка занимает 5–8 минут (скачивание Maven- и npm-зависимостей),
 последующие — меньше минуты.
 
