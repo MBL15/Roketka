@@ -63,6 +63,10 @@ public class UserAccount {
     @Column(nullable = false, columnDefinition = "INT NOT NULL DEFAULT 0")
     private int roundsLost;
 
+    /** Сумма бонусов, заработанная в игре (выигрыши и награды коллекций). */
+    @Column(nullable = false, columnDefinition = "BIGINT NOT NULL DEFAULT 0")
+    private long totalBonusEarned;
+
     /** Мини-онбординг у кнопки «Забрать» показывается только перед первым полётом. */
     @Column(nullable = false)
     private boolean onboardingSeen;
@@ -103,6 +107,12 @@ public class UserAccount {
 
     public void creditBonus(long amount) {
         bonusBalance += Math.max(0, amount);
+    }
+
+    public void recordBonusEarned(long amount) {
+        if (amount > 0) {
+            totalBonusEarned += amount;
+        }
     }
 
     public void addGamePoints(long amount) {
@@ -172,6 +182,10 @@ public class UserAccount {
 
     public int getRoundsLost() {
         return roundsLost;
+    }
+
+    public long getTotalBonusEarned() {
+        return totalBonusEarned;
     }
 
     public boolean isOnboardingSeen() {

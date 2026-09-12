@@ -27,6 +27,7 @@ export interface Player {
   roundsPlayed: number;
   roundsWon: number;
   roundsLost: number;
+  totalBonusEarned: number;
   onboardingSeen: boolean;
   tournamentPosition: number;
   collectionLevel: number;

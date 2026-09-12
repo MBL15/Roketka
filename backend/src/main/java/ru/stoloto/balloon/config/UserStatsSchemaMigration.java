@@ -23,17 +23,31 @@ public class UserStatsSchemaMigration implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        ensureColumn("rounds_won");
-        ensureColumn("rounds_lost");
+        ensureIntColumn("rounds_won");
+        ensureIntColumn("rounds_lost");
+        ensureLongColumn("total_bonus_earned");
     }
 
-    private void ensureColumn(String column) {
+    private void ensureIntColumn(String column) {
         if (columnExists(column)) {
             jdbc.update("UPDATE users SET " + column + " = 0 WHERE " + column + " IS NULL");
             return;
         }
         try {
             jdbc.execute("ALTER TABLE users ADD COLUMN " + column + " INT NOT NULL DEFAULT 0");
+            log.info("Добавлена колонка users.{}", column);
+        } catch (DataAccessException ex) {
+            log.warn("Не удалось добавить users.{}: {}", column, ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    private void ensureLongColumn(String column) {
+        if (columnExists(column)) {
+            jdbc.update("UPDATE users SET " + column + " = 0 WHERE " + column + " IS NULL");
+            return;
+        }
+        try {
+            jdbc.execute("ALTER TABLE users ADD COLUMN " + column + " BIGINT NOT NULL DEFAULT 0");
             log.info("Добавлена колонка users.{}", column);
         } catch (DataAccessException ex) {
             log.warn("Не удалось добавить users.{}: {}", column, ex.getMostSpecificCause().getMessage());

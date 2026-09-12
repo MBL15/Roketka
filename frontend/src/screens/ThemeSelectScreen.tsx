@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 
 import { Balloon } from '../components/Balloon';
 
@@ -21,15 +21,6 @@ export function ThemeSelectScreen(): JSX.Element {
   const [hovered, setHovered] = useState<string | null>(null);
 
   const [leaving, setLeaving] = useState<string | null>(null);
-
-
-
-  useEffect(() => {
-    audio.startAmbient();
-
-    return () => audio.stopAmbient();
-
-  }, []);
 
 
 
@@ -82,8 +73,6 @@ export function ThemeSelectScreen(): JSX.Element {
     }
 
     audio.unlock();
-
-    audio.waterDrop();
 
     setLeaving(theme.key);
 

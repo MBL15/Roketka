@@ -3,7 +3,7 @@ import { LoginRulesModal } from './components/LoginRulesModal';
 import { Sky } from './components/Sky';
 import { Toasts } from './components/Toasts';
 import { TopBar } from './components/TopBar';
-import { APP_SKY_SEED } from './utils/skySeed';
+import { audio } from './audio/AudioEngine';
 import { AdminScreen } from './screens/AdminScreen';
 import { BetSelectScreen } from './screens/BetSelectScreen';
 import { GameScreen } from './screens/GameScreen';
@@ -21,7 +21,22 @@ export function App(): JSX.Element {
   const { isLight } = useColorScheme();
   const [adminOpen, setAdminOpen] = useState(() => window.location.hash === '#admin');
   const [loginRulesOpen, setLoginRulesOpen] = useState(false);
+  const [skySeed, setSkySeed] = useState(() => Date.now());
   const loginRulesShownForRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setSkySeed(Date.now());
+  }, [phase]);
+
+  useEffect(() => {
+    const ambientPhases = new Set(['theme', 'bet', 'result', 'profile']);
+    if (ambientPhases.has(phase)) {
+      audio.startAmbient();
+      return () => audio.stopAmbient();
+    }
+    audio.stopAmbient();
+    return undefined;
+  }, [phase]);
 
   useEffect(() => {
     const onHashChange = () => setAdminOpen(window.location.hash === '#admin');
@@ -85,7 +100,7 @@ export function App(): JSX.Element {
   return (
     <div className={`app app--${phase} app--sky`}>
       <div className="app__sky-layer" aria-hidden="true">
-        <Sky seed={APP_SKY_SEED} fullPage stars={!isLight} />
+        <Sky seed={skySeed} fullPage stars={!isLight} />
       </div>
       <div className="app__content">
         {player && phase !== 'boot' && phase !== 'login' && <TopBar />}

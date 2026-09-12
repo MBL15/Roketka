@@ -91,6 +91,7 @@ public class RewardService {
             pointsAwarded += config.completionBonusPoints();
             bonusAwarded = config.completionBonusBalance();
             user.creditBonus(bonusAwarded);
+            user.recordBonusEarned(bonusAwarded);
             user.nextCollection();
         }
 

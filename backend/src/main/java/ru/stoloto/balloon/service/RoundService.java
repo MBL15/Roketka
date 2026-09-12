@@ -188,6 +188,7 @@ public class RoundService {
         GameRound round = rounds.findById(roundId).orElseThrow();
         UserAccount user = users.findById(account.getId()).orElseThrow();
         user.creditBonus(outcome.payout());
+        user.recordBonusEarned(outcome.payout());
 
         round.applyCashout(outcome.multiplier(), outcome.payout(), outcome.levelsPassed(),
                 outcome.boostApplied(), outcome.totalPoints());

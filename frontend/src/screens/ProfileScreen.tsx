@@ -47,6 +47,7 @@ export function ProfileScreen(): JSX.Element {
             <StatCard label="Игры" value={formatNumber(player.roundsPlayed)} />
             <StatCard label="Побед" value={formatNumber(player.roundsWon ?? 0)} accent />
             <StatCard label="Поражений" value={formatNumber(player.roundsLost ?? 0)} />
+            <StatCard label="Заработано" value={formatNumber(player.totalBonusEarned ?? 0)} accent />
           </div>
 
           {player.bonusBalance < 500 && (

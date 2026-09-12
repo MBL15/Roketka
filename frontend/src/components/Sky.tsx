@@ -1,17 +1,12 @@
 import { useEffect, useRef } from 'react';
+import { createSeededRandom, randomBetween } from '../utils/random';
 
 /**
  * Анимированное небо: фон всех экранов.
  *
- * По постановке на экране одновременно живут от 1 до 3 птиц и от 1 до 3
- * облаков, движущихся по случайным траекториям, причём птицы быстрее облаков —
- * это и создаёт ощущение глубины. Количество и позиции генерируются заново
- * при каждом входе на экран (проп `seed`).
- *
- * Рисуется одним canvas, а не набором DOM-элементов: это один слой композиции
- * вместо десятка, отсутствие перерасчёта стилей и предсказуемые 60 FPS даже на
- * слабых устройствах. Тяжёлые графические библиотеки не нужны — вся сцена это
- * несколько десятков вызовов 2D-контекста на кадр.
+ * На экране одновременно живут от 1 до 3 птиц и от 1 до 3 облаков,
+ * движущихся по случайным траекториям; птицы быстрее облаков — эффект глубины.
+ * Количество и позиции генерируются заново при каждом входе на экран (проп `seed`).
  */
 
 interface Cloud {
@@ -39,6 +34,12 @@ interface Star {
   twinklePhase: number;
 }
 
+interface SkyPalette {
+  cloudCore: string;
+  cloudEdge: string;
+  bird: string;
+}
+
 interface SkyProps {
   /** Смена значения перегенерирует небо: новые позиции птиц и облаков. */
   seed: number;
@@ -50,9 +51,23 @@ interface SkyProps {
   fullPage?: boolean;
 }
 
-const randomBetween = (min: number, max: number): number => min + Math.random() * (max - min);
-const randomCount = (): number => 1 + Math.floor(Math.random() * 3);
-const randomCloudCount = (): number => 4 + Math.floor(Math.random() * 4);
+const randomCount = (rng: () => number): number => 1 + Math.floor(rng() * 3);
+
+function readPalette(): SkyPalette {
+  const light = document.documentElement.dataset.colorScheme === 'light';
+  if (light) {
+    return {
+      cloudCore: 'rgba(120, 132, 145, 0.82)',
+      cloudEdge: 'rgba(120, 132, 145, 0)',
+      bird: '#18212f',
+    };
+  }
+  return {
+    cloudCore: 'rgba(255, 255, 255, 0.95)',
+    cloudEdge: 'rgba(255, 255, 255, 0)',
+    bird: '#ffffff',
+  };
+}
 
 export function Sky({ seed, stars = true, parallax = 0, fullPage = false }: SkyProps): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -74,37 +89,40 @@ export function Sky({ seed, stars = true, parallax = 0, fullPage = false }: SkyP
     let clouds: Cloud[] = [];
     let birds: Bird[] = [];
     let starField: Star[] = [];
+    let palette = readPalette();
 
     const populate = () => {
-      const cloudCount = fullPage ? randomCloudCount() : randomCount();
+      const rng = createSeededRandom(seed);
+      const cloudCount = randomCount(rng);
+      const birdCount = randomCount(rng);
       const cloudYMin = fullPage ? 0.04 : 0.08;
       const cloudYMax = fullPage ? 0.96 : 0.45;
+      const birdYMin = fullPage ? 0.08 : 0.12;
+      const birdYMax = fullPage ? 0.88 : 0.52;
 
       clouds = Array.from({ length: cloudCount }, () => ({
-        x: randomBetween(-0.2, 1.2),
-        y: randomBetween(cloudYMin, cloudYMax),
-        scale: randomBetween(fullPage ? 0.65 : 0.55, fullPage ? 1.55 : 1.35),
-        // Облака медленные: 0.006–0.018 экрана в секунду.
-        speed: randomBetween(0.006, 0.018) * (Math.random() < 0.5 ? -1 : 1),
-        opacity: randomBetween(0.14, fullPage ? 0.32 : 0.36),
+        x: randomBetween(rng, -0.2, 1.2),
+        y: randomBetween(rng, cloudYMin, cloudYMax),
+        scale: randomBetween(rng, fullPage ? 0.65 : 0.55, fullPage ? 1.55 : 1.35),
+        speed: randomBetween(rng, 0.006, 0.018) * (rng() < 0.5 ? -1 : 1),
+        opacity: randomBetween(rng, 0.14, fullPage ? 0.32 : 0.36),
       }));
 
-      birds = Array.from({ length: fullPage ? randomCloudCount() - 1 : randomCount() }, () => ({
-        x: randomBetween(-0.2, 1.2),
-        y: randomBetween(fullPage ? 0.08 : 0.12, fullPage ? 0.88 : 0.52),
-        scale: randomBetween(0.7, 1.25),
-        // Птицы в 6–12 раз быстрее облаков — отсюда эффект глубины.
-        speed: randomBetween(0.07, 0.16) * (Math.random() < 0.5 ? -1 : 1),
-        drift: randomBetween(-0.02, 0.02),
-        flapPhase: Math.random() * Math.PI * 2,
-        flapSpeed: randomBetween(5.5, 9),
+      birds = Array.from({ length: birdCount }, () => ({
+        x: randomBetween(rng, -0.2, 1.2),
+        y: randomBetween(rng, birdYMin, birdYMax),
+        scale: randomBetween(rng, 0.7, 1.25),
+        speed: randomBetween(rng, 0.07, 0.16) * (rng() < 0.5 ? -1 : 1),
+        drift: randomBetween(rng, -0.02, 0.02),
+        flapPhase: rng() * Math.PI * 2,
+        flapSpeed: randomBetween(rng, 5.5, 9),
       }));
 
       starField = Array.from({ length: fullPage ? 110 : 70 }, () => ({
-        x: Math.random(),
-        y: Math.random() * (fullPage ? 0.92 : 0.55),
-        radius: randomBetween(0.4, 1.5),
-        twinklePhase: Math.random() * Math.PI * 2,
+        x: rng(),
+        y: rng() * (fullPage ? 0.92 : 0.55),
+        radius: randomBetween(rng, 0.4, 1.5),
+        twinklePhase: rng() * Math.PI * 2,
       }));
     };
 
@@ -126,10 +144,9 @@ export function Sky({ seed, stars = true, parallax = 0, fullPage = false }: SkyP
       context.save();
       context.globalAlpha = cloud.opacity;
       const gradient = context.createRadialGradient(x, y, size * 0.1, x, y, size * 2.1);
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      gradient.addColorStop(0, palette.cloudCore);
+      gradient.addColorStop(1, palette.cloudEdge);
       context.fillStyle = gradient;
-      // Три перекрывающихся эллипса дают силуэт кучевого облака.
       [
         [0, 0, 1],
         [size * 0.85, size * 0.16, 0.78],
@@ -149,8 +166,7 @@ export function Sky({ seed, stars = true, parallax = 0, fullPage = false }: SkyP
       const flap = Math.sin(time * bird.flapSpeed + bird.flapPhase);
 
       context.save();
-      const light = document.documentElement.dataset.colorScheme === 'light';
-      context.strokeStyle = light ? 'rgba(24, 33, 47, 0.42)' : 'rgba(12, 28, 38, 0.55)';
+      context.strokeStyle = palette.bird;
       context.lineWidth = 1.7 * bird.scale;
       context.lineCap = 'round';
       context.beginPath();
@@ -174,6 +190,9 @@ export function Sky({ seed, stars = true, parallax = 0, fullPage = false }: SkyP
       context.restore();
     };
 
+    const birdClampMin = fullPage ? 0.06 : 0.08;
+    const birdClampMax = fullPage ? 0.92 : 0.6;
+
     let frame = 0;
     let previous = performance.now();
 
@@ -182,6 +201,7 @@ export function Sky({ seed, stars = true, parallax = 0, fullPage = false }: SkyP
       previous = now;
       const time = now / 1000;
 
+      palette = readPalette();
       context.clearRect(0, 0, width, height);
       if (stars) {
         drawStars(time);
@@ -199,7 +219,9 @@ export function Sky({ seed, stars = true, parallax = 0, fullPage = false }: SkyP
         bird.y += bird.drift * dt;
         if (bird.x > 1.25) bird.x = -0.25;
         if (bird.x < -0.25) bird.x = 1.25;
-        if (bird.y < 0.08 || bird.y > 0.6) bird.drift *= -1;
+        if (bird.y < birdClampMin || bird.y > birdClampMax) {
+          bird.drift *= -1;
+        }
         drawBird(bird, time);
       });
 

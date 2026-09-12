@@ -29,6 +29,7 @@ public final class GameDtos {
 
     public record PlayerDto(long id, String nickname, long bonusBalance, long gamePoints,
                             int lotteryTickets, int roundsPlayed, int roundsWon, int roundsLost,
+                            long totalBonusEarned,
                             boolean onboardingSeen, int tournamentPosition, int collectionLevel,
                             int playerLevel, int playerXp, int xpToNextLevel,
                             double displayProfitBonus,

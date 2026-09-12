@@ -109,6 +109,7 @@ public class SetupService {
                 user.getId(), user.getNickname(), user.getBonusBalance(),
                 tournamentService.livePoints(user.getId()), user.getLotteryTickets(),
                 user.getRoundsPlayed(), user.getRoundsWon(), user.getRoundsLost(),
+                user.getTotalBonusEarned(),
                 user.isOnboardingSeen(),
                 tournamentService.positionOf(user.getId()), user.getCollectionLevel(),
                 progression.playerLevel(), progression.playerXp(), progression.xpToNextLevel(),
