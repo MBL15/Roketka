@@ -90,13 +90,15 @@ export function FlightCanvas({ flight, stateRef, theme, lightScheme = false }: F
     const observer = new ResizeObserver(resize);
     observer.observe(canvas);
 
+    const brightSky = lightScheme || theme === 'red';
+
     const palette = lightScheme
       ? theme === 'green'
         ? { top: '#c8ddd4', mid: '#dceae4', horizon: '#f4faf7', balloonA: '#a7f3c3', balloonB: '#128c4b' }
-        : { top: '#ddd0d8', mid: '#ebe2e8', horizon: '#f8f4f6', balloonA: '#ffc2b4', balloonB: '#c02626' }
+        : { top: '#e8d0d8', mid: '#f0e0e6', horizon: '#fbf5f7', balloonA: '#ffc2b4', balloonB: '#c02626' }
       : theme === 'green'
         ? { top: '#052b1e', mid: '#0c5c3a', horizon: '#8ce0b0', balloonA: '#a7f3c3', balloonB: '#0f8f4d' }
-        : { top: '#2c0710', mid: '#7a1224', horizon: '#ffb59f', balloonA: '#ffc2b4', balloonB: '#c02626' };
+        : { top: '#6a3848', mid: '#9a6878', horizon: '#e8c0c8', balloonA: '#ffc2b4', balloonB: '#c02626' };
 
     const draw = (time: number) => {
       const state = stateRef.current;
@@ -115,9 +117,9 @@ export function FlightCanvas({ flight, stateRef, theme, lightScheme = false }: F
         spawnBurst(particles, width / 2, height * 0.44, theme);
       }
 
-      drawSky(context, width, height, palette, altitude, lightScheme);
+      drawSky(context, width, height, palette, altitude, brightSky);
       drawClouds(context, clouds, width, height, scroll, time);
-      drawLevelMarkers(context, flight, state, width, height, scroll);
+      drawLevelMarkers(context, flight, state, width, height, scroll, theme, lightScheme);
 
       if (!state.crashed) {
         drawBalloon(context, width, height, time, palette, state);
@@ -151,12 +153,12 @@ function drawSky(
   height: number,
   palette: { top: string; mid: string; horizon: string },
   altitude: number,
-  lightScheme: boolean,
+  brightSky: boolean,
 ): void {
   const gradient = context.createLinearGradient(0, 0, 0, height);
 
-  if (lightScheme) {
-    // В светлой теме небо остаётся молочным: с высотой светлеет, а не темнеет.
+  if (brightSky) {
+    // Светлая схема и красная тема: небо остаётся светлым, без ухода в космос.
     const lift = Math.min(1, altitude / 5);
     gradient.addColorStop(0, palette.top);
     gradient.addColorStop(0.45 - lift * 0.08, palette.mid);
@@ -229,7 +231,16 @@ function drawLevelMarkers(
   width: number,
   height: number,
   scroll: number,
+  theme: 'green' | 'red',
+  lightScheme: boolean,
 ): void {
+  const markerTone =
+    lightScheme && theme === 'green'
+      ? { pending: 'rgba(26, 157, 84, 0.55)', passed: 'rgba(46, 204, 113, 0.5)', active: 'rgba(26, 157, 84, 0.88)', text: '#1a9d54' }
+      : lightScheme && theme === 'red'
+        ? { pending: 'rgba(192, 57, 43, 0.55)', passed: 'rgba(231, 76, 60, 0.5)', active: 'rgba(192, 57, 43, 0.88)', text: '#c0392b' }
+        : { pending: 'rgba(255,255,255,0.55)', passed: '#ffffff', active: '#ffffff', text: 'rgba(255,255,255,0.82)' };
+
   const balloonY = height * 0.44;
   context.save();
   context.font = '600 11px ui-monospace, SFMono-Regular, Menlo, monospace';
@@ -245,7 +256,7 @@ function drawLevelMarkers(
     const isBoostHit = state.boostApplied && state.boostLevel === level;
 
     context.globalAlpha = passed ? 0.5 : 0.85;
-    context.strokeStyle = isBoostHit ? '#b98cff' : passed ? '#ffffff' : 'rgba(255,255,255,0.55)';
+    context.strokeStyle = isBoostHit ? '#b98cff' : passed ? markerTone.passed : markerTone.pending;
     context.lineWidth = isBoostHit ? 2 : 1;
     context.setLineDash(passed ? [] : [6, 8]);
     context.beginPath();
@@ -255,7 +266,7 @@ function drawLevelMarkers(
 
     context.setLineDash([]);
     context.globalAlpha = 1;
-    context.fillStyle = isBoostHit ? '#d9c2ff' : 'rgba(255,255,255,0.82)';
+    context.fillStyle = isBoostHit ? '#d9c2ff' : markerTone.text;
     context.fillText(`${level} · ${threshold.toFixed(2)}x`, 12, y - 10);
   });
 

@@ -83,7 +83,7 @@ export function App(): JSX.Element {
   }
 
   return (
-    <div className={`app app--${phase} app--sky`} data-theme={theme}>
+    <div className={`app app--${phase} app--sky`}>
       <div className="app__sky-layer" aria-hidden="true">
         <Sky seed={APP_SKY_SEED} fullPage stars={!isLight} />
       </div>

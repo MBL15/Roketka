@@ -159,13 +159,21 @@
   --sky-mid: #dceae4;
   --sky-low: #eaf2ee;
   --sky-horizon: #f4faf7;
+  --game-stage-bg: #d0e4d8;
+  --pill-low: #7dd4a3;
+  --pill-mid: #2ecc71;
+  --pill-high: #1a9d54;
 }
 
 [data-color-scheme='light'][data-theme='red'] {
-  --sky-top: #ddd0d8;
-  --sky-mid: #ebe2e8;
-  --sky-low: #f2ecf0;
-  --sky-horizon: #f8f4f6;
+  --sky-top: #e8d0d8;
+  --sky-mid: #f0e0e6;
+  --sky-low: #f6ecef;
+  --sky-horizon: #fbf5f7;
+  --game-stage-bg: #ead8de;
+  --pill-low: #f0a8a0;
+  --pill-mid: #e74c3c;
+  --pill-high: #c0392b;
 }
 
 [data-theme='red'] {
@@ -176,10 +184,10 @@
   --action-hover: #c0392b;
   --action-ink: #1a0505;
   --action-dim: rgba(231, 76, 60, 0.16);
-  --sky-top: #0b0a10;
-  --sky-mid: #18121c;
-  --sky-low: #281820;
-  --sky-horizon: #3a2430;
+  --sky-top: #6a3848;
+  --sky-mid: #8a5060;
+  --sky-low: #b07888;
+  --sky-horizon: #e8c0c8;
   --balloon-a: #ff8a6f;
   --balloon-b: #b01f2b;
 }
