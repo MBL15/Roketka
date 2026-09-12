@@ -61,6 +61,14 @@ public class UserAccount {
     @Column(nullable = false)
     private boolean onboardingSeen;
 
+    /** Уровень игрока: растёт за cashout с коэффициентом ≥ 2×. */
+    @Column
+    private Integer playerLevel = 1;
+
+    /** Опыт внутри текущего уровня. */
+    @Column
+    private Integer playerXp = 0;
+
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
@@ -151,6 +159,14 @@ public class UserAccount {
         return onboardingSeen;
     }
 
+    public int getPlayerLevel() {
+        return playerLevel == null ? 1 : playerLevel;
+    }
+
+    public int getPlayerXp() {
+        return playerXp == null ? 0 : playerXp;
+    }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
@@ -161,6 +177,14 @@ public class UserAccount {
 
     public void setGamePoints(long gamePoints) {
         this.gamePoints = gamePoints;
+    }
+
+    public void setPlayerLevel(int playerLevel) {
+        this.playerLevel = Math.max(1, playerLevel);
+    }
+
+    public void setPlayerXp(int playerXp) {
+        this.playerXp = Math.max(0, playerXp);
     }
 
     /** Баланса не хватает на выбранную ставку. */

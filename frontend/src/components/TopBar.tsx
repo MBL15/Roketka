@@ -59,6 +59,7 @@ export function TopBar(): JSX.Element {
       </div>
 
       <div className="crash-header__stats">
+        <Stat label="Уровень" value={`${player.playerLevel}`} title={`Профит ${player.displayProfitBonus.toFixed(2)}× (отображение)`} />
         <Stat label="Очки" value={formatNumber(player.gamePoints)} />
         <Stat label="Билеты" value={formatNumber(player.lotteryTickets)} />
         <Stat label="Турнир" value={`#${player.tournamentPosition}`} />
@@ -126,12 +127,12 @@ function ProfileIcon(): JSX.Element {
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }): JSX.Element {
+function Stat({ label, value, title }: { label: string; value: string; title?: string }): JSX.Element {
   return (
-    <div className="crash-header__stat">
+    <div className="crash-header__stat" title={title}>
       <span className="crash-header__stat-label">{label}</span>
       <span className="crash-header__stat-value num">{value}</span>
     </div>
   );
 }
-
+

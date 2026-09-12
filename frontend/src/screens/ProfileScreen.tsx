@@ -1,5 +1,6 @@
 import { CollectionStrip } from '../components/CollectionStrip';
 import { CrashShell } from '../components/CrashShell';
+import { PlayerLevelBar } from '../components/PlayerLevelBar';
 import { RatingPanel } from '../components/RatingPanel';
 import { useGame } from '../state/GameContext';
 import { formatNumber } from '../utils/format';
@@ -42,6 +43,10 @@ export function ProfileScreen(): JSX.Element {
               Пополнить +2000
             </button>
           )}
+        </div>
+
+        <div className="panel panel--pad profile__level-panel">
+          <PlayerLevelBar player={player} />
         </div>
 
         {setup.reward.enabled && (

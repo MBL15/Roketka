@@ -12,6 +12,7 @@ import { ApiError, api, setToken } from '../api/client';
 import { gameSocket, type SocketStatus } from '../api/socket';
 import { audio } from '../audio/AudioEngine';
 import type {
+  CashoutResult,
   GameSetup,
   HistoryEntry,
   Player,
@@ -60,6 +61,13 @@ type Action =
   | { type: 'rating'; rating: RatingEntry[] }
   | { type: 'socket'; status: SocketStatus }
   | { type: 'balance'; balance: number; points?: number }
+  | {
+      type: 'progression';
+      playerLevel: number;
+      playerXp: number;
+      xpToNextLevel: number;
+      displayProfitBonus: number;
+    }
   | { type: 'tickets'; tickets: number; balance: number }
   | { type: 'toast'; toast: Toast }
   | { type: 'dismiss'; id: number }
@@ -116,6 +124,19 @@ function reducer(state: State, action: Action): State {
             },
           }
         : state;
+    case 'progression':
+      return state.player
+        ? {
+            ...state,
+            player: {
+              ...state.player,
+              playerLevel: action.playerLevel,
+              playerXp: action.playerXp,
+              xpToNextLevel: action.xpToNextLevel,
+              displayProfitBonus: action.displayProfitBonus,
+            },
+          }
+        : state;
     case 'tickets':
       return state.player
         ? {
@@ -154,6 +175,10 @@ interface GameContextValue extends State {
   repeatBet: () => Promise<void>;
   /** Применяет покупку билетов из апсейла к профилю игрока. */
   applyPurchase: (totalTickets: number, balance: number) => void;
+  applyCashoutProgression: (result: Pick<
+    CashoutResult,
+    'balance' | 'playerLevel' | 'playerXp' | 'xpToNextLevel' | 'displayProfitBonus' | 'levelUp' | 'xpGained'
+  >) => void;
   refreshSetup: () => Promise<void>;
   refreshHistory: () => Promise<void>;
   notify: (toast: Omit<Toast, 'id'>) => void;
@@ -427,6 +452,13 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
           const result = await api.roundResult(roundId);
           dispatch({ type: 'result', result });
           dispatch({ type: 'balance', balance: result.balance, points: result.gamePoints });
+          dispatch({
+            type: 'progression',
+            playerLevel: result.playerLevel,
+            playerXp: result.playerXp,
+            xpToNextLevel: result.xpToNextLevel,
+            displayProfitBonus: result.displayProfitBonus,
+          });
           dispatch({ type: 'flight', flight: null });
           dispatch({ type: 'phase', phase: 'result' });
           if (result.reward.collectionCompleted) {
@@ -468,6 +500,38 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
     [notify],
   );
 
+  const applyCashoutProgression = useCallback(
+    (
+      result: Pick<
+        CashoutResult,
+        'balance' | 'playerLevel' | 'playerXp' | 'xpToNextLevel' | 'displayProfitBonus' | 'levelUp' | 'xpGained'
+      >,
+    ) => {
+      dispatch({ type: 'balance', balance: result.balance });
+      dispatch({
+        type: 'progression',
+        playerLevel: result.playerLevel,
+        playerXp: result.playerXp,
+        xpToNextLevel: result.xpToNextLevel,
+        displayProfitBonus: result.displayProfitBonus,
+      });
+      if (result.levelUp) {
+        notify({
+          tone: 'success',
+          title: `Уровень ${result.playerLevel}`,
+          body: `Новый бонус к профиту: +${result.displayProfitBonus.toFixed(2)}×`,
+        });
+      } else if (result.xpGained > 0) {
+        notify({
+          tone: 'info',
+          title: `+${result.xpGained} опыта`,
+          body: `${result.playerXp} / ${result.xpToNextLevel} до следующего уровня`,
+        });
+      }
+    },
+    [notify],
+  );
+
   const repeatBet = useCallback(async () => {
     if (state.lastBetOptionId === null) {
       dispatch({ type: 'phase', phase: 'bet' });
@@ -501,6 +565,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       playAgain,
       repeatBet,
       applyPurchase,
+      applyCashoutProgression,
       refreshSetup,
       refreshHistory,
       notify,
@@ -509,6 +574,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
     }),
     [
       applyPurchase,
+      applyCashoutProgression,
       chooseTheme,
       dismissToast,
       finishRound,

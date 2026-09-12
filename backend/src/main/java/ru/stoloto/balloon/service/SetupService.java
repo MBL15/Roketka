@@ -26,13 +26,16 @@ public class SetupService {
     private final GameConfigService configService;
     private final RewardService rewardService;
     private final TournamentService tournamentService;
+    private final PlayerProgressionService playerProgressionService;
 
     public SetupService(GameConfigService configService,
                         RewardService rewardService,
-                        TournamentService tournamentService) {
+                        TournamentService tournamentService,
+                        PlayerProgressionService playerProgressionService) {
         this.configService = configService;
         this.rewardService = rewardService;
         this.tournamentService = tournamentService;
+        this.playerProgressionService = playerProgressionService;
     }
 
     @Transactional(readOnly = true)
@@ -98,10 +101,13 @@ public class SetupService {
     }
 
     public GameDtos.PlayerDto toPlayerDto(UserAccount user) {
+        PlayerProgressionService.Snapshot progression = playerProgressionService.snapshot(user);
         return new GameDtos.PlayerDto(
                 user.getId(), user.getNickname(), user.getBonusBalance(),
                 tournamentService.livePoints(user.getId()), user.getLotteryTickets(),
                 user.getRoundsPlayed(), user.isOnboardingSeen(),
-                tournamentService.positionOf(user.getId()), user.getCollectionLevel());
+                tournamentService.positionOf(user.getId()), user.getCollectionLevel(),
+                progression.playerLevel(), progression.playerXp(), progression.xpToNextLevel(),
+                progression.displayProfitBonus());
     }
 }

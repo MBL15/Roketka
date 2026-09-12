@@ -29,7 +29,9 @@ public final class GameDtos {
 
     public record PlayerDto(long id, String nickname, long bonusBalance, long gamePoints,
                             int lotteryTickets, int roundsPlayed, boolean onboardingSeen,
-                            int tournamentPosition, int collectionLevel) {
+                            int tournamentPosition, int collectionLevel,
+                            int playerLevel, int playerXp, int xpToNextLevel,
+                            double displayProfitBonus) {
     }
 
     public record TopUpRequest(Long amount) {
@@ -133,7 +135,9 @@ public final class GameDtos {
 
     public record CashoutResponse(long roundId, double multiplier, long payout,
                                   long balance, int pointsAwarded, int totalPoints,
-                                  String message) {
+                                  String message,
+                                  int playerLevel, int playerXp, int xpToNextLevel,
+                                  double displayProfitBonus, int xpGained, boolean levelUp) {
     }
 
     /** Экран результата. Точка краха и зерно раскрываются только здесь. */
@@ -147,6 +151,8 @@ public final class GameDtos {
                                  RewardGrantDto reward,
                                  FairnessProofDto fairness,
                                  long balance, long gamePoints, int tournamentPosition,
+                                 int playerLevel, int playerXp, int xpToNextLevel,
+                                 double displayProfitBonus,
                                  UpsellOfferDto upsell,
                                  Instant startedAt, Instant finishedAt) {
     }

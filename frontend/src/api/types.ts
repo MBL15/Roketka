@@ -18,6 +18,10 @@ export interface Player {
   onboardingSeen: boolean;
   tournamentPosition: number;
   collectionLevel: number;
+  playerLevel: number;
+  playerXp: number;
+  xpToNextLevel: number;
+  displayProfitBonus: number;
 }
 
 export interface AuthResponse {
@@ -160,6 +164,12 @@ export interface CashoutResult {
   pointsAwarded: number;
   totalPoints: number;
   message: string;
+  playerLevel: number;
+  playerXp: number;
+  xpToNextLevel: number;
+  displayProfitBonus: number;
+  xpGained: number;
+  levelUp: boolean;
 }
 
 export interface PointsBreakdown {
@@ -227,6 +237,10 @@ export interface RoundResult {
   balance: number;
   gamePoints: number;
   tournamentPosition: number;
+  playerLevel: number;
+  playerXp: number;
+  xpToNextLevel: number;
+  displayProfitBonus: number;
   upsell: UpsellOffer;
   startedAt: string;
   finishedAt: string;

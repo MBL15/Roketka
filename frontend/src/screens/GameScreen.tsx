@@ -38,9 +38,9 @@ interface FlyingProps {
 }
 
 function Flying({ flight, setup, player, rating, onFinished }: FlyingProps): JSX.Element {
-  const { autoCashoutMultiplier } = useGame();
+  const { autoCashoutMultiplier, applyCashoutProgression } = useGame();
   const [hintVisible, setHintVisible] = useState(false);
-  const state = useFlight(flight, onFinished, autoCashoutMultiplier);
+  const state = useFlight(flight, onFinished, autoCashoutMultiplier, applyCashoutProgression);
 
   const stateRef = useRef(state);
   stateRef.current = state;

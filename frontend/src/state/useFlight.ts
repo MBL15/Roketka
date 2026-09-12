@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../api/client';
+import type { CashoutResult } from '../api/types';
 import { gameSocket } from '../api/socket';
 import { audio } from '../audio/AudioEngine';
 import { baseMultiplierAt, levelsPassedAt, quantizeDown, type Flight } from './flight';
@@ -53,6 +54,7 @@ export function useFlight(
   flight: Flight,
   onFinished: () => void,
   autoCashoutMultiplier: number | null = null,
+  onCashout?: (result: CashoutResult) => void,
 ): FlightState & { cashout: () => void } {
   const [state, setState] = useState<FlightState>(() => initialState(flight));
 
@@ -256,6 +258,7 @@ export function useFlight(
       .cashout(flight.roundId)
       .then((result) => {
         audio.cashout();
+        onCashout?.(result);
         setState((current) => ({
           ...current,
           cashedOut: true,
@@ -269,7 +272,7 @@ export function useFlight(
         // возвращаем кнопку, состояние всё равно придёт событием.
         setState((current) => (current.cashoutMultiplier === null ? { ...current, cashedOut: false } : current));
       });
-  }, [flight.roundId]);
+  }, [flight.roundId, onCashout]);
 
   // Автозабор: срабатывает после первого уровня, когда коэффициент достиг цели.
   useEffect(() => {

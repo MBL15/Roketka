@@ -47,6 +47,7 @@ public class RoundService {
     private final TournamentService tournamentService;
     private final RewardService rewardService;
     private final UpsellService upsellService;
+    private final PlayerProgressionService playerProgressionService;
     private final ApplicationEventPublisher events;
 
     public RoundService(GameConfigService configService,
@@ -57,6 +58,7 @@ public class RoundService {
                         TournamentService tournamentService,
                         RewardService rewardService,
                         UpsellService upsellService,
+                        PlayerProgressionService playerProgressionService,
                         ApplicationEventPublisher events) {
         this.configService = configService;
         this.fairness = fairness;
@@ -66,6 +68,7 @@ public class RoundService {
         this.tournamentService = tournamentService;
         this.rewardService = rewardService;
         this.upsellService = upsellService;
+        this.playerProgressionService = playerProgressionService;
         this.events = events;
     }
 
@@ -164,12 +167,18 @@ public class RoundService {
         long livePoints = tournamentService.addLivePoints(user.getId(), outcome.pointsAwarded());
         user.setGamePoints(livePoints);
 
+        PlayerProgressionService.AwardResult progression = playerProgressionService.awardForCashout(
+                user, round.getTheme(), outcome.multiplier());
+
         events.publishEvent(new GameEvents.CashoutAccepted(roundId, user.getId(),
                 outcome.multiplier(), outcome.payout(), user.getBonusBalance(), outcome.totalPoints()));
 
         return new GameDtos.CashoutResponse(roundId, outcome.multiplier(), outcome.payout(),
                 user.getBonusBalance(), outcome.pointsAwarded(), outcome.totalPoints(),
-                "Могли бы забрать больше");
+                "Могли бы забрать больше",
+                progression.snapshot().playerLevel(), progression.snapshot().playerXp(),
+                progression.snapshot().xpToNextLevel(), progression.snapshot().displayProfitBonus(),
+                progression.xpGained(), progression.levelUp());
     }
 
     // ------------------------------------------------------- состояние раунда
@@ -249,6 +258,7 @@ public class RoundService {
 
         boolean won = round.getStatus() == RoundStatus.WON;
         RewardService.CollectionState collection = rewardService.state(user);
+        PlayerProgressionService.Snapshot progression = playerProgressionService.snapshot(user);
 
         return new GameDtos.RoundResultDto(
                 round.getId(), round.getStatus().name(), won, round.getTheme(),
@@ -272,6 +282,8 @@ public class RoundService {
                         "/api/fairness/verify?roundId=" + round.getId()),
                 user.getBonusBalance(), user.getGamePoints(),
                 tournamentService.positionOf(user.getId()),
+                progression.playerLevel(), progression.playerXp(), progression.xpToNextLevel(),
+                progression.displayProfitBonus(),
                 upsellService.prepareOffer(sessionToken, user, round),
                 round.getStartedAt(), round.getFinishedAt());
     }
