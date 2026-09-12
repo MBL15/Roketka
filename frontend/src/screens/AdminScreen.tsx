@@ -285,7 +285,7 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
       </AdminHighlightContext.Provider>
 
       <footer className="admin__foot panel panel--pad">
-        <div className="admin__foot-copy grow">
+        <div className="admin__foot-copy">
           <strong>{dirty ? 'Есть несохранённые изменения' : 'Все изменения сохранены'}</strong>
           <span className="text-sm muted">
             {dirty
@@ -293,12 +293,14 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
               : 'Можно безопасно вернуться к игре или изменить другой раздел.'}
           </span>
         </div>
-        <button type="button" className="btn" onClick={() => void validate()} disabled={busy || !dirty}>
-          Проверить
-        </button>
-        <button type="button" className="btn btn--primary" onClick={() => void save()} disabled={busy || !dirty}>
-          Сохранить и применить
-        </button>
+        <div className="admin__foot-actions">
+          <button type="button" className="btn" onClick={() => void validate()} disabled={busy || !dirty}>
+            Проверить
+          </button>
+          <button type="button" className="btn btn--primary" onClick={() => void save()} disabled={busy || !dirty}>
+            Сохранить и применить
+          </button>
+        </div>
       </footer>
     </div>
   );

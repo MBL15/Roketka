@@ -151,10 +151,13 @@ button:disabled {
 }
 
 .app--admin .app__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   max-width: none;
   width: 100%;
-  margin: 0;
-  padding: 12px clamp(14px, 2.5vw, 28px) 16px;
+  margin: 0 auto;
+  padding: 16px clamp(16px, 3vw, 32px) 24px;
 }
 
 /* ===========================================================================
