@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useCountdown } from '../hooks/useCountdown';
 import { Balloon } from '../components/Balloon';
 import { CrashShell } from '../components/CrashShell';
 import { FlexibleBetCard } from '../components/FlexibleBetCard';
@@ -38,6 +39,9 @@ export function BetSelectScreen(): JSX.Element {
   const [rulesOpen, setRulesOpen] = useState(false);
   const [tournamentOpen, setTournamentOpen] = useState(false);
   const [autoValue, setAutoValue] = useState(() => autoCashoutMultiplier?.toFixed(2) ?? '');
+
+  const tournamentActive = Boolean(setup?.tournament.active);
+  const tournamentSecondsLeft = useCountdown(setup?.tournament.secondsLeft ?? 0, tournamentActive);
 
   const selectedCost = selected?.kind === 'preset' ? selected.cost : selected?.amount ?? 0;
   const balance = player?.bonusBalance ?? 0;
@@ -219,15 +223,15 @@ export function BetSelectScreen(): JSX.Element {
           {setup.tournament.enabled && (
             <button
               type="button"
-              className="btn btn--ghost btn--sm trophy"
+              className={`btn btn--ghost btn--sm trophy${tournamentActive ? ' trophy--live' : ''}`}
               onClick={() => setTournamentOpen(true)}
               aria-label="Турнирная таблица"
             >
               <TrophyIcon />
               <span className="trophy__text">
                 Турнир
-                {setup.tournament.active && (
-                  <span className="trophy__timer num">{formatCountdown(setup.tournament.secondsLeft)}</span>
+                {tournamentActive && (
+                  <span className="trophy__timer num">{formatCountdown(tournamentSecondsLeft)}</span>
                 )}
               </span>
             </button>

@@ -8,6 +8,7 @@ import './styles/global.css';
 import './styles/layout.css';
 import './styles/components.css';
 import './styles/screens.css';
+import './styles/admin.css';
 
 const container = document.getElementById('root');
 if (!container) {

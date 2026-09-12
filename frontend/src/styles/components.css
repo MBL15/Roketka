@@ -998,7 +998,8 @@
 
 .tournament__podium {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1.12fr 1fr;
+  align-items: end;
   gap: 10px;
 }
 
@@ -1007,22 +1008,60 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 14px 10px;
+  padding: 12px 10px 14px;
   border-radius: var(--radius-md);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
+  min-height: 96px;
+  position: relative;
 }
 
 .podium--1 {
-  background: linear-gradient(160deg, rgba(255, 209, 102, 0.22), var(--glass-bg));
+  min-height: 118px;
+  padding-top: 18px;
+  background: linear-gradient(165deg, rgba(255, 209, 102, 0.28), rgba(255, 209, 102, 0.06) 55%, var(--glass-bg));
+  border-color: rgba(255, 209, 102, 0.35);
+  box-shadow: 0 10px 28px rgba(255, 193, 7, 0.12);
+}
+
+.podium--2 {
+  background: linear-gradient(165deg, rgba(192, 200, 214, 0.24), var(--glass-bg));
+  border-color: rgba(192, 200, 214, 0.35);
+}
+
+.podium--3 {
+  background: linear-gradient(165deg, rgba(205, 127, 50, 0.2), var(--glass-bg));
+  border-color: rgba(205, 127, 50, 0.28);
 }
 
 .podium--me {
-  box-shadow: inset 0 0 0 2px var(--accent);
+  box-shadow: inset 0 0 0 2px var(--accent), 0 8px 20px rgba(46, 204, 113, 0.12);
+}
+
+.podium--empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.podium--skeleton {
+  min-height: 96px;
+  background: linear-gradient(90deg, var(--glass-bg), var(--glass-border), var(--glass-bg));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+.podium__rank {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 10px;
+  color: var(--ink-500);
+  font-weight: 700;
 }
 
 .podium__medal {
-  font-size: 22px;
+  font-size: 24px;
+  line-height: 1;
 }
 
 .podium__name {
@@ -1032,6 +1071,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: center;
 }
 
 .podium__points {
@@ -1039,11 +1079,27 @@
   font-weight: 700;
 }
 
+.tournament__list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
 .tournament__scroll {
-  max-height: 280px;
+  max-height: min(300px, 42vh);
   overflow-y: auto;
   border-radius: var(--radius-md);
   border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.02);
+  scrollbar-gutter: stable;
+}
+
+.tournament__scroll--skeleton {
+  min-height: 180px;
+  background: linear-gradient(90deg, var(--glass-bg), var(--glass-border), var(--glass-bg));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
 }
 
 .tournament__list {
@@ -1055,13 +1111,18 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 9px 12px;
+  padding: 10px 12px;
   font-size: 13px;
   border-bottom: 1px solid var(--glass-border);
+  transition: background 0.15s var(--ease-out);
 }
 
 .tournament__row:last-child {
   border-bottom: none;
+}
+
+.tournament__row:hover:not(.tournament__row--me) {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .tournament__row--me {
@@ -1071,28 +1132,60 @@
 }
 
 .tournament__position {
-  width: 26px;
+  width: 28px;
   color: var(--ink-400);
   font-size: 11px;
+  font-weight: 700;
 }
 
 .tournament__points {
   font-weight: 700;
+  min-width: 52px;
+  text-align: right;
 }
 
 .tournament__pinned {
-  border-radius: var(--radius-md);
+  margin-top: -1px;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
   border: 1px solid var(--accent);
+  border-top: 1px dashed rgba(46, 204, 113, 0.45);
   padding: 8px 4px 4px;
-  background: var(--accent-soft);
+  background: linear-gradient(180deg, var(--accent-soft), rgba(46, 204, 113, 0.08));
+  box-shadow: 0 -10px 24px rgba(4, 8, 14, 0.18);
 }
 
 .tournament__pinned .eyebrow {
   padding-left: 12px;
+  color: var(--accent);
 }
 
 .tournament__note {
-  line-height: 1.5;
+  line-height: 1.55;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+}
+
+.tournament__empty,
+.tournament__rest-empty {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--glass-border);
+  text-align: center;
+}
+
+.tournament--loading {
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ------------------------------------------------------------------ апсейл */

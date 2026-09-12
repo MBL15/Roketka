@@ -106,7 +106,9 @@ public class SetupService {
     public GameDtos.PlayerDto toPlayerDto(UserAccount user) {
         PlayerProgressionService.Snapshot progression = playerProgressionService.snapshot(user);
         return new GameDtos.PlayerDto(
-                user.getId(), user.getNickname(), user.getBonusBalance(),
+                user.getId(), user.getNickname(),
+                AccountProfiles.kindCode(AccountProfiles.kindOf(user)),
+                user.getBonusBalance(),
                 tournamentService.livePoints(user.getId()), user.getLotteryTickets(),
                 user.getRoundsPlayed(), user.getRoundsWon(), user.getRoundsLost(),
                 user.getTotalBonusEarned(),

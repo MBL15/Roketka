@@ -18,9 +18,12 @@ export interface Achievement {
   unlockedAt: string | null;
 }
 
+export type AccountKind = 'demo' | 'judge' | 'admin' | 'player';
+
 export interface Player {
   id: number;
   nickname: string;
+  accountKind: AccountKind;
   bonusBalance: number;
   gamePoints: number;
   lotteryTickets: number;

@@ -76,7 +76,7 @@ export function AdminSearch({ onNavigate }: AdminSearchProps): JSX.Element {
           className="input admin-search__input"
           type="search"
           value={query}
-          placeholder="Найти настройку: RTP, бустер, апсейл, демо-баланс…"
+          placeholder="RTP, бустер, alpha, демо-баланс — ищем всё"
           role="combobox"
           aria-expanded={open && results.length > 0}
           aria-controls={listId}

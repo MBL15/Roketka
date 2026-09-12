@@ -280,6 +280,15 @@
   color: var(--ink-400);
 }
 
+.trophy--live .trophy__icon {
+  filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.55));
+}
+
+.trophy--live .trophy__timer {
+  color: var(--warning);
+  font-weight: 650;
+}
+
 @keyframes trophy-sway {
   0%,
   100% {
@@ -829,8 +838,6 @@
 
 .admin-shell {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   width: 100%;
   min-height: 100%;
 }

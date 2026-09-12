@@ -142,25 +142,7 @@ button:disabled {
   gap: 8px;
 }
 
-.app--admin {
-  min-height: 100dvh;
-  background:
-    radial-gradient(ellipse 120% 80% at 0% -10%, rgba(46, 204, 113, 0.08), transparent 55%),
-    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(46, 204, 113, 0.05), transparent 50%),
-    radial-gradient(ellipse 100% 70% at 100% 110%, rgba(46, 204, 113, 0.08), transparent 55%),
-    radial-gradient(ellipse 80% 60% at 0% 100%, rgba(46, 204, 113, 0.05), transparent 50%),
-    var(--surface-base);
-}
-
-.app--admin .app__content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: none;
-  width: 100%;
-  margin: 0 auto;
-  padding: 16px clamp(16px, 3vw, 32px) 24px;
-}
+/* Админка — см. admin.css */
 
 /* ===========================================================================
    Типографика

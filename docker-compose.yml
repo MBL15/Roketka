@@ -22,8 +22,8 @@ services:
       dockerfile: backend/Dockerfile
     container_name: balloon-backend
     restart: unless-stopped
-    # host-сеть обходит сломанный bridge в некоторых VM; порты 8080/8081 на localhost.
-    network_mode: host
+    ports:
+      - '8081:8081'
     environment:
       # Конфигурация игры монтируется с хоста — правки видны без пересборки.
       BALLOON_CONFIG_PATH: /app/config/game-config.yaml
@@ -51,12 +51,11 @@ services:
       dockerfile: Dockerfile
     container_name: balloon-frontend
     restart: unless-stopped
-    network_mode: host
+    ports:
+      - '8080:8080'
     depends_on:
       backend:
         condition: service_healthy
-    volumes:
-      - ./frontend/nginx.host.conf:/etc/nginx/conf.d/default.conf:ro
 
   # Необязательный PostgreSQL. По умолчанию не запускается: базовый стенд
   # работает на встроенной H2 и не требует ничего, кроме Docker.

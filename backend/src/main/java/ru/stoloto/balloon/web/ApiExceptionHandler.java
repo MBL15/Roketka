@@ -37,6 +37,11 @@ public class ApiExceptionHandler {
         return error(HttpStatus.UNAUTHORIZED, "authentication_failed", e.getMessage(), null);
     }
 
+    @ExceptionHandler(AuthService.TopUpNotAllowedException.class)
+    public ResponseEntity<GameDtos.ApiError> onTopUpDenied(AuthService.TopUpNotAllowedException e) {
+        return error(HttpStatus.FORBIDDEN, "top_up_forbidden", e.getMessage(), null);
+    }
+
     @ExceptionHandler(AdminAccess.AccessDeniedException.class)
     public ResponseEntity<GameDtos.ApiError> onAdminDenied(AdminAccess.AccessDeniedException e) {
         return error(HttpStatus.FORBIDDEN, "forbidden", e.getMessage(), null);

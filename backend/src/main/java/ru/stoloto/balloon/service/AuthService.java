@@ -96,9 +96,12 @@ public class AuthService {
         }
     }
 
-    /** Начисление демонстрационных бонусов, если эксперт исчерпал баланс. */
+    /** Начисление демонстрационных бонусов; для судьи запрещено. */
     @Transactional
     public UserAccount topUp(UserAccount user, long amount) {
+        if (!AccountProfiles.manualTopUpAllowed(AccountProfiles.kindOf(user))) {
+            throw new TopUpNotAllowedException("Пополнение недоступно для аккаунта судьи");
+        }
         UserAccount stored = users.findById(user.getId()).orElseThrow();
         stored.creditBonus(Math.max(0, Math.min(amount, 1_000_000)));
         return stored;
@@ -112,6 +115,12 @@ public class AuthService {
 
     public static class AuthenticationFailedException extends RuntimeException {
         public AuthenticationFailedException(String message) {
+            super(message);
+        }
+    }
+
+    public static class TopUpNotAllowedException extends RuntimeException {
+        public TopUpNotAllowedException(String message) {
             super(message);
         }
     }

@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import type { RatingEntry, TournamentTable } from '../api/types';
+import { useCountdown } from '../hooks/useCountdown';
 import { formatCountdown, formatNumber } from '../utils/format';
 
 /** Компактный топ рейтинга для боковой колонки профиля. */
 export function RatingPanel(): JSX.Element {
   const [table, setTable] = useState<TournamentTable | null>(null);
-  const [secondsLeft, setSecondsLeft] = useState(0);
+  const [serverSecondsLeft, setServerSecondsLeft] = useState(0);
+  const secondsLeft = useCountdown(serverSecondsLeft, Boolean(table?.header.active));
 
   useEffect(() => {
     let cancelled = false;
@@ -17,18 +19,16 @@ export function RatingPanel(): JSX.Element {
           return;
         }
         setTable(data);
-        setSecondsLeft(data.header.secondsLeft);
+        setServerSecondsLeft(data.header.secondsLeft);
       });
     };
 
     load();
     const refresh = window.setInterval(load, 4000);
-    const tick = window.setInterval(() => setSecondsLeft((value) => Math.max(0, value - 1)), 1000);
 
     return () => {
       cancelled = true;
       window.clearInterval(refresh);
-      window.clearInterval(tick);
     };
   }, []);
 

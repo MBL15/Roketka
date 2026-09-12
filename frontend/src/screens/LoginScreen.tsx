@@ -3,9 +3,9 @@ import { CrashShell } from '../components/CrashShell';
 import { useGame } from '../state/GameContext';
 
 const DEMO_ACCOUNTS = [
-  { login: 'demo', password: 'demo', note: 'обычный игрок' },
-  { login: 'expert', password: 'expert', note: 'игра + настройки' },
-  { login: 'judge', password: 'judge', note: 'второй игрок' },
+  { login: 'demo', password: 'demo', note: 'демо · 5000 баллов, пополнение' },
+  { login: 'judge', password: 'judge', note: 'судья · 500 баллов, без пополнения' },
+  { login: 'expert', password: 'expert', note: 'админ · игра + настройки' },
 ];
 
 export function LoginScreen(): JSX.Element {
@@ -117,7 +117,7 @@ export function LoginScreen(): JSX.Element {
               ))}
             </div>
             <p className="text-xs muted">
-              У каждого профиля ненулевой баланс. Если баллы закончатся — кнопка пополнения в шапке.
+              Три типа аккаунта: demo и admin пополняются при нехватке баллов, у судьи — фиксированные 500.
             </p>
           </div>
         </div>
@@ -125,4 +125,4 @@ export function LoginScreen(): JSX.Element {
     </CrashShell>
   );
 }
-
+

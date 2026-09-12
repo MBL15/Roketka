@@ -27,7 +27,7 @@ public final class GameDtos {
     public record AuthResponse(String token, PlayerDto player) {
     }
 
-    public record PlayerDto(long id, String nickname, long bonusBalance, long gamePoints,
+    public record PlayerDto(long id, String nickname, String accountKind, long bonusBalance, long gamePoints,
                             int lotteryTickets, int roundsPlayed, int roundsWon, int roundsLost,
                             long totalBonusEarned,
                             boolean onboardingSeen, int tournamentPosition, int collectionLevel,

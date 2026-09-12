@@ -5,6 +5,7 @@ import { HomeButton } from '../components/HomeButton';
 import { PlayerLevelBar } from '../components/PlayerLevelBar';
 import { RatingPanel } from '../components/RatingPanel';
 import { useGame } from '../state/GameContext';
+import { canTopUpAccount, resolveAccountKind } from '../utils/access';
 import { formatNumber } from '../utils/format';
 
 export function ProfileScreen(): JSX.Element {
@@ -15,6 +16,7 @@ export function ProfileScreen(): JSX.Element {
   }
 
   const initial = player.nickname.slice(0, 1).toUpperCase();
+  const topUpAllowed = canTopUpAccount(resolveAccountKind(player.nickname, player.accountKind));
 
   return (
     <CrashShell fill rail={<RatingPanel />}>
@@ -50,7 +52,7 @@ export function ProfileScreen(): JSX.Element {
             <StatCard label="Заработано" value={formatNumber(player.totalBonusEarned ?? 0)} accent />
           </div>
 
-          {player.bonusBalance < 500 && (
+          {topUpAllowed && player.bonusBalance < 500 && (
             <button type="button" className="btn btn--sm btn--primary profile-hero__topup" onClick={() => void topUp()}>
               Пополнить +2000
             </button>

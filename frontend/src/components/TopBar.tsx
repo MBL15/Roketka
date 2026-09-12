@@ -4,7 +4,7 @@ import { HomeButton } from './HomeButton';
 import { ThemeToggleButton } from './ThemeToggleButton';
 import { useGame } from '../state/GameContext';
 import { formatNumber } from '../utils/format';
-import { isExpertAccount } from '../utils/access';
+import { canTopUpAccount, resolveAccountKind } from '../utils/access';
 
 export function TopBar(): JSX.Element {
   const { player, socketStatus, logout, topUp, phase, goTo } = useGame();
@@ -36,7 +36,9 @@ export function TopBar(): JSX.Element {
         ? { label: 'связь…', tone: 'warning' as const }
         : { label: 'опрос', tone: 'negative' as const };
 
-  const expert = isExpertAccount(player.nickname);
+  const accountKind = resolveAccountKind(player.nickname, player.accountKind);
+  const expert = accountKind === 'admin';
+  const topUpAllowed = canTopUpAccount(accountKind);
   const showHome = phase === 'bet' || phase === 'profile' || phase === 'result';
   const showProfile = phase !== 'game' && phase !== 'result' && phase !== 'profile';
 
@@ -70,7 +72,7 @@ export function TopBar(): JSX.Element {
           {connection.label}
         </span>
 
-        {player.bonusBalance < 500 && phase !== 'game' && (
+        {topUpAllowed && player.bonusBalance < 500 && phase !== 'game' && (
           <button type="button" className="btn btn--sm btn--primary" onClick={() => void topUp()}>
             +2000
           </button>

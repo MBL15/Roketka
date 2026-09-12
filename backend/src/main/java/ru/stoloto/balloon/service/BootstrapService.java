@@ -83,7 +83,7 @@ public class BootstrapService implements ApplicationRunner {
     }
 
     private void seedDemoUsers() {
-        long startingBalance = configService.current().session().demoBonusBalance();
+        long demoBalance = configService.current().session().demoBonusBalance();
         for (String entry : properties.demoUsers()) {
             String[] parts = entry.split(":", 2);
             if (parts.length != 2) {
@@ -91,11 +91,16 @@ public class BootstrapService implements ApplicationRunner {
             }
             String nickname = parts[0].trim();
             String password = parts[1].trim();
+            AccountProfiles.Kind kind = AccountProfiles.kindOf(nickname);
+            long startingBalance = AccountProfiles.startingBonus(kind, demoBalance);
             users.findByNicknameIgnoreCase(nickname).ifPresentOrElse(
                     existing -> {
-                        // Баланс демо-аккаунта пополняется, чтобы эксперт всегда мог играть.
-                        if (existing.getBonusBalance() < startingBalance / 10) {
-                            existing.creditBonus(startingBalance);
+                        if (kind == AccountProfiles.Kind.JUDGE) {
+                            // Судья стартует с 500 при запуске сервера; во время сессии пополнение отключено.
+                            existing.setBonusBalance(AccountProfiles.JUDGE_STARTING_BALANCE);
+                        } else if (AccountProfiles.autoRefillOnBootstrap(kind)
+                                && existing.getBonusBalance() < demoBalance / 10) {
+                            existing.creditBonus(demoBalance);
                             log.info("Демо-аккаунт {} пополнен до {} бонусов",
                                     nickname, existing.getBonusBalance());
                         }
@@ -105,8 +110,8 @@ public class BootstrapService implements ApplicationRunner {
                         UserAccount created = users.save(new UserAccount(
                                 nickname, passwordHasher.hash(password), startingBalance, false));
                         tournamentService.track(created);
-                        log.info("Создан демо-аккаунт {} / {} с балансом {}",
-                                nickname, password, startingBalance);
+                        log.info("Создан аккаунт {} / {} ({}) с балансом {}",
+                                nickname, password, AccountProfiles.kindCode(kind), startingBalance);
                     });
         }
     }

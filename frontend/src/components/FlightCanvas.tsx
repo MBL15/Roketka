@@ -34,6 +34,23 @@ interface Cloud {
   drift: number;
 }
 
+interface Bird {
+  x: number;
+  altitude: number;
+  scale: number;
+  alpha: number;
+  drift: number;
+  flapPhase: number;
+  flapSpeed: number;
+  flockOffsetX: number;
+  flockOffsetAlt: number;
+}
+
+/** Шаг процедурной генерации птиц по высоте (ln-единицы). */
+const BIRD_BAND_LN = 0.55;
+/** Горизонтальная скорость птиц относительно облаков. */
+const BIRD_DRIFT_SCALE = 0.0028;
+
 interface Particle {
   x: number;
   y: number;
@@ -74,6 +91,7 @@ export function FlightCanvas({ flight, stateRef, theme, lightScheme = false }: F
       alpha: 0.12 + Math.random() * 0.22,
       drift: (Math.random() - 0.5) * 0.012,
     }));
+    const birdSeed = flight.startedAtMillis % 100_000;
     const particles: Particle[] = [];
 
     const resize = () => {
@@ -119,6 +137,7 @@ export function FlightCanvas({ flight, stateRef, theme, lightScheme = false }: F
 
       drawSky(context, width, height, palette, altitude, brightSky);
       drawClouds(context, clouds, width, height, scroll, time);
+      drawProceduralBirds(context, width, height, scroll, time, birdSeed, brightSky, lightScheme);
       drawLevelMarkers(context, flight, state, width, height, scroll, theme, lightScheme);
 
       if (!state.crashed) {
@@ -220,6 +239,153 @@ function puff(context: CanvasRenderingContext2D, x: number, y: number, radius: n
   context.arc(x - radius * 0.55, y + radius * 0.16, radius * 0.4, 0, Math.PI * 2);
   context.arc(x + radius * 0.12, y - radius * 0.28, radius * 0.42, 0, Math.PI * 2);
   context.fill();
+}
+
+// --------------------------------------------------------------------- птицы
+
+function birdRand(seed: number): number {
+  return pseudoRandom(seed);
+}
+
+function makeBird(seed: number, band: number): Bird {
+  const driftDir = birdRand(seed + 1) > 0.5 ? 1 : -1;
+  return {
+    x: birdRand(seed + 2),
+    altitude: band * BIRD_BAND_LN + birdRand(seed + 3) * BIRD_BAND_LN * 0.82,
+    scale: 0.42 + birdRand(seed + 4) * 0.88,
+    alpha: 0.24 + birdRand(seed + 5) * 0.42,
+    drift: driftDir * (0.04 + birdRand(seed + 6) * 0.06),
+    flapPhase: birdRand(seed + 7) * Math.PI * 2,
+    flapSpeed: 8 + birdRand(seed + 8) * 6,
+    flockOffsetX: 0,
+    flockOffsetAlt: 0,
+  };
+}
+
+function drawProceduralBirds(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  scroll: number,
+  time: number,
+  roundSeed: number,
+  brightSky: boolean,
+  lightScheme: boolean,
+): void {
+  const span = height * 1.6;
+  const birdColor = lightScheme || brightSky ? 'rgba(24, 33, 47, 0.92)' : 'rgba(255, 255, 255, 0.88)';
+  const birdShadow = lightScheme || brightSky ? 'rgba(24, 33, 47, 0.18)' : 'rgba(0, 0, 0, 0.22)';
+
+  const scrollAlt = scroll / (PIXELS_PER_LN * 0.92);
+  const minBand = Math.floor(scrollAlt / BIRD_BAND_LN) - 2;
+  const maxBand = Math.ceil((scrollAlt + (height * 1.4) / (PIXELS_PER_LN * 0.92)) / BIRD_BAND_LN) + 2;
+
+  const visible: Bird[] = [];
+
+  for (let band = minBand; band <= maxBand; band += 1) {
+    const bandSeed = roundSeed + band * 19.713;
+
+    if (birdRand(bandSeed) > 0.58) {
+      visible.push(makeBird(bandSeed, band));
+    }
+
+    if (birdRand(bandSeed + 500) > 0.78) {
+      const flockSize = 2 + Math.floor(birdRand(bandSeed + 501) * 2);
+      const lead = makeBird(bandSeed + 900, band);
+      for (let member = 0; member < flockSize; member += 1) {
+        visible.push({
+          ...lead,
+          scale: lead.scale * (1 - member * 0.07),
+          alpha: lead.alpha * (1 - member * 0.06),
+          flockOffsetX: member === 0 ? 0 : -0.05 * member - birdRand(bandSeed + 902 + member) * 0.025,
+          flockOffsetAlt: member === 0 ? 0 : 0.02 * member + birdRand(bandSeed + 910 + member) * 0.014,
+          flapPhase: lead.flapPhase + member * 0.35,
+        });
+      }
+    }
+  }
+
+  visible.sort((a, b) => a.scale - b.scale);
+
+  visible.forEach((bird) => {
+    const raw = (bird.altitude + bird.flockOffsetAlt) * PIXELS_PER_LN * 0.92 - scroll;
+    const y = height - (((raw % span) + span) % span);
+    if (y < -60 || y > height + 60) {
+      return;
+    }
+    const glide = Math.sin(time * 0.0024 + bird.flapPhase) * 6 * bird.scale;
+    const xNorm = (((bird.x + bird.flockOffsetX + bird.drift * time * BIRD_DRIFT_SCALE) % 1) + 1) % 1;
+    drawBirdSilhouette(
+      context,
+      xNorm * width,
+      y + glide,
+      bird.scale,
+      time,
+      bird,
+      bird.drift >= 0,
+      birdColor,
+      birdShadow,
+      bird.alpha,
+    );
+  });
+}
+
+function drawBirdSilhouette(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  scale: number,
+  time: number,
+  bird: Bird,
+  facingRight: boolean,
+  color: string,
+  shadowColor: string,
+  alpha: number,
+): void {
+  const dir = facingRight ? 1 : -1;
+  const flap = Math.sin(time * 0.001 * bird.flapSpeed + bird.flapPhase);
+  const wingLift = flap * 8 * scale;
+  const span = 16 * scale;
+  const bob = Math.sin(time * 0.002 + bird.flapPhase * 1.7) * 1.5 * scale;
+
+  context.save();
+  context.translate(x, y + bob);
+  context.scale(dir, 1);
+  context.globalAlpha = alpha;
+
+  context.strokeStyle = shadowColor;
+  context.lineWidth = 2.6 * scale;
+  context.lineCap = 'round';
+  context.beginPath();
+  context.moveTo(-span, -wingLift + 1.5);
+  context.quadraticCurveTo(-span * 0.28, span * 0.22, 0, 1.5);
+  context.quadraticCurveTo(span * 0.28, span * 0.22, span, -wingLift + 1.5);
+  context.stroke();
+
+  context.strokeStyle = color;
+  context.fillStyle = color;
+  context.lineWidth = 1.9 * scale;
+  context.beginPath();
+  context.moveTo(-span, -wingLift);
+  context.quadraticCurveTo(-span * 0.28, span * 0.18, 0, 0);
+  context.quadraticCurveTo(span * 0.28, span * 0.18, span, -wingLift);
+  context.stroke();
+
+  context.beginPath();
+  context.moveTo(-span * 0.12, -wingLift * 0.35);
+  context.lineTo(-span * 0.55, -wingLift * 0.85 - 2 * scale);
+  context.stroke();
+
+  context.beginPath();
+  context.ellipse(span * 0.08, 0.5 * scale, 2.4 * scale, 1.3 * scale, -0.15, 0, Math.PI * 2);
+  context.fill();
+
+  context.beginPath();
+  context.moveTo(span * 0.18, 0);
+  context.lineTo(span * 0.42, -1.2 * scale);
+  context.stroke();
+
+  context.restore();
 }
 
 // ------------------------------------------------------------------ уровни

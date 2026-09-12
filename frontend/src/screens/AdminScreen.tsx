@@ -4,7 +4,7 @@ import type { AdminConfig, AdminTheme, ConfigStatus, RuntimeStats, SimulationRep
 import { formatMultiplier, formatNumber, formatPercent } from '../utils/format';
 import { AdminSearch } from './AdminSearch';
 import { AdminTopMenu } from './AdminTopMenu';
-import { type AdminSearchEntry, type AdminTab } from './adminSettingsSearch';
+import { adminTabLabel, type AdminSearchEntry, type AdminTab } from './adminSettingsSearch';
 
 type ThemeSectionKind = 'general' | 'levels' | 'economy';
 
@@ -152,6 +152,10 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
   };
 
   useEffect(() => {
+    document.querySelector<HTMLElement>('.admin-workspace')?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [tab]);
+
+  useEffect(() => {
     if (!highlightFieldId) {
       return undefined;
     }
@@ -171,10 +175,16 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
   if (!draft) {
     return (
       <div className="admin-shell">
-        <div className="admin admin--loading">Загружаем конфигурацию…</div>
+        <div className="admin-workspace">
+          <div className="admin admin--loading">Загружаем конфигурацию</div>
+        </div>
       </div>
     );
   }
+
+  const tabParts = adminTabLabel(tab).split(' → ');
+  const tabGroup = tabParts[0] ?? '';
+  const tabName = tabParts[1] ?? tab;
 
   return (
     <div className="admin-shell">
@@ -187,40 +197,52 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
         busy={busy}
       />
 
+      <div className="admin-workspace">
       <div className="admin">
-      <header className="admin__head panel panel--pad panel--strong">
+      <header className="admin__head">
         <div className="col grow">
-          <span className="eyebrow admin__eyebrow">Административная панель</span>
-          <h1 className="h2 admin__title">Настройки игры</h1>
-          <p className="text-sm muted admin__lead">
-            Меняйте экономику, уровни и награды — изменения применяются к новым раундам без перезапуска сервера.
+          <span className="eyebrow admin__eyebrow">Студия · бонусная краш-игра</span>
+          <h1 className="admin__title">
+            <span className="admin__title-accent">{tabName}</span>
+            <br />
+            {tabGroup}
+          </h1>
+          <p className="admin__lead">
+            Крутите ручки — шар летит по новым правилам. Сохранённые параметры подхватят следующие раунды,
+            текущие полёты не прервутся.
           </p>
-
-          {status && (
-            <div className="admin__status">
-              <span className={`admin__pill${dirty ? ' admin__pill--draft' : ' admin__pill--ok'}`}>
-                {dirty ? 'Есть несохранённые правки' : 'Все настройки сохранены'}
-              </span>
-              <span className="admin__pill">Версия {status.appliedRevisions}</span>
-              {stats && stats.activeRounds > 0 && (
-                <span className="admin__pill admin__pill--live">
-                  Сейчас в игре: {stats.activeRounds} {stats.activeRounds === 1 ? 'раунд' : 'раунда'}
-                </span>
-              )}
-              {!status.writable && <span className="admin__pill admin__pill--warn">Только чтение</span>}
-            </div>
-          )}
 
           {status && (
             <details className="admin__meta">
               <summary>Техническая информация</summary>
               <p className="text-xs muted">
-                Файл конфигурации: <span className="mono">{status.path}</span>
+                Файл: <span className="mono">{status.path}</span>
+                {!status.writable && ' · только чтение'}
               </p>
             </details>
           )}
         </div>
 
+        {status && (
+          <div className="admin__stats" aria-label="Статус конфигурации">
+            <div className="admin__stat">
+              <span className={`admin__stat-value${dirty ? ' admin__stat-value--warn' : ' admin__stat-value--ok'}`}>
+                {dirty ? '●' : '✓'}
+              </span>
+              <span className="admin__stat-label">{dirty ? 'Черновик' : 'Сохранено'}</span>
+            </div>
+            <div className="admin__stat">
+              <span className="admin__stat-value">{status.appliedRevisions}</span>
+              <span className="admin__stat-label">Ревизия</span>
+            </div>
+            <div className="admin__stat">
+              <span className={`admin__stat-value${stats && stats.activeRounds > 0 ? ' admin__stat-value--live' : ''}`}>
+                {stats?.activeRounds ?? 0}
+              </span>
+              <span className="admin__stat-label">В полёте</span>
+            </div>
+          </div>
+        )}
       </header>
 
       {(errors.length > 0 || message) && (
@@ -236,8 +258,8 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
         </div>
       )}
 
-      <div className="admin__search-shell panel panel--pad">
-        <p className="admin__search-label">Быстрый поиск</p>
+      <div className="admin__search-shell">
+        <p className="admin__search-label">Поиск по настройкам</p>
         <AdminSearch onNavigate={navigateToSetting} />
       </div>
 
@@ -262,13 +284,13 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
         </div>
       </AdminHighlightContext.Provider>
 
-      <footer className="admin__foot panel panel--pad">
+      <footer className={`admin__foot${dirty ? ' admin__foot--dirty' : ''}`}>
         <div className="admin__foot-copy">
-          <strong>{dirty ? 'Есть несохранённые изменения' : 'Все изменения сохранены'}</strong>
+          <strong>{dirty ? 'Есть несохранённые изменения' : 'Всё чисто'}</strong>
           <span className="text-sm muted">
             {dirty
-              ? 'Нажмите «Проверить», затем «Сохранить». Новые раунды возьмут обновлённые параметры, текущие полёты не прервутся.'
-              : 'Можно безопасно вернуться к игре или изменить другой раздел.'}
+              ? 'Сначала «Проверить», потом «Сохранить». Так надёжнее.'
+              : 'Можно спокойно вернуться к игре.'}
           </span>
         </div>
         <div className="admin__foot-actions">
@@ -276,10 +298,11 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
             Проверить
           </button>
           <button type="button" className="btn btn--primary" onClick={() => void save()} disabled={busy || !dirty}>
-            Сохранить и применить
+            Сохранить
           </button>
         </div>
       </footer>
+      </div>
       </div>
     </div>
   );
