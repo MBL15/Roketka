@@ -3,7 +3,8 @@ import { ApiError, api } from '../api/client';
 import type { AdminConfig, AdminTheme, ConfigStatus, RuntimeStats, SimulationReport } from '../api/types';
 import { formatMultiplier, formatNumber, formatPercent } from '../utils/format';
 import { AdminSearch } from './AdminSearch';
-import { TAB_GROUPS, type AdminSearchEntry, type AdminTab } from './adminSettingsSearch';
+import { AdminTopMenu } from './AdminTopMenu';
+import { type AdminSearchEntry, type AdminTab } from './adminSettingsSearch';
 
 type ThemeSectionKind = 'general' | 'levels' | 'economy';
 
@@ -40,12 +41,6 @@ function themeSection(tab: AdminTab): ThemeSectionKind {
   if (tab.endsWith('-levels')) return 'levels';
   if (tab.endsWith('-economy')) return 'economy';
   return 'general';
-}
-
-function themeTone(tab: AdminTab): 'green' | 'red' | 'global' {
-  if (tab.startsWith('green-')) return 'green';
-  if (tab.startsWith('red-')) return 'red';
-  return 'global';
 }
 
 /**
@@ -174,11 +169,25 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
   }, [highlightFieldId, tab]);
 
   if (!draft) {
-    return <div className="admin admin--loading">Загружаем конфигурацию…</div>;
+    return (
+      <div className="admin-shell">
+        <div className="admin admin--loading">Загружаем конфигурацию…</div>
+      </div>
+    );
   }
 
   return (
-    <div className="admin">
+    <div className="admin-shell">
+      <AdminTopMenu
+        tab={tab}
+        onTabChange={setTab}
+        onReload={() => void reload()}
+        onReset={() => void reset()}
+        onExit={onExit}
+        busy={busy}
+      />
+
+      <div className="admin">
       <header className="admin__head panel panel--pad panel--strong">
         <div className="col grow">
           <span className="eyebrow admin__eyebrow">Административная панель</span>
@@ -212,17 +221,6 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
           )}
         </div>
 
-        <div className="admin__head-actions">
-          <button type="button" className="btn btn--ghost btn--sm" onClick={() => void reload()} disabled={busy}>
-            Обновить
-          </button>
-          <button type="button" className="btn btn--danger btn--sm" onClick={() => void reset()} disabled={busy}>
-            Сбросить настройки
-          </button>
-          <button type="button" className="btn btn--primary btn--sm" onClick={onExit}>
-            Вернуться к игре
-          </button>
-        </div>
       </header>
 
       {(errors.length > 0 || message) && (
@@ -241,26 +239,6 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
       <div className="admin__search-shell panel panel--pad">
         <p className="admin__search-label">Быстрый поиск</p>
         <AdminSearch onNavigate={navigateToSetting} />
-      </div>
-
-      <div className="admin__nav">
-        {TAB_GROUPS.map((group) => (
-          <section key={group.label} className="admin__nav-group">
-            <span className="admin__nav-label">{group.label}</span>
-            <nav className="admin__tabs" aria-label={group.label}>
-              {group.tabs.map(([key, label]) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={`admin__tab admin__tab--${themeTone(key)}${tab === key ? ' admin__tab--active' : ''}`}
-                  onClick={() => setTab(key)}
-                >
-                  {label}
-                </button>
-              ))}
-            </nav>
-          </section>
-        ))}
       </div>
 
       <p className="admin__tab-hint text-sm muted">{tabHint}</p>
@@ -302,6 +280,7 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
           </button>
         </div>
       </footer>
+      </div>
     </div>
   );
 }
