@@ -29,6 +29,8 @@ services:
       DEMO_BONUS_BALANCE: ${DEMO_BONUS_BALANCE:-5000}
       SIMULATION_ENABLED: ${SIMULATION_ENABLED:-true}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES:-default}
+      # AUTO_SERVER=TRUE из application.yaml ломает H2 в контейнере (UnknownHostException).
+      SPRING_DATASOURCE_URL: jdbc:h2:file:/app/data/balloon;DB_CLOSE_DELAY=-1
     volumes:
       # Bind mount, а не копия: изменил файл в редакторе — сервер перечитал его
       # сам за секунду. На этом построен сценарий 5.
