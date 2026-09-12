@@ -87,19 +87,18 @@ export function TopBar(): JSX.Element {
           {soundOn ? '🔊' : '🔇'}
         </button>
 
+        <ThemeToggleButton />
+
         {phase !== 'game' && phase !== 'result' && (
-          <>
-            <ThemeToggleButton />
-            <button
-              type="button"
-              className={`btn btn--icon btn--ghost${onProfile ? ' btn--icon-active' : ''}`}
-              onClick={openProfile}
-              aria-label="Профиль"
-              title="Профиль"
-            >
-              <ProfileIcon />
-            </button>
-          </>
+          <button
+            type="button"
+            className={`btn btn--icon btn--ghost${onProfile ? ' btn--icon-active' : ''}`}
+            onClick={openProfile}
+            aria-label="Профиль"
+            title="Профиль"
+          >
+            <ProfileIcon />
+          </button>
         )}
 
         {expert && (
