@@ -179,10 +179,10 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
 
   return (
     <div className="admin">
-      <header className="admin__head panel panel--pad">
+      <header className="admin__head panel panel--pad panel--strong">
         <div className="col grow">
-          <span className="eyebrow">Административная панель</span>
-          <h1 className="h2">Настройки игры</h1>
+          <span className="eyebrow admin__eyebrow">Административная панель</span>
+          <h1 className="h2 admin__title">Настройки игры</h1>
           <p className="text-sm muted admin__lead">
             Меняйте экономику, уровни и награды — изменения применяются к новым раундам без перезапуска сервера.
           </p>
@@ -238,7 +238,10 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
         </div>
       )}
 
-      <AdminSearch onNavigate={navigateToSetting} />
+      <div className="admin__search-shell panel panel--pad">
+        <p className="admin__search-label">Быстрый поиск</p>
+        <AdminSearch onNavigate={navigateToSetting} />
+      </div>
 
       <div className="admin__nav">
         {TAB_GROUPS.map((group) => (
@@ -1049,7 +1052,7 @@ function Card({
       className={`panel panel--pad admin__card${wide ? ' admin__card--wide' : ''}${highlighted ? ' field--highlight' : ''}`}
     >
       <header className="admin__card-head">
-        <h3 className="h3">{title}</h3>
+        <h3 className="h3 admin__card-title">{title}</h3>
         {hint && <p className="text-xs muted">{hint}</p>}
       </header>
       <div className="admin__card-body">{children}</div>

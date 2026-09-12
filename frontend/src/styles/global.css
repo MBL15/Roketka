@@ -144,7 +144,10 @@ button:disabled {
 
 .app--admin {
   min-height: 100dvh;
-  background: var(--surface-base);
+  background:
+    radial-gradient(ellipse 120% 80% at 0% -10%, rgba(46, 204, 113, 0.08), transparent 55%),
+    radial-gradient(ellipse 80% 60% at 100% 0%, rgba(46, 204, 113, 0.05), transparent 50%),
+    var(--surface-base);
 }
 
 .app--admin .app__content {
