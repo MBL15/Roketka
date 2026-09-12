@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
+import { ColorSchemeProvider } from './hooks/useColorScheme';
 import { GameProvider } from './state/GameContext';
 import { applyColorScheme, readColorScheme } from './utils/colorScheme';
 import './styles/tokens.css';
@@ -23,8 +24,10 @@ document.getElementById('boot')?.remove();
 
 createRoot(container).render(
   <StrictMode>
-    <GameProvider>
-      <App />
-    </GameProvider>
+    <ColorSchemeProvider>
+      <GameProvider>
+        <App />
+      </GameProvider>
+    </ColorSchemeProvider>
   </StrictMode>,
 );

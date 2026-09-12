@@ -134,7 +134,7 @@
 }
 
 .round-strip__track--long {
-  animation-duration: 240s;
+  animation-duration: 300s;
 }
 
 .round-strip--marquee:hover .round-strip__track {
@@ -334,6 +334,7 @@
 .balloon-art {
   display: block;
   overflow: visible;
+  transform-origin: center bottom;
 }
 
 /* ---------------------------------------------------------------- история */
@@ -572,86 +573,114 @@
   }
 }
 
-/* ------------------------------------------------------------- фрагменты */
+/* ------------------------------------------------------------- фрагменты пазла */
 
 .puzzle {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 148px;
-  padding: 12px;
-  text-align: left;
+  display: block;
+  width: 100%;
+  min-height: 196px;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  margin: 0;
+  text-align: center;
   color: var(--ink-100);
   border: none;
-  border-radius: var(--radius-md);
-  background: var(--surface-elevated);
-  border: 1px solid var(--surface-border);
+  background: transparent;
   cursor: pointer;
-  overflow: hidden;
-  transition: border-color var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+  isolation: isolate;
+  filter: drop-shadow(0 6px 14px rgba(16, 24, 36, 0.16));
+  transition:
+    transform var(--t-base) var(--ease-out),
+    filter var(--t-base) var(--ease-out);
 }
 
 .puzzle:hover:not(.puzzle--locked) {
-  border-color: var(--glass-border-strong);
-  background: var(--surface-hover);
+  transform: translateY(-4px) scale(1.015);
+  filter: drop-shadow(0 12px 22px rgba(16, 24, 36, 0.22));
 }
 
 .puzzle--selected {
-  background: var(--action-dim);
-  border-color: var(--action);
+  transform: translateY(-3px) scale(1.02);
+  filter: drop-shadow(0 10px 20px color-mix(in srgb, var(--action) 38%, rgba(16, 24, 36, 0.2)));
 }
 
 .puzzle--locked {
   cursor: not-allowed;
   opacity: 0.55;
-  filter: saturate(0.4);
+  filter: drop-shadow(0 3px 8px rgba(16, 24, 36, 0.08)) saturate(0.45);
 }
 
-/* Свечение выведено из потока для всех карточек, а не только для карточек с
-   бустером: иначе у карточки без бустера пустой span остаётся flex-элементом
-   и добавляет лишний gap, из-за чего её цена опускается ниже соседних. */
-.puzzle__glow {
+.puzzle--locked:hover {
+  transform: none;
+  z-index: auto;
+}
+
+.puzzle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.puzzle__graphic {
   position: absolute;
-  inset: auto -30% -40% auto;
-  width: 180px;
-  height: 180px;
-  border-radius: 50%;
+  inset: -12% -12% -12% -12%;
+  width: 124%;
+  height: 124%;
   pointer-events: none;
+  overflow: visible;
 }
 
-.puzzle--boosted .puzzle__glow {
-  background: radial-gradient(circle, rgba(185, 140, 255, 0.35), transparent 70%);
+.puzzle__shape {
+  paint-order: stroke fill;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.35));
 }
 
-/* Плашка множителя стоит под номером фрагмента, а не рядом с ним: строки
-   «×1 · без усиления» и «бустер ×2» сильно разной длины, и в одну строку с
-   номером первая переносилась только на одной карточке — цены переставали
-   совпадать по высоте. Отдельная строка выравнивает все четыре карточки и
-   заодно снимает обрезку плашки на узких экранах. */
+.puzzle__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  min-height: 196px;
+  box-sizing: border-box;
+  overflow: hidden;
+  max-width: 100%;
+  text-align: center;
+}
+
 .puzzle__head {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .puzzle__index {
   font-size: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.1em;
   color: var(--ink-400);
 }
 
 .puzzle__cost {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .puzzle__cost-value {
   font-size: 26px;
   font-weight: 800;
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .puzzle__cost-unit {
@@ -662,37 +691,370 @@
 .puzzle__note {
   color: var(--ink-300);
   flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  word-break: break-word;
+  text-align: center;
 }
 
 .puzzle--flex {
-  text-align: left;
+  text-align: center;
 }
 
 .puzzle--custom {
-  cursor: default;
+  cursor: text;
 }
 
 .puzzle--custom:focus-within {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline: none;
+  filter: drop-shadow(0 8px 22px color-mix(in srgb, var(--accent) 30%, rgba(8, 14, 24, 0.16)));
+}
+
+.puzzle--custom:focus-within .puzzle__shell {
+  box-shadow:
+    inset 0 0 0 1.5px color-mix(in srgb, var(--accent) 65%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -8px 16px color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 .puzzle__custom-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .puzzle__custom-input {
-  min-height: 40px;
-  padding: 0 12px;
-  font-size: 22px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  font-size: 20px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  text-align: center;
+  background: color-mix(in srgb, var(--input-bg) 88%, transparent);
 }
 
 .puzzle__foot {
   margin-top: auto;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Светлая схема: мягкие пастельные фрагменты + тёмный текст */
+[data-color-scheme='light'] .puzzle {
+  color: #18212f;
+  filter: drop-shadow(0 4px 14px rgba(16, 24, 36, 0.08));
+}
+
+[data-color-scheme='light'] .puzzle:hover:not(.puzzle--locked) {
+  filter: drop-shadow(0 8px 20px rgba(16, 24, 36, 0.12));
+}
+
+[data-color-scheme='light'] .puzzle--selected {
+  filter: drop-shadow(0 6px 18px color-mix(in srgb, var(--action) 28%, rgba(16, 24, 36, 0.1)));
+}
+
+[data-color-scheme='light'] .puzzle--locked {
+  opacity: 0.68;
+  filter: drop-shadow(0 2px 8px rgba(16, 24, 36, 0.06)) saturate(0.55);
+}
+
+[data-color-scheme='light'] .puzzle__shape {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.65));
+}
+
+[data-color-scheme='light'] .puzzle__index {
+  color: #475569;
+  text-shadow: none;
+}
+
+[data-color-scheme='light'] .puzzle__cost-value {
+  color: #18212f;
+  text-shadow: none;
+}
+
+[data-color-scheme='light'] .puzzle__cost-unit,
+[data-color-scheme='light'] .puzzle__note {
+  color: #5a6778;
+}
+
+[data-color-scheme='light'] .puzzle .chip:not(.chip--accent):not(.chip--boost):not(.chip--negative):not(.chip--positive) {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(24, 33, 47, 0.1);
+  color: #18212f;
+}
+
+[data-color-scheme='light'] .puzzle .chip--boost {
+  background: rgba(110, 70, 190, 0.14);
+  border-color: rgba(110, 70, 190, 0.26);
+  color: #4a2a82;
+}
+
+[data-color-scheme='light'] .puzzle .chip--negative {
+  background: rgba(200, 60, 60, 0.1);
+  border-color: rgba(200, 60, 60, 0.22);
+  color: #9b2020;
+}
+
+[data-color-scheme='light'] .puzzle .chip--accent {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+[data-color-scheme='light'] .puzzle__custom-input {
+  background: #ffffff;
+  border-color: rgba(24, 33, 47, 0.16);
+  color: #18212f;
+  box-shadow: inset 0 1px 2px rgba(24, 33, 47, 0.06);
+}
+
+[data-color-scheme='light'] .puzzle--flex .puzzle__index {
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(24, 33, 47, 0.08);
+  color: #334155;
+  font-weight: 700;
+  line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: none;
+}
+
+[data-color-scheme='light'] .puzzle[data-puzzle-tone='pastel'] {
+  filter: drop-shadow(0 4px 14px rgba(16, 24, 36, 0.09)) saturate(1.04);
+}
+
+[data-color-scheme='light'] .puzzle--flex[data-puzzle-tone='pale'] {
+  filter: drop-shadow(0 3px 12px rgba(16, 24, 36, 0.07)) saturate(0.72);
+}
+
+/* Тёмная тема */
+[data-color-scheme='dark'] .puzzle {
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.48));
+  color: var(--ink-100);
+}
+
+[data-color-scheme='dark'] .puzzle:hover:not(.puzzle--locked) {
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.58));
+}
+
+[data-color-scheme='dark'] .puzzle--selected {
+  filter: drop-shadow(0 12px 26px color-mix(in srgb, var(--action) 45%, rgba(0, 0, 0, 0.55)));
+}
+
+[data-color-scheme='dark'] .puzzle--locked {
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.35)) saturate(0.4);
+}
+
+[data-color-scheme='dark'] .puzzle__shape {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.1));
+}
+
+[data-color-scheme='dark'] .puzzle .puzzle__cost-value {
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
+[data-color-scheme='dark'] .puzzle .puzzle__cost-unit,
+[data-color-scheme='dark'] .puzzle .puzzle__note {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+[data-color-scheme='dark'] .puzzle .chip:not(.chip--accent):not(.chip--boost):not(.chip--negative):not(.chip--positive) {
+  background: rgba(0, 0, 0, 0.32);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--ink-100);
+}
+
+[data-color-scheme='dark'] .puzzle .chip--boost {
+  background: rgba(0, 0, 0, 0.28);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+[data-color-scheme='dark'] .puzzle .chip--negative {
+  background: rgba(0, 0, 0, 0.24);
+  border-color: rgba(232, 192, 112, 0.35);
+  color: #e8c070;
+}
+
+[data-color-scheme='dark'] .puzzle .chip--accent {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+[data-color-scheme='dark'] .puzzle[data-puzzle-tone='soft'] {
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.52)) saturate(0.92);
+}
+
+[data-color-scheme='dark'] .puzzle[data-puzzle-tone='deep'] {
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.56)) saturate(0.88);
+}
+
+/* «Своя сумма» / «Весь баланс» */
+[data-color-scheme='dark'] .puzzle--flex .puzzle__index {
+  padding: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.94);
+  font-weight: 700;
+  line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+[data-color-scheme='dark'] .puzzle--flex .puzzle__custom-input {
+  background: rgba(0, 0, 0, 0.38);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: var(--ink-100);
+}
+
+[data-color-scheme='dark'] .puzzle--custom:focus-within {
+  filter: drop-shadow(0 10px 26px color-mix(in srgb, var(--accent) 35%, rgba(0, 0, 0, 0.5)));
+}
+
+@media (max-width: 768px) {
+  .bet-cards--puzzle .puzzle {
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+  }
+
+  .bet-cards--puzzle .puzzle__content {
+    min-height: 0;
+    /* %-padding считается от ширины — на узкой сетке уменьшаем отступы */
+    padding: 16% !important;
+    justify-content: center;
+    gap: 3px;
+  }
+
+  .bet-cards--puzzle .puzzle__cost-value {
+    font-size: 20px;
+  }
+
+  .bet-cards--puzzle .puzzle__custom-input {
+    min-height: 36px;
+    font-size: 17px;
+  }
+
+  .bet-cards--puzzle .puzzle__note {
+    display: none;
+  }
+
+  .bet-cards--puzzle .puzzle__foot {
+    margin-top: 4px;
+  }
+
+  .bet-cards--puzzle .puzzle--shape-1 .puzzle__content {
+    transform: none !important;
+  }
+
+  /* Нижний ряд: tab↑ — больше отступ сверху; tab← / slot→ — асимметрия по X */
+  .bet-cards--puzzle .puzzle--shape-3 .puzzle__content {
+    padding: 24% 20% 13% 16% !important;
+  }
+
+  /* «Своя сумма»: tab↑ tab← slot→ — симметричные отступы, без сдвига */
+  .bet-cards--puzzle .puzzle--custom .puzzle__content {
+    padding: 26% 28% 14% 28% !important;
+    transform: none !important;
+  }
+
+  .bet-cards--puzzle .puzzle--custom .puzzle__head,
+  .bet-cards--puzzle .puzzle--custom .puzzle__custom-field,
+  .bet-cards--puzzle .puzzle--custom .puzzle__foot {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .bet-cards--puzzle .puzzle--custom .puzzle__tier {
+    display: none;
+  }
+
+  .bet-cards--puzzle .puzzle--shape-5 .puzzle__content {
+    padding: 24% 14% 12% 20% !important;
+    transform: translateX(4px) !important;
+  }
+
+  /* «Своя сумма» / «Весь баланс» — компактнее, без лишних подписей */
+  .bet-cards--puzzle .puzzle--flex .puzzle__head {
+    gap: 2px;
+  }
+
+  .bet-cards--puzzle .puzzle--flex .puzzle__index {
+    font-size: 9px;
+    letter-spacing: 0.07em;
+  }
+
+  .bet-cards--puzzle .puzzle--custom .puzzle__custom-field .puzzle__cost-unit {
+    display: none;
+  }
+
+  .bet-cards--puzzle .puzzle--flex .puzzle__custom-input {
+    min-height: 32px;
+    font-size: 16px;
+  }
+
+  .bet-cards--puzzle .puzzle--flex .puzzle__cost-value {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .bet-cards--puzzle .puzzle:not(.puzzle--shape-3):not(.puzzle--shape-4):not(.puzzle--shape-5) .puzzle__content {
+    padding: 14% !important;
+  }
+
+  .bet-cards--puzzle .puzzle--shape-3 .puzzle__content {
+    padding: 22% 18% 12% 14% !important;
+  }
+
+  .bet-cards--puzzle .puzzle--custom .puzzle__content {
+    padding: 24% 26% 12% 26% !important;
+    transform: none !important;
+  }
+
+  .bet-cards--puzzle .puzzle--shape-5 .puzzle__content {
+    padding: 22% 12% 11% 18% !important;
+  }
+
+  .bet-cards--puzzle .puzzle__cost-value {
+    font-size: 22px;
+  }
+
+  .bet-cards--puzzle .chip {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .puzzle:hover:not(.puzzle--locked) {
+    transform: none;
+    filter: drop-shadow(0 6px 14px rgba(16, 24, 36, 0.16));
+  }
+
+  [data-color-scheme='dark'] .puzzle:hover:not(.puzzle--locked) {
+    filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.48));
+  }
 }
 
 /* ---------------------------------------------------------------- лестница */
@@ -865,11 +1227,6 @@
   color: var(--ink-200);
 }
 
-.rating-panel__pinned {
-  padding-top: 4px;
-  border-top: 1px solid var(--surface-border);
-}
-
 /* -------------------------------------------------------------- коллекция */
 
 .collection {
@@ -1038,6 +1395,20 @@
   gap: 4px;
   padding-left: 18px;
   list-style: disc;
+}
+
+.rules__list--stages {
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .rules__text {
+    padding-left: 0;
+  }
+
+  .rules__list {
+    padding-left: 16px;
+  }
 }
 
 /* ------------------------------------------------------------------ турнир */

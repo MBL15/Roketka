@@ -68,7 +68,7 @@ public class RoundController {
     @Operation(summary = "Забрать выигрыш",
             description = """
                     Коэффициент берётся из серверного времени на момент обработки запроса, а не из
-                    тела запроса. Доступно после прохождения первого уровня и до краха. Шар после
+                    тела запроса. Доступно с ×1 и до краха. Шар после
                     фиксации продолжает лететь, но сумма выигрыша больше не меняется.
                     """)
     public GameDtos.CashoutResponse cashout(AuthContext context, @PathVariable long roundId) {

@@ -104,6 +104,7 @@ button:disabled {
 }
 
 .app--sky {
+  background: transparent;
   --sky-surface: color-mix(in srgb, var(--surface-panel) 66%, transparent);
   --sky-glass: color-mix(in srgb, var(--glass-bg) 63%, transparent);
   --sky-elevated: color-mix(in srgb, var(--surface-elevated) 60%, transparent);
@@ -114,7 +115,6 @@ button:disabled {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  opacity: 0.42;
 }
 
 .app__sky {
@@ -140,6 +140,12 @@ button:disabled {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .app__content {
+    padding: 6px 8px 8px;
+  }
 }
 
 /* Админка — см. admin.css */

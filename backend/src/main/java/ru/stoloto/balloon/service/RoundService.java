@@ -151,7 +151,7 @@ public class RoundService {
                 normalizedChances(theme.lootProbabilities()),
                 theme.levelCount(), theme.levelMultipliers(),
                 math.multiplierGrowthRate(), math.delta(), math.maxMultiplier(),
-                theme.levelThreshold(1),
+                CrashMath.cashoutUnlockMultiplier(math.delta()),
                 round.getStartedAt().toEpochMilli(), System.currentTimeMillis(),
                 seedHash, usedClientSeed, nonce,
                 user.getBonusBalance(), showOnboarding,

@@ -33,7 +33,7 @@ import java.util.List;
  *
  * <h2>Рост коэффициента</h2>
  * <pre>
- *   m(t) = exp(growthRate * t),  t — секунды с начала полёта
+ *   m(t) = exp(growthRate * t) - 1,  t — секунды с начала полёта, m(0) = 0
  * </pre>
  * Формула аналитически обратима, поэтому сервер знает точное время краха ещё
  * до старта, а клиент рисует те же 60 FPS локально, не опрашивая сервер на
@@ -70,26 +70,31 @@ public final class CrashMath {
         return quantizeDown(crash, delta);
     }
 
-    /** Базовый коэффициент через {@code seconds} секунд полёта. */
+    /** Базовый коэффициент через {@code seconds} секунд полёта. Старт с нуля. */
     public static double multiplierAt(double seconds, double growthRate) {
         if (seconds <= 0) {
-            return 1.0;
+            return 0.0;
         }
-        return Math.exp(growthRate * seconds);
+        return Math.exp(growthRate * seconds) - 1.0;
     }
 
     /** Момент, в который базовый коэффициент достигает {@code multiplier}. */
     public static double secondsToReach(double multiplier, double growthRate) {
-        if (multiplier <= 1.0) {
+        if (multiplier <= 0.0) {
             return 0.0;
         }
-        return Math.log(multiplier) / growthRate;
+        return Math.log(multiplier + 1.0) / growthRate;
+    }
+
+    /** Минимальный коэффициент, на котором доступна фиксация выигрыша (×1). */
+    public static double cashoutUnlockMultiplier(double delta) {
+        return quantizeDown(1.0, delta);
     }
 
     /** Теоретическая вероятность дожить до коэффициента {@code m}. */
     public static double survivalProbability(double m, double alpha, double houseEdge) {
         if (m <= 1.0) {
-            return 1.0 - houseEdge;
+            return 1.0;
         }
         return (1.0 - houseEdge) * Math.pow(m, -alpha);
     }

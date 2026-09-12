@@ -23,7 +23,7 @@ interface RulesModalProps {
 }
 
 export function RulesModal({ open, onClose, setup, theme, intro, footer, closeOnBackdrop }: RulesModalProps): JSX.Element {
-  const unlock = theme.levelMultipliers[0] ?? 1.2;
+  const unlock = 1;
   const boostValues = theme.betOptions.filter((option) => option.boostTier > 1).map((option) => option.boostValue);
 
   return (
@@ -57,20 +57,30 @@ export function RulesModal({ open, onClose, setup, theme, intro, footer, closeOn
 
         <Section index={2} title="Полёт и коэффициент">
           <p>
-            После подтверждения шар начинает подниматься, а коэффициент выигрыша растёт со временем полёта по
-            формуле <code>коэффициент = e^({theme.growthRate.toFixed(2)} · секунды)</code>. Потолок
-            коэффициента — {formatMultiplier(theme.maxMultiplier)}.
+            После подтверждения шар начинает подниматься с коэффициента ×0, а выигрыш растёт со временем полёта по
+            формуле <code>коэффициент = e^({theme.growthRate.toFixed(2)} · секунды) − 1</code>. Шар может
+            лопнуть уже на ×1. Потолок коэффициента — {formatMultiplier(theme.maxMultiplier)}.
           </p>
           <p>
             В случайный момент, определённый сервером <strong>до начала полёта</strong>, шар лопается. Повлиять
             на этот момент нельзя ни вам, ни нам: до конца раунда вы видите только хеш серверного зерна, а
             после краха зерно раскрывается и результат можно пересчитать.
           </p>
+          <p>
+            При прохождении уровня начисляются игровые очки и проигрывается звуковой эффект. Стиль отображения
+            коэффициента меняется по мере роста:
+          </p>
+          <ul className="rules__list rules__list--stages">
+            <li>от 0 до 1 уровня — чёрный цвет;</li>
+            <li>от 1 до 2 уровня — жёлтый;</li>
+            <li>от 2 до 3 уровня — жёлтый с подсветкой;</li>
+            <li>от 3 уровня и выше — жёлтый с подсветкой и увеличенным шрифтом.</li>
+          </ul>
         </Section>
 
         <Section index={3} title="Забрать выигрыш">
           <p>
-            Кнопка «Забрать» становится активной после прохождения первого уровня — с коэффициента{' '}
+            Кнопка «Забрать» становится активной на коэффициенте{' '}
             <strong className="num">{formatMultiplier(unlock)}</strong>. Выигрыш считается как{' '}
             <strong>ставка × текущий коэффициент</strong> и зачисляется сразу.
           </p>

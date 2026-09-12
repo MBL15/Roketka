@@ -1,6 +1,7 @@
 import { useEffect, useRef, type MutableRefObject } from 'react';
 import { baseMultiplierAt, type Flight } from '../state/flight';
 import type { FlightState } from '../state/useFlight';
+import { readCloudPaint, readSkyColors, type CloudPaint } from '../utils/skyColors';
 
 /**
  * Анимация полёта на Canvas 2D.
@@ -10,8 +11,8 @@ import type { FlightState } from '../state/useFlight';
  * анимации не зависят ни от частоты серверных тиков, ни от того, как часто
  * перерисовывается остальной интерфейс.
  *
- * Высота считается как ln(коэффициент): коэффициент растёт экспоненциально,
- * логарифм делает подъём равномерным по времени. Небо и облака прокручиваются
+ * Высота считается как ln(коэффициент + 1): коэффициент стартует с нуля и
+ * растёт экспоненциально, логарифм делает подъём равномерным по времени. Небо и облака прокручиваются
  * от этой же величины, поэтому скорость подъёма читается визуально, а шар
  * остаётся в центре кадра и не улетает за его пределы.
  *
@@ -123,7 +124,7 @@ export function FlightCanvas({ flight, stateRef, theme, lightScheme = false }: F
       const base = state.crashed
         ? (state.crashMultiplier ?? state.baseMultiplier)
         : baseMultiplierAt(flight, Date.now());
-      const altitude = Math.log(Math.max(1, base));
+      const altitude = Math.log(base + 1);
       const scroll = altitude * PIXELS_PER_LN;
 
       if (state.boostFlash !== lastBoostFlash) {
@@ -136,7 +137,7 @@ export function FlightCanvas({ flight, stateRef, theme, lightScheme = false }: F
       }
 
       drawSky(context, width, height, palette, altitude, brightSky);
-      drawClouds(context, clouds, width, height, scroll, time);
+      drawClouds(context, clouds, width, height, scroll, time, lightScheme);
       drawProceduralBirds(context, width, height, scroll, time, birdSeed, brightSky, lightScheme);
       drawLevelMarkers(context, flight, state, width, height, scroll, theme, lightScheme);
 
@@ -217,8 +218,10 @@ function drawClouds(
   height: number,
   scroll: number,
   time: number,
+  lightScheme: boolean,
 ): void {
   const span = height * 1.6;
+  const paint = lightScheme ? readCloudPaint(readSkyColors()) : undefined;
   context.save();
   clouds.forEach((cloud) => {
     // Облака «уходят вниз» по мере подъёма и зацикливаются по высоте.
@@ -226,19 +229,72 @@ function drawClouds(
     const y = height - (((raw % span) + span) % span);
     const x = (((cloud.x + cloud.drift * time * 0.001) % 1) + 1) % 1;
     context.globalAlpha = cloud.alpha;
-    context.fillStyle = '#ffffff';
-    puff(context, x * width, y, 46 * cloud.scale);
+    puff(context, x * width, y, 46 * cloud.scale, paint);
   });
   context.restore();
 }
 
-function puff(context: CanvasRenderingContext2D, x: number, y: number, radius: number): void {
+function puff(
+  context: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  radius: number,
+  paint?: CloudPaint,
+): void {
+  const puffs: [number, number, number, number][] = [
+    [0, 0.04, 1.18, 0.92],
+    [-0.82, 0.14, 0.9, 0.74],
+    [0.86, 0.12, 0.94, 0.76],
+    [-0.42, -0.22, 0.72, 0.58],
+    [0.46, -0.24, 0.76, 0.6],
+    [0.08, -0.38, 0.64, 0.52],
+    [-0.68, -0.08, 0.58, 0.48],
+    [0.62, -0.06, 0.56, 0.46],
+  ];
+
+  context.save();
+
+  const ambient = context.createRadialGradient(x, y + radius * 0.34, radius * 0.08, x, y + radius * 0.38, radius * 2.6);
+  ambient.addColorStop(0, paint?.shadow ?? 'rgba(150, 168, 198, 0.28)');
+  ambient.addColorStop(1, paint?.edge ?? 'rgba(150, 168, 198, 0)');
+  context.fillStyle = ambient;
   context.beginPath();
-  context.arc(x, y, radius * 0.6, 0, Math.PI * 2);
-  context.arc(x + radius * 0.55, y + radius * 0.12, radius * 0.45, 0, Math.PI * 2);
-  context.arc(x - radius * 0.55, y + radius * 0.16, radius * 0.4, 0, Math.PI * 2);
-  context.arc(x + radius * 0.12, y - radius * 0.28, radius * 0.42, 0, Math.PI * 2);
+  context.ellipse(x, y + radius * 0.3, radius * 1.95, radius * 0.58, 0, 0, Math.PI * 2);
   context.fill();
+
+  puffs.forEach(([dx, dy, rxk, ryk]) => {
+    const px = x + dx * radius;
+    const py = y + dy * radius;
+    const rx = radius * rxk * 0.72;
+    const ry = radius * ryk * 0.72;
+
+    const shadowGrad = context.createRadialGradient(px, py + ry * 0.42, rx * 0.04, px, py, Math.max(rx, ry) * 1.25);
+    shadowGrad.addColorStop(0, paint?.shadow ?? 'rgba(150, 168, 198, 0.34)');
+    shadowGrad.addColorStop(1, paint?.edge ?? 'rgba(150, 168, 198, 0)');
+    context.fillStyle = shadowGrad;
+    context.beginPath();
+    context.ellipse(px + rx * 0.08, py + ry * 0.18, rx * 1.08, ry * 0.96, 0, 0, Math.PI * 2);
+    context.fill();
+
+    const bodyGrad = context.createRadialGradient(
+      px + rx * 0.34,
+      py - ry * 0.28,
+      Math.min(rx, ry) * 0.04,
+      px,
+      py,
+      Math.max(rx, ry) * 1.2,
+    );
+    bodyGrad.addColorStop(0, paint?.highlight ?? 'rgba(255, 255, 255, 0.98)');
+    bodyGrad.addColorStop(0.35, paint?.body ?? 'rgba(244, 248, 255, 0.92)');
+    bodyGrad.addColorStop(0.75, paint?.body ?? 'rgba(230, 238, 250, 0.84)');
+    bodyGrad.addColorStop(1, paint?.edge ?? 'rgba(255, 255, 255, 0)');
+    context.fillStyle = bodyGrad;
+    context.beginPath();
+    context.ellipse(px, py, rx, ry, 0, 0, Math.PI * 2);
+    context.fill();
+  });
+
+  context.restore();
 }
 
 // --------------------------------------------------------------------- птицы
@@ -414,7 +470,7 @@ function drawLevelMarkers(
 
   flight.levelMultipliers.forEach((threshold, index) => {
     const level = index + 1;
-    const y = balloonY + scroll - Math.log(threshold) * PIXELS_PER_LN;
+    const y = balloonY + scroll - Math.log(threshold + 1) * PIXELS_PER_LN;
     if (y < -40 || y > height + 40) {
       return;
     }
@@ -441,6 +497,9 @@ function drawLevelMarkers(
 
 // --------------------------------------------------------------------- шар
 
+const BALLOON_ENVELOPE_PATH =
+  'M50 3 C76 3 93 24 93 47 C93 68 84 84 70 93 C62 98 55 100 50 100 C45 100 38 98 30 93 C16 84 7 68 7 47 C7 24 24 3 50 3 Z';
+
 function drawBalloon(
   context: CanvasRenderingContext2D,
   width: number,
@@ -452,6 +511,9 @@ function drawBalloon(
   const centerX = width / 2 + Math.sin(time * 0.0007) * width * 0.045;
   const centerY = height * 0.44 + Math.sin(time * 0.0013) * 8;
   const radius = Math.min(width, height) * 0.11;
+  const scale = radius / 43;
+  const originX = centerX - 50 * scale;
+  const originY = centerY - 48 * scale;
 
   context.save();
 
@@ -461,51 +523,103 @@ function drawBalloon(
   } else if (state.cashedOut) {
     context.shadowColor = 'rgba(53, 224, 143, 0.7)';
     context.shadowBlur = 26;
+  } else {
+    context.shadowColor = 'rgba(0, 0, 0, 0.28)';
+    context.shadowBlur = 14;
+    context.shadowOffsetY = 5;
   }
 
-  const gradient = context.createRadialGradient(
-    centerX - radius * 0.35,
-    centerY - radius * 0.45,
-    radius * 0.15,
-    centerX,
-    centerY,
-    radius * 1.25,
-  );
-  gradient.addColorStop(0, palette.balloonA);
-  gradient.addColorStop(1, palette.balloonB);
+  context.translate(originX, originY);
+  context.scale(scale, scale);
 
-  context.beginPath();
-  context.ellipse(centerX, centerY, radius, radius * 1.15, 0, 0, Math.PI * 2);
+  const gradient = context.createRadialGradient(32, 24, 4, 50, 50, 86);
+  gradient.addColorStop(0, palette.balloonA);
+  gradient.addColorStop(0.48, palette.balloonB);
+  gradient.addColorStop(0.88, palette.balloonB);
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0.38)');
+
+  const envelope = new Path2D(BALLOON_ENVELOPE_PATH);
   context.fillStyle = gradient;
-  context.fill();
+  context.fill(envelope);
 
   context.shadowBlur = 0;
-  context.globalAlpha = 0.22;
-  context.strokeStyle = '#ffffff';
-  context.lineWidth = 1.2;
-  [-0.55, 0, 0.55].forEach((offset) => {
+  context.shadowOffsetY = 0;
+
+  const shine = context.createRadialGradient(28, 22, 2, 30, 24, 38);
+  shine.addColorStop(0, 'rgba(255, 255, 255, 0.55)');
+  shine.addColorStop(0.55, 'rgba(255, 255, 255, 0.12)');
+  shine.addColorStop(1, 'rgba(255, 255, 255, 0)');
+  context.fillStyle = shine;
+  context.fill(envelope);
+
+  context.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+  context.lineWidth = 1.15 / scale;
+  context.lineCap = 'round';
+  const gores = [
+    'M50 4 C38 28 38 72 50 98',
+    'M50 4 C62 28 62 72 50 98',
+    'M50 4 C28 32 16 52 12 58',
+    'M50 4 C72 32 84 52 88 58',
+    'M14 48 C36 58 64 58 86 48',
+  ];
+  gores.forEach((d) => {
     context.beginPath();
-    context.ellipse(centerX, centerY, Math.abs(radius * offset) || 2, radius * 1.15, 0, 0, Math.PI * 2);
-    context.stroke();
+    context.stroke(new Path2D(d));
   });
+
+  context.fillStyle = palette.balloonB;
+  context.globalAlpha = 0.85;
+  context.beginPath();
+  context.moveTo(46, 100);
+  context.quadraticCurveTo(50, 106, 54, 100);
+  context.quadraticCurveTo(50, 103, 46, 100);
+  context.fill();
   context.globalAlpha = 1;
 
-  const basketY = centerY + radius * 1.15;
-  context.strokeStyle = 'rgba(255,255,255,0.55)';
-  context.lineWidth = 1.4;
-  [-0.45, 0.45].forEach((offset) => {
+  context.strokeStyle = 'rgba(35, 22, 12, 0.55)';
+  context.lineWidth = 1.05 / scale;
+  const ropes = [
+    'M43 98 Q44 104 41 110',
+    'M47 99 Q48 105 44 109',
+    'M53 99 Q52 105 56 109',
+    'M57 98 Q56 104 59 110',
+  ];
+  ropes.forEach((d) => {
     context.beginPath();
-    context.moveTo(centerX + radius * offset, basketY - radius * 0.12);
-    context.lineTo(centerX + radius * offset * 0.4, basketY + radius * 0.4);
-    context.stroke();
+    context.stroke(new Path2D(d));
   });
 
-  context.fillStyle = '#7a5230';
+  const basketGrad = context.createLinearGradient(36, 108, 36, 124);
+  basketGrad.addColorStop(0, '#d4a068');
+  basketGrad.addColorStop(0.45, '#a87240');
+  basketGrad.addColorStop(1, '#5c3a1e');
+  context.fillStyle = basketGrad;
   context.beginPath();
-  context.roundRect(centerX - radius * 0.26, basketY + radius * 0.38, radius * 0.52, radius * 0.34, 4);
+  context.moveTo(36, 108);
+  context.lineTo(64, 108);
+  context.lineTo(60, 124);
+  context.lineTo(40, 124);
+  context.closePath();
   context.fill();
 
+  context.fillStyle = '#6a4424';
+  context.fillRect(36, 108, 28, 2.5);
+  context.strokeStyle = 'rgba(0, 0, 0, 0.14)';
+  context.lineWidth = 0.8 / scale;
+  for (let i = 0; i < 4; i += 1) {
+    const y = 112 + i * 3.5;
+    context.beginPath();
+    context.moveTo(38, y);
+    context.lineTo(62, y);
+    context.stroke();
+  }
+
   context.restore();
+
+  context.fillStyle = 'rgba(0, 0, 0, 0.12)';
+  context.beginPath();
+  context.ellipse(centerX, centerY + radius * 1.05, radius * 0.34, radius * 0.07, 0, 0, Math.PI * 2);
+  context.fill();
 }
 
 // ------------------------------------------------------------------ эффекты

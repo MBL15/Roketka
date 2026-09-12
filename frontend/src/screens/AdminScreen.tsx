@@ -883,6 +883,15 @@ function SessionEditor({
 
 // ------------------------------------------------------------ симулятор RTP
 
+const SIMULATION_ROUND_PRESETS = [
+  { value: 1_000, label: '1 000 — быстрая проверка' },
+  { value: 10_000, label: '10 000' },
+  { value: 50_000, label: '50 000 — рекомендуется' },
+  { value: 100_000, label: '100 000' },
+  { value: 200_000, label: '200 000' },
+  { value: 500_000, label: '500 000 — максимум' },
+] as const;
+
 function Simulator({ draft, dirty }: { draft: AdminConfig; dirty: boolean }): JSX.Element {
   const [theme, setTheme] = useState('green');
   const [strategy, setStrategy] = useState('LEVEL');
@@ -945,7 +954,20 @@ function Simulator({ draft, dirty }: { draft: AdminConfig; dirty: boolean }): JS
           <Num label="Коэффициент выхода" value={targetMultiplier} step={0.5} onChange={setTargetMultiplier} />
         )}
 
-        <Num label="Раундов на вариант" value={rounds} step={10_000} onChange={setRounds} />
+        <label className="field">
+          <span className="field__label">Раундов на вариант</span>
+          <select className="input" value={rounds} onChange={(event) => setRounds(Number(event.target.value))}>
+            {SIMULATION_ROUND_PRESETS.map((preset) => (
+              <option key={preset.value} value={preset.value}>
+                {preset.label}
+              </option>
+            ))}
+          </select>
+          <span className="field__hint text-xs muted">
+            Симуляция прогоняется отдельно по каждому из 4 вариантов ставки. Доступно от 1 000 до 500 000
+            раундов.
+          </span>
+        </label>
         <Num
           label="Seed для воспроизводимости"
           code="seed"

@@ -4,8 +4,8 @@
 
 .crash-header {
   display: flex;
-  align-items: center;
-  gap: 14px;
+  flex-direction: column;
+  gap: 0;
   min-height: 52px;
   padding: 0 16px;
   margin-bottom: 6px;
@@ -13,6 +13,28 @@
   backdrop-filter: blur(10px);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-md);
+}
+
+.crash-header__row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.crash-header__row--top {
+  min-height: 52px;
+}
+
+.crash-header__row--bottom {
+  display: none;
+}
+
+.crash-header__titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
 }
 
 .crash-header__brand {
@@ -46,11 +68,11 @@
 }
 
 .crash-header__balance {
-  margin-left: auto;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 1px;
+  margin-left: auto;
 }
 
 .crash-header__balance-label {
@@ -98,6 +120,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .crash-header__status {
@@ -116,6 +140,177 @@
   height: 6px;
   border-radius: 50%;
   background: currentColor;
+}
+
+@media (min-width: 1101px) {
+  .crash-header {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .crash-header__row--top {
+    display: contents;
+  }
+
+  .crash-header__row--bottom {
+    display: contents;
+  }
+
+  .crash-header__brand {
+    order: 1;
+  }
+
+  .crash-header__balance {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .crash-header__stats {
+    order: 3;
+  }
+
+  .crash-header__actions {
+    order: 4;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 1100px) {
+  .crash-header {
+    padding: 8px 12px;
+    gap: 0;
+  }
+
+  .crash-header__row--top {
+    gap: 8px;
+    min-height: 44px;
+  }
+
+  .crash-header__row--bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-top: 8px;
+    border-top: 1px solid var(--surface-border);
+  }
+
+  .crash-header__brand {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .crash-header__name {
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .crash-header__tag {
+    font-size: 10px;
+  }
+
+  .crash-header__balance {
+    margin-left: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1 1 auto;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .crash-header__balance-value {
+    font-size: 18px;
+  }
+
+  .crash-header__stats {
+    display: none;
+  }
+
+  .crash-header__actions {
+    gap: 4px;
+  }
+
+  .crash-header__actions .btn--icon {
+    width: 36px;
+    min-height: 36px;
+  }
+
+  .crash-header__actions .btn--sm {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
+  .crash-header__status {
+    padding: 4px 7px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .crash-header {
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .crash-header__logo {
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+  }
+
+  .crash-header__brand {
+    gap: 8px;
+  }
+
+  .crash-header__name {
+    font-size: 13px;
+  }
+
+  .crash-header__tag {
+    display: none;
+  }
+
+  .crash-header__balance {
+    padding-top: 6px;
+  }
+
+  .crash-header__balance-value {
+    font-size: 17px;
+  }
+
+  .crash-header__status {
+    padding: 0;
+    width: 28px;
+    min-width: 28px;
+    height: 28px;
+    justify-content: center;
+    gap: 0;
+  }
+
+  .crash-header__status-text {
+    display: none;
+  }
+
+  .crash-header__logout {
+    width: 36px;
+    min-width: 36px;
+    padding: 0;
+  }
+
+  .crash-header__logout-text {
+    display: none;
+  }
+
+  .crash-header__logout::after {
+    content: '⎋';
+    font-size: 15px;
+    line-height: 1;
+  }
 }
 
 /* --- админ-шапка (на базе crash-header) ------------------------------ */
@@ -531,6 +726,64 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.bet-cards--puzzle {
+  --puzzle-overlap-x-mid: 9%;
+  --puzzle-overlap-x-right: 16.5%;
+  --puzzle-overlap-y: 14.5%;
+  gap: 0;
+  padding: 14px 12px 18px;
+  align-items: stretch;
+}
+
+/* Средняя колонка (tab←): меньше налезания на левого соседа */
+.bet-cards--puzzle .puzzle--shape-1,
+.bet-cards--puzzle .puzzle--shape-4 {
+  margin-left: calc(-1 * var(--puzzle-overlap-x-mid));
+}
+
+/* Правая колонка: чуть сильнее стык с серединой — равные промежутки 50|120|250 */
+.bet-cards--puzzle .puzzle--shape-2,
+.bet-cards--puzzle .puzzle--shape-5 {
+  margin-left: calc(-1 * var(--puzzle-overlap-x-right));
+}
+
+.bet-cards--puzzle .puzzle--shape-3,
+.bet-cards--puzzle .puzzle--shape-4,
+.bet-cards--puzzle .puzzle--shape-5 {
+  margin-top: calc(-1 * var(--puzzle-overlap-y));
+}
+
+/* Планшет / мобильный: две колонки, без налезания — читаемость важнее стыковки */
+@media (max-width: 768px) {
+  .bet-cards.bet-cards--six.bet-cards--puzzle {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 10px 8px 14px;
+  }
+
+  .bet-cards--puzzle .puzzle--shape-1,
+  .bet-cards--puzzle .puzzle--shape-2,
+  .bet-cards--puzzle .puzzle--shape-4,
+  .bet-cards--puzzle .puzzle--shape-5 {
+    margin-left: 0;
+  }
+
+  .bet-cards--puzzle .puzzle--shape-3,
+  .bet-cards--puzzle .puzzle--shape-4,
+  .bet-cards--puzzle .puzzle--shape-5 {
+    margin-top: 0;
+  }
+}
+
+/* Узкий экран: один столбец на всю ширину */
+@media (max-width: 420px) {
+  .bet-cards.bet-cards--six.bet-cards--puzzle {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 8px 6px 12px;
+  }
+}
+
 /* --- вход / тема ----------------------------------------------------- */
 
 .auth-screen {
@@ -571,8 +824,10 @@
 .theme-pick__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 20px;
   flex: 1;
+  width: 100%;
+  max-width: 920px;
 }
 
 @media (max-width: 1100px) {
@@ -588,7 +843,7 @@
     display: none;
   }
 
-  .bet-cards {
+  .bet-cards:not(.bet-cards--puzzle) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -618,7 +873,7 @@
 }
 
 @media (max-width: 520px) {
-  .bet-cards {
+  .bet-cards:not(.bet-cards--puzzle) {
     grid-template-columns: minmax(0, 1fr);
   }
 

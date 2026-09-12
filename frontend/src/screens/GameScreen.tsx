@@ -6,11 +6,11 @@ import { LevelLadder } from '../components/LevelLadder';
 import { LiveRating } from '../components/LiveRating';
 import { useColorScheme } from '../hooks/useColorScheme';
 import { useGame } from '../state/GameContext';
-import { multiplierStage, type Flight } from '../state/flight';
+import { cashoutUnlocked, multiplierStage, type Flight } from '../state/flight';
 import { useFlight } from '../state/useFlight';
 import { formatMultiplier, formatNumber } from '../utils/format';
 
-/** Экран полёта — кнопка «Забрать» активна после первого уровня. */
+/** Экран полёта — кнопка «Забрать» активна с ×1. */
 export function GameScreen(): JSX.Element {
   const { flight, setup, player, rating, finishRound } = useGame();
 
@@ -47,7 +47,7 @@ function Flying({ flight, setup, player, rating, onFinished }: FlyingProps): JSX
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  const unlocked = state.levelsPassed >= 1;
+  const unlocked = cashoutUnlocked(state.baseMultiplier);
   const stage = multiplierStage(state.levelsPassed);
 
   useEffect(() => {
@@ -156,7 +156,7 @@ function Flying({ flight, setup, player, rating, onFinished }: FlyingProps): JSX
 
                 {!unlocked && !state.crashed && (
                   <span className="text-xs muted game__lock-note">
-                    Откроется после {formatMultiplier(flight.cashoutUnlockMultiplier)}
+                    Откроется на {formatMultiplier(flight.cashoutUnlockMultiplier)}
                   </span>
                 )}
 

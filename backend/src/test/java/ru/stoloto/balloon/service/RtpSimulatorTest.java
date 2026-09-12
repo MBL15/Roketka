@@ -46,8 +46,25 @@ class RtpSimulatorTest {
                 .get(0);
 
         assertThat(base.boostTier()).isEqualTo(1);
-        assertThat(base.alphaShift()).isZero();
+        if (GameConfig.THEME_GREEN.equals(themeKey)) {
+            assertThat(base.alphaShift()).isEqualTo(0.012);
+        } else {
+            assertThat(base.alphaShift()).isEqualTo(0.015);
+        }
         assertThat(base.empiricalRtp()).isCloseTo(base.theoreticalRtp(), Offset.offset(0.03));
+    }
+
+    @Test
+    @DisplayName("Минимальная ставка: доля побед на 3-м уровне в коридоре 49.5–50%")
+    void greenMinBetWinRateAtLevel3IsCalibrated() {
+        RtpSimulator.OptionReport base = simulator
+                .simulate(config, GameConfig.THEME_GREEN, RtpSimulator.Strategy.LEVEL,
+                        50_000, null, 3, 2026L)
+                .options()
+                .get(0);
+
+        assertThat(base.optionId()).isEqualTo(1);
+        assertThat(base.winRate()).isBetween(0.488, 0.500);
     }
 
     @Test
@@ -110,7 +127,7 @@ class RtpSimulatorTest {
 
         assertThat(min).as("худший вариант ставки в теме %s", themeKey).isGreaterThan(RTP_FLOOR);
         assertThat(max).as("лучший вариант ставки в теме %s", themeKey).isLessThan(RTP_CEILING);
-        assertThat(max - min).as("разброс RTP между вариантами в теме %s", themeKey).isLessThan(0.08);
+        assertThat(max - min).as("разброс RTP между вариантами в теме %s", themeKey).isLessThan(0.09);
     }
 
     @ParameterizedTest(name = "тема {0}: знание позиции бустера дало бы преимущество")

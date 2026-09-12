@@ -9,6 +9,7 @@ import { PuzzleCard } from '../components/PuzzleCard';
 import { RulesModal } from '../components/RulesModal';
 import { TournamentModal } from '../components/TournamentModal';
 import { audio } from '../audio/AudioEngine';
+import { cashoutUnlockMultiplier } from '../state/flight';
 import { useGame } from '../state/GameContext';
 import type { StartBetParams } from '../state/GameContext';
 import { formatCountdown, formatMultiplier, formatNumber } from '../utils/format';
@@ -46,7 +47,7 @@ export function BetSelectScreen(): JSX.Element {
   const selectedCost = selected?.kind === 'preset' ? selected.cost : selected?.amount ?? 0;
   const balance = player?.bonusBalance ?? 0;
   const canStart = selected !== null && selectedCost > 0 && balance >= selectedCost && !launching;
-  const unlockMultiplier = theme?.levelMultipliers[0] ?? 1.2;
+  const unlockMultiplier = theme ? cashoutUnlockMultiplier(theme.delta) : 1;
   const maxMultiplier = theme?.maxMultiplier ?? unlockMultiplier;
 
   const startBetParams = useMemo((): StartBetParams | null => {
@@ -251,7 +252,7 @@ export function BetSelectScreen(): JSX.Element {
           )}
         </div>
 
-        <div className="bet-cards bet-cards--six">
+        <div className="bet-cards bet-cards--six bet-cards--puzzle">
           {theme.betOptions.map((item, index) => (
             <PuzzleCard
               key={item.id}
@@ -265,6 +266,7 @@ export function BetSelectScreen(): JSX.Element {
           ))}
 
           <FlexibleBetCard
+            shapeIndex={4}
             kind="custom"
             selected={selected?.kind === 'custom'}
             balance={player.bonusBalance}
@@ -280,6 +282,7 @@ export function BetSelectScreen(): JSX.Element {
           />
 
           <FlexibleBetCard
+            shapeIndex={5}
             kind="full"
             selected={selected?.kind === 'full'}
             balance={player.bonusBalance}

@@ -1,7 +1,9 @@
 import type { KeyboardEvent } from 'react';
 import { formatNumber } from '../utils/format';
+import { PuzzleShell } from './PuzzleShell';
 
 type FlexibleBetCardProps = {
+  shapeIndex: number;
   kind: 'custom' | 'full';
   selected: boolean;
   balance: number;
@@ -12,6 +14,7 @@ type FlexibleBetCardProps = {
 };
 
 export function FlexibleBetCard({
+  shapeIndex,
   kind,
   selected,
   balance,
@@ -27,41 +30,41 @@ export function FlexibleBetCard({
   const amount = kind === 'custom' ? (customValid ? parsedCustom : 0) : balance;
   const shortfall = kind === 'custom' && parsedCustom > balance ? parsedCustom - balance : 0;
 
-  const handleCustomKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+  const submitCustom = () => {
+    onSelect();
+    if (customValid) {
+      onCustomSubmit?.();
+    }
+  };
+
+  const handleCustomKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      submitCustom();
+    }
+  };
+
+  const handleInputKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     event.stopPropagation();
     if (event.key === 'Enter') {
       event.preventDefault();
-      onSelect();
-      if (customValid) {
-        onCustomSubmit?.();
-      }
+      submitCustom();
     }
   };
 
   if (kind === 'custom') {
     return (
-      <div
-        className={[
-          'puzzle',
-          'puzzle--flex',
-          'puzzle--custom',
-          selected ? 'puzzle--selected' : '',
-          affordable ? '' : 'puzzle--locked',
-        ]
-          .filter(Boolean)
-          .join(' ')}
+      <PuzzleShell
+        shapeIndex={shapeIndex}
+        selected={selected}
+        locked={!affordable && !customAmount}
+        flex
+        custom
+        as="div"
+        ariaLabel="Своя сумма ставки"
         onClick={onSelect}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            onSelect();
-          }
-        }}
-        role="group"
-        aria-label="Своя сумма ставки"
+        onKeyDown={handleCustomKeyDown}
       >
-        <span className="puzzle__glow" aria-hidden="true" />
-
         <span className="puzzle__head">
           <span className="puzzle__index">Своя сумма</span>
           <span className="chip puzzle__tier">×1 · без усиления</span>
@@ -79,7 +82,7 @@ export function FlexibleBetCard({
             value={customAmount}
             onChange={(event) => onCustomAmountChange(event.target.value.replace(/[^\d]/g, ''))}
             onFocus={onSelect}
-            onKeyDown={handleCustomKeyDown}
+            onKeyDown={handleInputKeyDown}
             aria-label="Своя сумма ставки"
           />
         </label>
@@ -97,26 +100,19 @@ export function FlexibleBetCard({
             <span className="chip chip--negative">{customAmount ? 'укажите сумму' : 'введите сумму'}</span>
           )}
         </span>
-      </div>
+      </PuzzleShell>
     );
   }
 
   return (
-    <button
-      type="button"
+    <PuzzleShell
+      shapeIndex={shapeIndex}
+      selected={selected}
+      locked={!affordable}
+      flex
+      ariaPressed={selected}
       onClick={onSelect}
-      aria-pressed={selected}
-      className={[
-        'puzzle',
-        'puzzle--flex',
-        selected ? 'puzzle--selected' : '',
-        affordable ? '' : 'puzzle--locked',
-      ]
-        .filter(Boolean)
-        .join(' ')}
     >
-      <span className="puzzle__glow" aria-hidden="true" />
-
       <span className="puzzle__head">
         <span className="puzzle__index">Весь баланс</span>
         <span className="chip puzzle__tier">×1 · без усиления</span>
@@ -140,6 +136,6 @@ export function FlexibleBetCard({
           <span className="chip chip--negative">недоступно</span>
         )}
       </span>
-    </button>
+    </PuzzleShell>
   );
 }

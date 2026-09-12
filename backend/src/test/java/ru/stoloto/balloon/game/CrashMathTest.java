@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CrashMathTest {
 
     private static final double EDGE = 0.04;
-    private static final double MIN_CRASH = 1.01;
+    private static final double MIN_CRASH = 1.0;
     private static final double MAX_CRASH = 10_000.0;
     private static final double DELTA = 0.01;
 
@@ -118,11 +118,18 @@ class CrashMathTest {
     @DisplayName("Рост коэффициента обратим: время -> коэффициент -> время")
     void growthIsInvertible() {
         double rate = 0.17;
+        assertThat(CrashMath.multiplierAt(0, rate)).isZero();
         for (double seconds : new double[]{0.5, 1.0, 3.7, 12.0}) {
             double multiplier = CrashMath.multiplierAt(seconds, rate);
             assertThat(CrashMath.secondsToReach(multiplier, rate))
                     .isCloseTo(seconds, org.assertj.core.data.Offset.offset(1e-9));
         }
+    }
+
+    @Test
+    @DisplayName("«Забрать» разблокируется на ×1")
+    void cashoutUnlockIsAtOne() {
+        assertThat(CrashMath.cashoutUnlockMultiplier(DELTA)).isEqualTo(1.0);
     }
 
     @Test

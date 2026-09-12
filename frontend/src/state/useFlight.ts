@@ -3,7 +3,7 @@ import { api } from '../api/client';
 import type { CashoutResult } from '../api/types';
 import { gameSocket } from '../api/socket';
 import { audio } from '../audio/AudioEngine';
-import { baseMultiplierAt, levelsPassedAt, quantizeDown, type Flight } from './flight';
+import { baseMultiplierAt, cashoutUnlocked, levelsPassedAt, quantizeDown, type Flight } from './flight';
 
 /**
  * Состояние летящего шара.
@@ -11,7 +11,7 @@ import { baseMultiplierAt, levelsPassedAt, quantizeDown, type Flight } from './f
  * Разделение обязанностей здесь такое же, как между сервером и клиентом:
  *
  *  - коэффициент клиент считает сам, каждый кадр, по той же формуле
- *    m(t) = exp(rate · t) и по времени старта раунда. Поэтому анимация идёт
+ *    m(t) = exp(rate · t) - 1 и по времени старта раунда. Поэтому анимация идёт
  *    в 60 FPS независимо от частоты серверных тиков, а расхождение не
  *    накапливается: обе стороны опираются на одну точку отсчёта;
  *  - всё, что влияет на деньги и очки — прохождение уровней, срабатывание
@@ -274,12 +274,12 @@ export function useFlight(
       });
   }, [flight.roundId, onCashout]);
 
-  // Автозабор: срабатывает после первого уровня, когда коэффициент достиг цели.
+  // Автозабор: срабатывает с ×1, когда коэффициент достиг цели.
   useEffect(() => {
     if (autoCashoutMultiplier === null || autoTriggered.current) {
       return;
     }
-    if (state.cashedOut || state.crashed || state.levelsPassed < 1) {
+    if (state.cashedOut || state.crashed || !cashoutUnlocked(state.baseMultiplier)) {
       return;
     }
     if (state.multiplier >= autoCashoutMultiplier) {
@@ -291,7 +291,7 @@ export function useFlight(
     cashout,
     state.cashedOut,
     state.crashed,
-    state.levelsPassed,
+    state.baseMultiplier,
     state.multiplier,
   ]);
 

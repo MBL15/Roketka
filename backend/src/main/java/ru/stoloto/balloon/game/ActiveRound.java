@@ -153,8 +153,8 @@ public final class ActiveRound {
             return CashoutOutcome.rejected("Шар уже лопнул");
         }
         double base = baseMultiplierAt(nowMillis);
-        if (CrashMath.levelsPassed(base, levelMultipliers) < 1) {
-            return CashoutOutcome.rejected("«Забрать» доступно после прохождения первого уровня");
+        if (base + 1e-9 < 1.0) {
+            return CashoutOutcome.rejected("«Забрать» доступно с коэффициента ×1");
         }
 
         double multiplier = displayedMultiplier(base, boostApplied);

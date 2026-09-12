@@ -81,7 +81,7 @@ export function flightFromState(state: RoundState, points: PointsRules): Flight 
     growthRate: state.growthRate,
     delta: state.delta,
     maxMultiplier: state.maxMultiplier,
-    cashoutUnlockMultiplier: state.levelMultipliers[0] ?? 1.2,
+    cashoutUnlockMultiplier: cashoutUnlockMultiplier(state.delta),
     startedAtMillis: state.startedAtMillis,
     clockOffsetMillis: state.serverTimeMillis - Date.now(),
     serverSeedHash: null,
@@ -98,15 +98,24 @@ export function flightFromState(state: RoundState, points: PointsRules): Flight 
 
 /**
  * Коэффициент в момент {@code nowMillis} по той же формуле, что на сервере:
- * m(t) = exp(growthRate * t). Клиент считает её локально на каждом кадре,
- * поэтому анимация идёт в 60 FPS независимо от частоты серверных тиков,
- * а расхождение с сервером не накапливается — обе стороны исходят из времени
- * старта раунда.
+ * m(t) = exp(growthRate * t) - 1, старт с нуля. Клиент считает её локально
+ * на каждом кадре, поэтому анимация идёт в 60 FPS независимо от частоты
+ * серверных тиков, а расхождение с сервером не накапливается — обе стороны
+ * исходят из времени старта раунда.
  */
 export function baseMultiplierAt(flight: Flight, nowMillis: number): number {
   const elapsedSeconds = Math.max(0, nowMillis + flight.clockOffsetMillis - flight.startedAtMillis) / 1000;
-  const raw = Math.exp(flight.growthRate * elapsedSeconds);
-  return quantizeDown(Math.min(raw, flight.maxMultiplier), flight.delta);
+  const raw = Math.exp(flight.growthRate * elapsedSeconds) - 1;
+  return quantizeDown(Math.min(Math.max(raw, 0), flight.maxMultiplier), flight.delta);
+}
+
+/** Минимальный коэффициент для «Забрать»: с ×1 включительно. */
+export function cashoutUnlocked(multiplier: number): boolean {
+  return multiplier + 1e-9 >= 1;
+}
+
+export function cashoutUnlockMultiplier(_delta: number): number {
+  return 1;
 }
 
 export function quantizeDown(value: number, delta: number): number {

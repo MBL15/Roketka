@@ -44,74 +44,83 @@ export function TopBar(): JSX.Element {
 
   return (
     <header className="crash-header">
-      <div className="crash-header__brand">
-        <span className="crash-header__logo" aria-hidden="true">
-          ◓
-        </span>
-        <span className="col" style={{ gap: 0 }}>
-          <span className="crash-header__name">Воздушный шар</span>
-          <span className="crash-header__tag">бонусная игра</span>
-        </span>
-      </div>
+      <div className="crash-header__row crash-header__row--top">
+        <div className="crash-header__brand">
+          <span className="crash-header__logo" aria-hidden="true">
+            ◓
+          </span>
+          <span className="crash-header__titles">
+            <span className="crash-header__name">Воздушный шар</span>
+            <span className="crash-header__tag">бонусная игра</span>
+          </span>
+        </div>
 
-      <div className="crash-header__balance">
-        <span className="crash-header__balance-label">Баланс</span>
-        <span className="crash-header__balance-value num">{formatNumber(player.bonusBalance)}</span>
-      </div>
+        <div className="crash-header__actions">
+          <span className={`crash-header__status chip chip--${connection.tone}`} title="Статус соединения">
+            <span className="crash-header__dot" aria-hidden="true" />
+            <span className="crash-header__status-text">{connection.label}</span>
+          </span>
 
-      <div className="crash-header__stats">
-        <Stat label="Уровень" value={`${player.playerLevel}`} title={`Профит ${player.displayProfitBonus.toFixed(2)}× (отображение)`} />
-        <Stat label="Очки" value={formatNumber(player.gamePoints)} />
-        <Stat label="Билеты" value={formatNumber(player.lotteryTickets)} />
-        <Stat label="Турнир" value={`#${player.tournamentPosition}`} />
-      </div>
+          {topUpAllowed && player.bonusBalance < 500 && phase !== 'game' && (
+            <button type="button" className="btn btn--sm btn--primary" onClick={() => void topUp()}>
+              +2000
+            </button>
+          )}
 
-      <div className="crash-header__actions">
-        <span className={`crash-header__status chip chip--${connection.tone}`} title="Статус соединения">
-          <span className="crash-header__dot" aria-hidden="true" />
-          {connection.label}
-        </span>
-
-        {topUpAllowed && player.bonusBalance < 500 && phase !== 'game' && (
-          <button type="button" className="btn btn--sm btn--primary" onClick={() => void topUp()}>
-            +2000
-          </button>
-        )}
-
-        <button
-          type="button"
-          className="btn btn--icon btn--ghost"
-          onClick={toggleSound}
-          aria-label={soundOn ? 'Выключить звук' : 'Включить звук'}
-        >
-          {soundOn ? '🔊' : '🔇'}
-        </button>
-
-        <ThemeToggleButton />
-
-        {showHome && <HomeButton variant="icon" />}
-
-        {showProfile && (
           <button
             type="button"
             className="btn btn--icon btn--ghost"
-            onClick={openProfile}
-            aria-label="Профиль"
-            title="Профиль"
+            onClick={toggleSound}
+            aria-label={soundOn ? 'Выключить звук' : 'Включить звук'}
           >
-            <ProfileIcon />
+            {soundOn ? '🔊' : '🔇'}
           </button>
-        )}
 
-        {expert && (
-          <a className="btn btn--icon btn--ghost" href="#admin" title="Настройки" aria-label="Настройки">
-            ⚙
-          </a>
-        )}
+          <ThemeToggleButton />
 
-        <button type="button" className="btn btn--sm btn--ghost" onClick={() => void logout()}>
-          Выйти
-        </button>
+          {showHome && <HomeButton variant="icon" />}
+
+          {showProfile && (
+            <button
+              type="button"
+              className="btn btn--icon btn--ghost"
+              onClick={openProfile}
+              aria-label="Профиль"
+              title="Профиль"
+            >
+              <ProfileIcon />
+            </button>
+          )}
+
+          {expert && (
+            <a className="btn btn--icon btn--ghost" href="#admin" title="Настройки" aria-label="Настройки">
+              ⚙
+            </a>
+          )}
+
+          <button
+            type="button"
+            className="btn btn--sm btn--ghost crash-header__logout"
+            onClick={() => void logout()}
+            aria-label="Выйти"
+          >
+            <span className="crash-header__logout-text">Выйти</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="crash-header__row crash-header__row--bottom">
+        <div className="crash-header__balance">
+          <span className="crash-header__balance-label">Баланс</span>
+          <span className="crash-header__balance-value num">{formatNumber(player.bonusBalance)}</span>
+        </div>
+
+        <div className="crash-header__stats">
+          <Stat label="Уровень" value={`${player.playerLevel}`} title={`Профит ${player.displayProfitBonus.toFixed(2)}× (отображение)`} />
+          <Stat label="Очки" value={formatNumber(player.gamePoints)} />
+          <Stat label="Билеты" value={formatNumber(player.lotteryTickets)} />
+          <Stat label="Турнир" value={`#${player.tournamentPosition}`} />
+        </div>
       </div>
     </header>
   );

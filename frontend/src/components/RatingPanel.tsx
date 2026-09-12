@@ -50,8 +50,11 @@ export function RatingPanel(): JSX.Element {
     );
   }
 
-  const visible = [...table.top, ...table.rest.slice(0, 12)];
-  const currentVisible = visible.some((entry) => entry.current);
+  const topVisible = 15;
+  const leaders = [...table.top, ...table.rest.slice(0, Math.max(0, topVisible - table.top.length))];
+  const currentInLeaders = leaders.some((entry) => entry.current);
+  const listEntries =
+    table.current && !currentInLeaders ? [...leaders, table.current] : leaders;
 
   return (
     <div className="panel panel--pad rating-panel">
@@ -66,19 +69,10 @@ export function RatingPanel(): JSX.Element {
       </header>
 
       <ol className="rating-panel__list">
-        {visible.map((entry) => (
+        {listEntries.map((entry) => (
           <RatingRow key={entry.userId} entry={entry} />
         ))}
       </ol>
-
-      {table.current && !currentVisible && (
-        <div className="rating-panel__pinned">
-          <span className="eyebrow">Вы</span>
-          <ol className="rating-panel__list">
-            <RatingRow entry={table.current} />
-          </ol>
-        </div>
-      )}
     </div>
   );
 }

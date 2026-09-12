@@ -100,7 +100,7 @@ export function App(): JSX.Element {
   return (
     <div className={`app app--${phase} app--sky`}>
       <div className="app__sky-layer" aria-hidden="true">
-        <Sky seed={skySeed} fullPage stars={!isLight} />
+        <Sky theme={theme} seed={skySeed} fullPage stars={!isLight} />
       </div>
       <div className="app__content">
         {player && phase !== 'boot' && phase !== 'login' && <TopBar />}
