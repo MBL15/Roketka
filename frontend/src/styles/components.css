@@ -456,24 +456,33 @@
 .rating {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(14px);
   overflow: hidden;
+  min-width: 0;
+}
+
+.rating--live {
+  box-shadow: 0 8px 24px rgba(4, 8, 14, 0.22);
 }
 
 .rating__label {
   flex: none;
+  font-size: 10px;
 }
 
 .rating__list {
   display: flex;
-  gap: 6px;
+  flex: 1;
+  gap: 5px;
+  min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
+  scroll-snap-type: x proximity;
 }
 
 .rating__list::-webkit-scrollbar {
@@ -482,25 +491,37 @@
 
 .rating__item {
   display: flex;
+  flex: 0 0 auto;
   align-items: baseline;
-  gap: 6px;
-  padding: 4px 10px;
+  gap: 5px;
+  padding: 5px 10px;
   border-radius: var(--radius-pill);
   background: var(--fill-subtle);
   font-size: 12px;
   white-space: nowrap;
-  transition: background 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out);
+  scroll-snap-align: start;
+  transition:
+    background 0.35s var(--ease-out),
+    box-shadow 0.35s var(--ease-out),
+    transform 0.35s var(--ease-out);
 }
 
 .rating__position {
   color: var(--ink-400);
   font-size: 10px;
+  min-width: 14px;
+}
+
+.rating__points {
+  font-weight: 700;
+  font-size: 13px;
 }
 
 .rating__item--me {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--action-dim);
+  color: var(--action);
   font-weight: 650;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--action) 35%, transparent);
 }
 
 .rating__you {
@@ -509,15 +530,46 @@
   letter-spacing: 0.08em;
 }
 
-/* Короткая подсветка — очки изменились, позиция та же. */
+/* Короткая подсветка — очки изменились, позиция та же (0.3–0.5 с). */
 .rating__item--flash-short {
-  animation: flash 0.45s var(--ease-out);
+  animation: rating-flash-short 0.45s var(--ease-out);
 }
 
-/* Длинная со свечением — игрок сдвинулся в таблице. */
+/* Длинная со свечением — смена позиции (0.8–1.2 с). */
 .rating__item--flash-long {
-  animation: glow-pulse 1.2s var(--ease-out);
-  box-shadow: 0 0 0 1px var(--accent), 0 0 18px var(--accent-soft);
+  animation: rating-flash-long 1.1s var(--ease-out);
+}
+
+@keyframes rating-flash-short {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+  45% {
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--action) 50%, transparent),
+      0 0 16px color-mix(in srgb, var(--action) 35%, transparent);
+  }
+}
+
+@keyframes rating-flash-long {
+  0%,
+  100% {
+    transform: translateY(0);
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+  25% {
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 0 0 1px var(--action),
+      0 0 22px color-mix(in srgb, var(--action) 45%, transparent);
+  }
+  55% {
+    transform: translateY(0);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, var(--action) 60%, transparent),
+      0 0 28px color-mix(in srgb, var(--action) 50%, transparent);
+  }
 }
 
 /* ------------------------------------------------------------- фрагменты */

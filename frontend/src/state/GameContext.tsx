@@ -354,6 +354,43 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
 
   useEffect(() => gameSocket.onStatus((status) => dispatch({ type: 'socket', status })), []);
 
+  /** Резервный опрос живого рейтинга (~1 с), если WebSocket недоступен. */
+  useEffect(() => {
+    if (state.phase !== 'game' || !state.setup?.tournament.enabled) {
+      return undefined;
+    }
+
+    let cancelled = false;
+    const poll = window.setInterval(() => {
+      if (cancelled || state.socketStatus === 'open') {
+        return;
+      }
+      void api
+        .liveRating()
+        .then((entries) => {
+          if (cancelled) {
+            return;
+          }
+          dispatch({
+            type: 'rating',
+            rating: entries.map((entry) => ({
+              ...entry,
+              current: entry.userId === playerIdRef.current,
+            })),
+          });
+        })
+        .catch(() => undefined);
+    }, 1000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(poll);
+    };
+  }, [state.phase, state.setup?.tournament.enabled, state.socketStatus]);
+
+  const playerIdRef = useRef<number | null>(state.player?.id ?? null);
+  playerIdRef.current = state.player?.id ?? null;
+
   useEffect(
     () =>
       gameSocket.onMessage((message) => {
@@ -363,7 +400,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
               type: 'rating',
               rating: message.entries.map((entry) => ({
                 ...entry,
-                current: entry.userId === state.player?.id,
+                current: entry.userId === playerIdRef.current,
               })),
             });
             break;

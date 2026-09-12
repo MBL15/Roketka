@@ -346,11 +346,12 @@
   inset: 0;
   display: grid;
   grid-template-areas:
+    'rating rating'
     'center center'
     'hud hud'
     'action action';
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: 1fr auto auto;
+  grid-template-rows: auto 1fr auto auto;
   gap: 6px;
   padding: 10px 12px;
   pointer-events: none;
@@ -364,9 +365,16 @@
   pointer-events: auto;
 }
 
-.game .rating {
+.game__rating {
   grid-area: rating;
-  justify-self: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  pointer-events: auto;
+}
+
+.game .rating {
+  width: 100%;
   max-width: 100%;
 }
 

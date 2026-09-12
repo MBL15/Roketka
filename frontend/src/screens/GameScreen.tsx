@@ -61,11 +61,6 @@ function Flying({ flight, setup, player, rating, onFinished }: FlyingProps): JSX
 
   const rail = (
     <>
-      {setup.tournament.enabled && rating.length > 0 && (
-        <div className="panel panel--pad game-rail__rating">
-          <LiveRating entries={rating} currentUserId={player.id} />
-        </div>
-      )}
       <div className="panel panel--pad game-rail__ladder">
         <span className="eyebrow">Уровни</span>
         <LevelLadder
@@ -88,6 +83,11 @@ function Flying({ flight, setup, player, rating, onFinished }: FlyingProps): JSX
         <FlightCanvas flight={flight} stateRef={stateRef} theme={flight.theme} lightScheme={isLight} />
 
         <div className="game__overlay game__overlay--crash">
+          {setup.tournament.enabled && rating.length > 0 && (
+            <div className="game__rating">
+              <LiveRating entries={rating} currentUserId={player.id} />
+            </div>
+          )}
           <div className="game__center">
             <div className={`multiplier multiplier--${stage}${state.crashed ? ' multiplier--crashed' : ''}`}>
               <span className="multiplier__value num">{formatMultiplier(state.multiplier)}</span>

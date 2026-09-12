@@ -116,7 +116,7 @@ themes:
     # Игровые очки — отдельная валюта: идут в турнир и не конвертируются
     # в бонусные баллы. Начисляются и при выигрыше, и при проигрыше.
     points:
-      perLine: 10                 # points_per_line      — за каждый пройденный уровень
+      perLine: 1                  # points_per_line      — за каждый пройденный уровень
       cashoutBonus: 25            # points_cashout_bonus — разово за успешный cashout
       boostBonusPerTier: [0, 40, 80, 140] # points_xN_bonus — за активацию бустера tier N
 
@@ -205,7 +205,7 @@ themes:
     # Игровые очки — отдельная валюта: идут в турнир и не конвертируются
     # в бонусные баллы. Начисляются и при выигрыше, и при проигрыше.
     points:
-      perLine: 12                 # points_per_line      — за каждый пройденный уровень
+      perLine: 2                  # points_per_line      — за каждый пройденный уровень
       cashoutBonus: 30            # points_cashout_bonus — разово за успешный cashout
       boostBonusPerTier: [0, 50, 100, 180] # points_xN_bonus — за активацию бустера tier N
 
