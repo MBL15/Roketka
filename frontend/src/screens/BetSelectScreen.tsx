@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { Balloon } from '../components/Balloon';
 import { CrashShell } from '../components/CrashShell';
 import { FlexibleBetCard } from '../components/FlexibleBetCard';
+import { HomeButton } from '../components/HomeButton';
 import { LevelLadder } from '../components/LevelLadder';
 import { PuzzleCard } from '../components/PuzzleCard';
 import { RulesModal } from '../components/RulesModal';
@@ -27,7 +28,6 @@ export function BetSelectScreen(): JSX.Element {
     currentTheme: theme,
     startRound,
     switchTheme,
-    goTo,
     notify,
     autoCashoutMultiplier,
     setAutoCashout,
@@ -212,17 +212,7 @@ export function BetSelectScreen(): JSX.Element {
       <div className={`bet-stage${launching ? ' bet--launching' : ''}`}>
         <div className="bet-toolbar">
           <h1 className="bet-toolbar__theme">{theme.gameName}</h1>
-          <button
-            type="button"
-            className="btn btn--ghost btn--sm"
-            onClick={() => {
-              audio.click();
-              setSelected(null);
-              goTo('theme');
-            }}
-          >
-            ← Тема
-          </button>
+          <HomeButton onNavigate={() => setSelected(null)} />
           <button type="button" className="btn btn--ghost btn--sm" onClick={() => setRulesOpen(true)}>
             Правила
           </button>

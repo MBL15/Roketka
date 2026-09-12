@@ -61,7 +61,8 @@
 }
 
 .topbar__profile-icon,
-.topbar__theme-icon {
+.topbar__theme-icon,
+.home-button__icon {
   width: 18px;
   height: 18px;
   display: block;

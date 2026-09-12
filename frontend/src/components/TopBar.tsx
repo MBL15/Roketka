@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { audio } from '../audio/AudioEngine';
+import { HomeButton } from './HomeButton';
 import { ThemeToggleButton } from './ThemeToggleButton';
 import { useGame } from '../state/GameContext';
 import { formatNumber } from '../utils/format';
@@ -25,10 +26,6 @@ export function TopBar(): JSX.Element {
 
   const openProfile = () => {
     audio.click();
-    if (phase === 'profile') {
-      goTo('bet');
-      return;
-    }
     goTo('profile');
   };
 
@@ -40,7 +37,8 @@ export function TopBar(): JSX.Element {
         : { label: 'опрос', tone: 'negative' as const };
 
   const expert = isExpertAccount(player.nickname);
-  const onProfile = phase === 'profile';
+  const showHome = phase === 'bet' || phase === 'profile' || phase === 'result';
+  const showProfile = phase !== 'game' && phase !== 'result' && phase !== 'profile';
 
   return (
     <header className="crash-header">
@@ -89,10 +87,12 @@ export function TopBar(): JSX.Element {
 
         <ThemeToggleButton />
 
-        {phase !== 'game' && phase !== 'result' && (
+        {showHome && <HomeButton variant="icon" />}
+
+        {showProfile && (
           <button
             type="button"
-            className={`btn btn--icon btn--ghost${onProfile ? ' btn--icon-active' : ''}`}
+            className="btn btn--icon btn--ghost"
             onClick={openProfile}
             aria-label="Профиль"
             title="Профиль"

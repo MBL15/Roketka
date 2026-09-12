@@ -1609,6 +1609,12 @@
   padding: 10px 12px;
 }
 
+.profile__nav {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .profile-hero {
   display: flex;
   flex-direction: column;

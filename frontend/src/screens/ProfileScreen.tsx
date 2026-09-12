@@ -1,6 +1,7 @@
 import { AchievementPanel } from '../components/AchievementPanel';
 import { CollectionStrip } from '../components/CollectionStrip';
 import { CrashShell } from '../components/CrashShell';
+import { HomeButton } from '../components/HomeButton';
 import { PlayerLevelBar } from '../components/PlayerLevelBar';
 import { RatingPanel } from '../components/RatingPanel';
 import { useGame } from '../state/GameContext';
@@ -18,6 +19,10 @@ export function ProfileScreen(): JSX.Element {
   return (
     <CrashShell fill rail={<RatingPanel />}>
       <div className="profile">
+        <div className="profile__nav">
+          <HomeButton />
+        </div>
+
         <div className="profile-hero panel panel--pad">
           <div className="profile-hero__main">
             <span className="profile-hero__avatar" aria-hidden="true">
