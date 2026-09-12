@@ -36,8 +36,18 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
      */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        // Паттерны, а не фиксированный список: в проде nginx отдаёт SPA и /api с одного
+        // origin, но браузер всё равно шлёт Origin (IP, домен, порт). Жёсткий whitelist
+        // localhost ломал вход на VPS с «Invalid CORS request» / 403.
+        String[] patterns = properties.corsOrigins().stream()
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .toArray(String[]::new);
+        if (patterns.length == 0) {
+            patterns = new String[] { "*" };
+        }
         registry.addMapping("/api/**")
-                .allowedOrigins(properties.corsOrigins().toArray(String[]::new))
+                .allowedOriginPatterns(patterns)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .maxAge(3600);

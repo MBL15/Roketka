@@ -52,8 +52,13 @@ balloon:
   dev-seed: ${DEV_SEED:}
   # Демо-аккаунты, создаваемые при первом запуске: логин/пароль.
   demo-users: demo:demo, expert:expert, judge:judge
-  # Источники, которым разрешён доступ к API при локальной разработке фронтенда.
-  cors-origins: http://localhost:5173, http://127.0.0.1:5173, http://localhost:8080, http://127.0.0.1:8080
+  # CORS-паттерны: «*» — любой origin (VPS по IP/домену); localhost — для Vite dev.
+  cors-origins:
+    - http://localhost:5173
+    - http://127.0.0.1:5173
+    - http://localhost:8080
+    - http://127.0.0.1:8080
+    - "*"
 
 springdoc:
   swagger-ui:
