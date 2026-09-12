@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stoloto.balloon.config.BalloonProperties;
@@ -37,6 +38,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * где должен быть по времени, либо сразу завершится, если время вышло.
  */
 @Component
+@Order(100)
 public class BootstrapService implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(BootstrapService.class);
