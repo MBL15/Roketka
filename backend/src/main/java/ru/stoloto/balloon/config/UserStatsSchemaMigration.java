@@ -2,18 +2,16 @@ package ru.stoloto.balloon.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.core.annotation.Order;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Добавляет счётчики побед/поражений в существующую файловую H2 без сброса данных.
+ * Добавляет счётчики побед/поражений в существующую файловую H2 до любых запросов к users.
  */
 @Component
-@Order(0)
-public class UserStatsSchemaMigration implements ApplicationRunner {
+public class UserStatsSchemaMigration implements InitializingBean {
 
     private static final Logger log = LoggerFactory.getLogger(UserStatsSchemaMigration.class);
 
@@ -24,23 +22,33 @@ public class UserStatsSchemaMigration implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) {
-        addColumnIfMissing("rounds_won", "INT NOT NULL DEFAULT 0");
-        addColumnIfMissing("rounds_lost", "INT NOT NULL DEFAULT 0");
+    public void afterPropertiesSet() {
+        ensureColumn("rounds_won");
+        ensureColumn("rounds_lost");
     }
 
-    private void addColumnIfMissing(String column, String definition) {
+    private void ensureColumn(String column) {
+        if (columnExists(column)) {
+            jdbc.update("UPDATE users SET " + column + " = 0 WHERE " + column + " IS NULL");
+            return;
+        }
+        try {
+            jdbc.execute("ALTER TABLE users ADD COLUMN " + column + " INT NOT NULL DEFAULT 0");
+            log.info("Добавлена колонка users.{}", column);
+        } catch (DataAccessException ex) {
+            log.warn("Не удалось добавить users.{}: {}", column, ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    private boolean columnExists(String column) {
         Integer count = jdbc.queryForObject(
                 """
                 SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_NAME = 'USERS' AND COLUMN_NAME = ?
+                WHERE TABLE_SCHEMA = 'PUBLIC' AND UPPER(TABLE_NAME) = 'USERS'
+                  AND UPPER(COLUMN_NAME) = ?
                 """,
                 Integer.class,
                 column.toUpperCase());
-        if (count != null && count > 0) {
-            return;
-        }
-        jdbc.execute("ALTER TABLE users ADD COLUMN " + column + " " + definition);
-        log.info("Добавлена колонка users.{}", column);
+        return count != null && count > 0;
     }
 }

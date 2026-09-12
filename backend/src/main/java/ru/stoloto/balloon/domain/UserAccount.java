@@ -57,10 +57,10 @@ public class UserAccount {
     @Column(nullable = false)
     private int roundsPlayed;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "INT NOT NULL DEFAULT 0")
     private int roundsWon;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "INT NOT NULL DEFAULT 0")
     private int roundsLost;
 
     /** Мини-онбординг у кнопки «Забрать» показывается только перед первым полётом. */

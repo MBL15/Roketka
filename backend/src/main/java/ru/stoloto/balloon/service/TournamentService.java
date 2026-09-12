@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,7 @@ import java.util.concurrent.atomic.LongAdder;
  * При перезапуске значения снова поднимаются из БД.
  */
 @Service
+@DependsOn("userStatsSchemaMigration")
 public class TournamentService {
 
     private static final Logger log = LoggerFactory.getLogger(TournamentService.class);
