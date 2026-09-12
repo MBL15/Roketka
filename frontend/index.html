@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#0b1f2a" />
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('balloon.colorScheme') === 'light') {
+            document.documentElement.dataset.colorScheme = 'light';
+            document.querySelector('meta[name="theme-color"]').content = '#e4eaf0';
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta
       name="description"
       content="Воздушный Шар — бонусная crash-игра с бустерами и турнирной механикой"
@@ -18,6 +28,10 @@
         place-items: center;
         background: radial-gradient(circle at 50% 20%, #123b4d, #071219 70%);
         color: #dff3ff;
+      }
+      html[data-color-scheme='light'] #boot {
+        background: radial-gradient(circle at 50% 20%, #e8eef4, #dfe6ee 70%);
+        color: #334155;
         font: 500 15px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
         letter-spacing: 0.08em;
         text-transform: uppercase;

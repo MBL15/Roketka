@@ -76,6 +76,96 @@
   --sky-horizon: #243040;
   --balloon-a: #4ff0a1;
   --balloon-b: #0f8a5f;
+
+  --fill-faint: rgba(255, 255, 255, 0.03);
+  --fill-muted: rgba(255, 255, 255, 0.04);
+  --fill-soft: rgba(255, 255, 255, 0.05);
+  --fill-subtle: rgba(255, 255, 255, 0.06);
+  --fill-medium: rgba(255, 255, 255, 0.07);
+  --fill-hover: rgba(255, 255, 255, 0.08);
+  --fill-strong: rgba(255, 255, 255, 0.1);
+  --fill-emphasis: rgba(255, 255, 255, 0.12);
+  --fill-active: rgba(255, 255, 255, 0.14);
+  --inset-highlight: rgba(255, 255, 255, 0.12);
+  --gradient-shine: rgba(255, 255, 255, 0.1);
+  --knob-bg: #ffffff;
+  --game-hud-text: #ffffff;
+  --text-on-vivid: #ffffff;
+  --input-bg: rgba(4, 14, 20, 0.5);
+  --input-bg-focus: rgba(4, 14, 20, 0.68);
+  --scrollbar-thumb: rgba(190, 226, 243, 0.24);
+  --game-stage-bg: #06080c;
+  --modal-bg: rgba(18, 22, 32, 0.98);
+}
+
+/* ---------------------------------------------------------------------------
+   Светлая цветовая схема — холодный молочный, не чисто белый
+   --------------------------------------------------------------------------- */
+
+[data-color-scheme='light'] {
+  color-scheme: light;
+
+  --surface-base: #e4eaf0;
+  --surface-panel: #eef2f6;
+  --surface-elevated: #f6f8fb;
+  --surface-border: #cfd8e3;
+  --surface-hover: #e0e7ef;
+
+  --ink-100: #18212f;
+  --ink-200: #334155;
+  --ink-300: #5a6778;
+  --ink-400: #7b8794;
+  --ink-500: #9aa5b1;
+
+  --glass-bg: var(--surface-panel);
+  --glass-bg-strong: #e8edf3;
+  --glass-bg-soft: var(--surface-elevated);
+  --glass-border: var(--surface-border);
+  --glass-border-strong: #b8c4d4;
+
+  --shadow-sm: 0 2px 8px rgba(24, 33, 47, 0.07);
+  --shadow-md: 0 8px 24px rgba(24, 33, 47, 0.1);
+  --shadow-lg: 0 16px 40px rgba(24, 33, 47, 0.14);
+  --shadow-glow: 0 0 0 1px var(--surface-border);
+
+  --sky-top: #dfe6ee;
+  --sky-mid: #d4dce6;
+  --sky-low: #c8d4e0;
+  --sky-horizon: #bcc9d8;
+
+  --fill-faint: rgba(24, 33, 47, 0.03);
+  --fill-muted: rgba(24, 33, 47, 0.04);
+  --fill-soft: rgba(24, 33, 47, 0.05);
+  --fill-subtle: rgba(24, 33, 47, 0.06);
+  --fill-medium: rgba(24, 33, 47, 0.07);
+  --fill-hover: rgba(24, 33, 47, 0.08);
+  --fill-strong: rgba(24, 33, 47, 0.1);
+  --fill-emphasis: rgba(24, 33, 47, 0.12);
+  --fill-active: rgba(24, 33, 47, 0.14);
+  --inset-highlight: rgba(255, 255, 255, 0.55);
+  --gradient-shine: rgba(255, 255, 255, 0.65);
+  --knob-bg: #ffffff;
+  --game-hud-text: #18212f;
+  --text-on-vivid: #ffffff;
+  --input-bg: rgba(255, 255, 255, 0.72);
+  --input-bg-focus: #f6f8fb;
+  --scrollbar-thumb: rgba(24, 33, 47, 0.18);
+  --game-stage-bg: #d8e0ea;
+  --modal-bg: rgba(246, 248, 251, 0.98);
+}
+
+[data-color-scheme='light'][data-theme='green'] {
+  --sky-top: #dce8e4;
+  --sky-mid: #d0e0d8;
+  --sky-low: #c4d8cc;
+  --sky-horizon: #b8cfc0;
+}
+
+[data-color-scheme='light'][data-theme='red'] {
+  --sky-top: #e8e0e4;
+  --sky-mid: #e0d4da;
+  --sky-low: #d8c8d0;
+  --sky-horizon: #d0bcc4;
 }
 
 [data-theme='red'] {

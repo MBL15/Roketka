@@ -56,7 +56,7 @@ button:disabled {
 /* Мягкая полоса прокрутки, чтобы списки не ломали композицию */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(190, 226, 243, 0.24) transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -65,7 +65,7 @@ button:disabled {
 }
 
 *::-webkit-scrollbar-thumb {
-  background: rgba(190, 226, 243, 0.24);
+  background: var(--scrollbar-thumb);
   border-radius: var(--radius-pill);
 }
 
@@ -404,7 +404,7 @@ button:disabled {
   padding: 0 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--glass-border);
-  background: rgba(4, 14, 20, 0.5);
+  background: var(--input-bg);
   color: var(--ink-100);
   transition: border-color var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
 }
@@ -416,7 +416,7 @@ button:disabled {
 .input:focus {
   outline: none;
   border-color: var(--accent);
-  background: rgba(4, 14, 20, 0.68);
+  background: var(--input-bg-focus);
 }
 
 .input--invalid {

@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { GameProvider } from './state/GameContext';
+import { applyColorScheme, readColorScheme } from './utils/colorScheme';
 import './styles/tokens.css';
 import './styles/global.css';
 import './styles/layout.css';
@@ -12,6 +13,8 @@ const container = document.getElementById('root');
 if (!container) {
   throw new Error('Не найден корневой элемент #root');
 }
+
+applyColorScheme(readColorScheme());
 
 // Заставка из index.html убирается только сейчас — так между HTML и первым
 // кадром React не возникает белой вспышки.

@@ -298,7 +298,7 @@
 .crash__main--bleed {
   padding: 0;
   overflow: hidden;
-  background: #06080c;
+  background: var(--game-stage-bg);
   backdrop-filter: none;
 }
 

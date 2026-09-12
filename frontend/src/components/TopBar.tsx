@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { audio } from '../audio/AudioEngine';
+import { ThemeToggleButton } from './ThemeToggleButton';
 import { useGame } from '../state/GameContext';
 import { formatNumber } from '../utils/format';
 import { isExpertAccount } from '../utils/access';
@@ -87,15 +88,18 @@ export function TopBar(): JSX.Element {
         </button>
 
         {phase !== 'game' && phase !== 'result' && (
-          <button
-            type="button"
-            className={`btn btn--icon btn--ghost${onProfile ? ' btn--icon-active' : ''}`}
-            onClick={openProfile}
-            aria-label="Профиль"
-            title="Профиль"
-          >
-            <ProfileIcon />
-          </button>
+          <>
+            <ThemeToggleButton />
+            <button
+              type="button"
+              className={`btn btn--icon btn--ghost${onProfile ? ' btn--icon-active' : ''}`}
+              onClick={openProfile}
+              aria-label="Профиль"
+              title="Профиль"
+            >
+              <ProfileIcon />
+            </button>
+          </>
         )}
 
         {expert && (
