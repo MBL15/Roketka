@@ -1044,6 +1044,10 @@
     white-space: nowrap;
   }
 
+  .bet-cards--puzzle .puzzle--flex .puzzle__cost-unit {
+    display: none;
+  }
+
   .bet-cards--puzzle .puzzle--flex .puzzle__cost {
     flex: 1;
     min-height: 0;
