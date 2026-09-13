@@ -27,7 +27,6 @@ export function FlexibleBetCard({
   const customValid = Number.isFinite(parsedCustom) && parsedCustom > 0 && parsedCustom <= balance;
   const fullValid = balance > 0;
   const affordable = kind === 'custom' ? customValid : fullValid;
-  const amount = kind === 'custom' ? (customValid ? parsedCustom : 0) : balance;
   const shortfall = kind === 'custom' && parsedCustom > balance ? parsedCustom - balance : 0;
 
   const submitCustom = () => {
@@ -70,8 +69,7 @@ export function FlexibleBetCard({
           <span className="chip puzzle__tier">×1 · без усиления</span>
         </span>
 
-        <label className="puzzle__custom-field" onClick={(event) => event.stopPropagation()}>
-          <span className="puzzle__cost-unit">Бонусных баллов</span>
+        <label className="puzzle__cost puzzle__cost--custom" onClick={(event) => event.stopPropagation()}>
           <input
             className="input input--num puzzle__custom-input"
             type="text"
@@ -85,6 +83,7 @@ export function FlexibleBetCard({
             onKeyDown={handleInputKeyDown}
             aria-label="Своя сумма ставки"
           />
+          <span className="puzzle__cost-unit">бонусных баллов</span>
         </label>
 
         <span className="puzzle__note text-xs">
@@ -140,7 +139,7 @@ export function FlexibleBetCard({
       <span className="puzzle__foot">
         {affordable ? (
           <span className={`chip ${selected ? 'chip--accent' : ''}`}>
-            {selected ? 'выбрано' : formatNumber(amount)}
+            {selected ? 'выбрано' : 'выбрать'}
           </span>
         ) : (
           <span className="chip chip--negative">недоступно</span>

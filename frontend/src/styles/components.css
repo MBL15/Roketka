@@ -575,39 +575,73 @@
 
 /* ------------------------------------------------------------- фрагменты пазла */
 
-/* Типографика масштабируется от ширины ячейки (container query). */
+/* Типографика: один cqi на контент, остальное — em (надёжнее на мобилках). */
 .bet-cards--puzzle .puzzle {
   container-type: inline-size;
   container-name: puzzle-cell;
 }
 
+.bet-cards--puzzle .puzzle__content {
+  font-size: clamp(9px, 4.2cqi, 13px);
+}
+
 .bet-cards--puzzle .puzzle__tier,
 .bet-cards--puzzle .puzzle__index {
-  font-size: clamp(8px, 3.2cqi, 11px);
+  font-size: 0.8em;
+  line-height: 1.25;
 }
 
 .bet-cards--puzzle .puzzle__cost-value {
-  font-size: clamp(18px, 13cqi, 28px);
+  font-size: 2.05em;
   line-height: 1.05;
 }
 
 .bet-cards--puzzle .puzzle--flex .puzzle__cost-value {
-  font-size: clamp(12px, 9cqi, 24px);
+  font-size: 1.85em;
 }
 
 .bet-cards--puzzle .puzzle__cost-unit {
-  font-size: clamp(8px, 3cqi, 11px);
+  font-size: 0.78em;
   line-height: 1.25;
 }
 
-.bet-cards--puzzle .puzzle__custom-input {
-  font-size: clamp(14px, 9cqi, 20px);
-  min-height: clamp(28px, 14cqi, 38px);
+.bet-cards--puzzle .puzzle__cost--custom {
+  flex: 1;
+  min-height: 0;
+  justify-content: center;
+  gap: 0.12em;
+}
+
+.bet-cards--puzzle .puzzle__cost--custom .puzzle__custom-input {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  min-height: unset;
+  height: auto;
+  font-size: 2.05em;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: inherit;
+}
+
+.bet-cards--puzzle .puzzle__cost--custom .puzzle__custom-input.input--num {
+  text-align: center;
+}
+
+.bet-cards--puzzle .puzzle__cost--custom .puzzle__custom-input::placeholder {
+  color: color-mix(in srgb, currentColor 42%, transparent);
+  opacity: 1;
 }
 
 .bet-cards--puzzle .puzzle .chip {
-  font-size: clamp(8px, 2.8cqi, 11px);
-  padding: clamp(2px, 0.8cqi, 4px) clamp(5px, 2.2cqi, 10px);
+  font-size: 0.76em;
+  padding: 0.22em 0.58em;
 }
 
 .puzzle {
@@ -957,9 +991,13 @@
 }
 
 [data-color-scheme='dark'] .puzzle--flex .puzzle__custom-input {
-  background: rgba(0, 0, 0, 0.38);
-  border-color: rgba(255, 255, 255, 0.22);
   color: var(--ink-100);
+}
+
+[data-color-scheme='dark'] .bet-cards--puzzle .puzzle__cost--custom .puzzle__custom-input {
+  background: transparent;
+  border-color: transparent;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
 }
 
 [data-color-scheme='dark'] .puzzle--custom:focus-within {
@@ -975,10 +1013,15 @@
   .bet-cards--puzzle .puzzle__content {
     min-height: 0;
     height: 100%;
-    padding: 14% !important;
-    justify-content: center;
-    gap: clamp(2px, 1.5cqi, 5px);
+    padding: 18% 16% 14% !important;
+    justify-content: space-between;
+    gap: 0.1em;
     transform: none !important;
+  }
+
+  .bet-cards--puzzle .puzzle:not(.puzzle--flex) .puzzle__content {
+    justify-content: center;
+    gap: 0.15em;
   }
 
   .bet-cards--puzzle .puzzle__note {
@@ -990,12 +1033,60 @@
   }
 
   .bet-cards--puzzle .puzzle--flex .puzzle__head {
-    gap: clamp(2px, 1cqi, 4px);
+    gap: 0.08em;
+    flex-shrink: 0;
   }
 
-  .bet-cards--puzzle .puzzle--custom .puzzle__tier,
-  .bet-cards--puzzle .puzzle--custom .puzzle__cost-unit {
+  .bet-cards--puzzle .puzzle--flex .puzzle__tier,
+  .bet-cards--puzzle .puzzle--flex .puzzle__cost-unit {
     display: none;
+  }
+
+  .bet-cards--puzzle .puzzle--flex .puzzle__index {
+    font-size: 0.72em;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  [data-color-scheme='dark'] .bet-cards--puzzle .puzzle--flex .puzzle__index {
+    color: rgba(255, 255, 255, 0.62);
+    font-weight: 600;
+    text-shadow: none;
+  }
+
+  .bet-cards--puzzle .puzzle--flex .puzzle__cost {
+    flex: 1;
+    min-height: 0;
+    justify-content: center;
+  }
+
+  .bet-cards--puzzle .puzzle--flex .puzzle__cost-value {
+    font-size: 1.75em;
+  }
+
+  .bet-cards--puzzle .puzzle--custom .puzzle__cost--custom .puzzle__custom-input {
+    font-size: 1.75em;
+  }
+
+  /* tab↑ tab← slot→ flat↓ */
+  .bet-cards--puzzle .puzzle--custom.puzzle--shape-4 .puzzle__content {
+    padding: 22% 18% 12% 20% !important;
+  }
+
+  /* tab↑ tab← flat→ flat↓ */
+  .bet-cards--puzzle .puzzle--flex.puzzle--shape-5 .puzzle__content {
+    padding: 22% 16% 12% 20% !important;
+  }
+
+  .bet-cards--puzzle .puzzle--flex .puzzle__foot {
+    flex-shrink: 0;
+    margin-top: 0.08em;
   }
 
   /* Декоративный orb бустера не должен перекрывать текст */
