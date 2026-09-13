@@ -575,6 +575,41 @@
 
 /* ------------------------------------------------------------- фрагменты пазла */
 
+/* Типографика масштабируется от ширины ячейки (container query). */
+.bet-cards--puzzle .puzzle {
+  container-type: inline-size;
+  container-name: puzzle-cell;
+}
+
+.bet-cards--puzzle .puzzle__tier,
+.bet-cards--puzzle .puzzle__index {
+  font-size: clamp(8px, 3.2cqi, 11px);
+}
+
+.bet-cards--puzzle .puzzle__cost-value {
+  font-size: clamp(18px, 13cqi, 28px);
+  line-height: 1.05;
+}
+
+.bet-cards--puzzle .puzzle--flex .puzzle__cost-value {
+  font-size: clamp(12px, 9cqi, 24px);
+}
+
+.bet-cards--puzzle .puzzle__cost-unit {
+  font-size: clamp(8px, 3cqi, 11px);
+  line-height: 1.25;
+}
+
+.bet-cards--puzzle .puzzle__custom-input {
+  font-size: clamp(14px, 9cqi, 20px);
+  min-height: clamp(28px, 14cqi, 38px);
+}
+
+.bet-cards--puzzle .puzzle .chip {
+  font-size: clamp(8px, 2.8cqi, 11px);
+  padding: clamp(2px, 0.8cqi, 4px) clamp(5px, 2.2cqi, 10px);
+}
+
 .puzzle {
   position: relative;
   display: block;
@@ -935,31 +970,15 @@
   .bet-cards--puzzle .puzzle {
     min-height: 0;
     aspect-ratio: 1 / 1;
-    max-height: 132px;
   }
 
   .bet-cards--puzzle .puzzle__content {
     min-height: 0;
-    padding: 12% !important;
+    height: 100%;
+    padding: 14% !important;
     justify-content: center;
-    gap: 2px;
+    gap: clamp(2px, 1.5cqi, 5px);
     transform: none !important;
-  }
-
-  .bet-cards--puzzle .puzzle__cost-value {
-    font-size: clamp(15px, 4.2vw, 18px);
-    line-height: 1.05;
-  }
-
-  .bet-cards--puzzle .puzzle__cost-unit {
-    font-size: 9px;
-    line-height: 1.2;
-  }
-
-  .bet-cards--puzzle .puzzle__custom-input {
-    min-height: 30px;
-    font-size: 15px;
-    padding: 0 6px;
   }
 
   .bet-cards--puzzle .puzzle__note {
@@ -967,22 +986,11 @@
   }
 
   .bet-cards--puzzle .puzzle__foot {
-    margin-top: 2px;
-  }
-
-  .bet-cards--puzzle .puzzle__tier {
-    font-size: 9px;
-    padding: 2px 6px;
+    margin-top: clamp(2px, 1cqi, 6px);
   }
 
   .bet-cards--puzzle .puzzle--flex .puzzle__head {
-    gap: 2px;
-  }
-
-  .bet-cards--puzzle .puzzle--flex .puzzle__index {
-    font-size: 8px;
-    letter-spacing: 0.05em;
-    line-height: 1.2;
+    gap: clamp(2px, 1cqi, 4px);
   }
 
   .bet-cards--puzzle .puzzle--custom .puzzle__tier,
@@ -990,27 +998,9 @@
     display: none;
   }
 
-  .bet-cards--puzzle .puzzle--flex .puzzle__cost-value {
-    font-size: clamp(13px, 3.8vw, 16px);
-  }
-
-  .bet-cards--puzzle .chip {
-    font-size: 9px;
-    padding: 2px 6px;
-  }
-}
-
-@media (max-width: 420px) {
-  .bet-cards--puzzle .puzzle {
-    max-height: 118px;
-  }
-
-  .bet-cards--puzzle .puzzle__content {
-    padding: 10% !important;
-  }
-
-  .bet-cards--puzzle .puzzle__cost-value {
-    font-size: clamp(14px, 4vw, 17px);
+  /* Декоративный orb бустера не должен перекрывать текст */
+  .bet-cards--puzzle .puzzle__boost-orb {
+    display: none;
   }
 }
 
