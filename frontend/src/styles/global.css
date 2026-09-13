@@ -148,6 +148,41 @@ button:disabled {
   }
 }
 
+/* Экран ставки: обычный document scroll — без height:100% и flex-ловушек.
+   Класс app--bet-scroll вешается на <html> из App.tsx. */
+html.app--bet-scroll {
+  height: auto;
+  min-height: 100%;
+  overflow: visible;
+}
+
+html.app--bet-scroll body {
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.app--bet-scroll #root {
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
+}
+
+html.app--bet-scroll .app--bet {
+  display: block;
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
+}
+
+html.app--bet-scroll .app--bet .app__content {
+  display: block;
+  overflow: visible;
+}
+
 /* Админка — см. admin.css */
 
 /* ===========================================================================

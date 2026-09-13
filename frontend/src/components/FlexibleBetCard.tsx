@@ -104,14 +104,24 @@ export function FlexibleBetCard({
     );
   }
 
+  const handleFullKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelect();
+    }
+  };
+
   return (
     <PuzzleShell
       shapeIndex={shapeIndex}
       selected={selected}
       locked={!affordable}
       flex
+      as="div"
       ariaPressed={selected}
+      ariaLabel={`Весь баланс, ${formatNumber(balance)} бонусных баллов`}
       onClick={onSelect}
+      onKeyDown={handleFullKeyDown}
     >
       <span className="puzzle__head">
         <span className="puzzle__index">Весь баланс</span>

@@ -114,7 +114,7 @@ export function BetSelectScreen(): JSX.Element {
       return undefined;
     }
     const frame = window.requestAnimationFrame(() => {
-      betPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      betPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
     return () => window.cancelAnimationFrame(frame);
   }, [selectedKey]);
@@ -233,7 +233,7 @@ export function BetSelectScreen(): JSX.Element {
   );
 
   return (
-    <CrashShell fill rail={rail}>
+    <CrashShell rail={rail}>
       <div className={`bet-stage${launching ? ' bet--launching' : ''}`}>
         <div className="bet-toolbar">
           <h1 className="bet-toolbar__theme">{theme.gameName}</h1>

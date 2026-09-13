@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react';
 import type { BetOption } from '../api/types';
 import { formatNumber } from '../utils/format';
 import { PuzzleShell } from './PuzzleShell';
@@ -30,14 +31,24 @@ export function PuzzleCard({
   const hasBoost = option.boostTier > 1;
   const shortfall = option.cost - balance;
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelect();
+    }
+  };
+
   return (
     <PuzzleShell
       shapeIndex={index}
       selected={selected}
       locked={!affordable}
       boosted={hasBoost}
+      as="div"
       ariaPressed={selected}
+      ariaLabel={`${hasBoost ? `бустер ×${option.boostValue.toFixed(0)}` : 'без усиления'}, ${formatNumber(option.cost)} бонусных баллов`}
       onClick={onSelect}
+      onKeyDown={handleKeyDown}
     >
       <span className="puzzle__head">
         {hasBoost ? (

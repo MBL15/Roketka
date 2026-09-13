@@ -869,15 +869,32 @@
     display: none;
   }
 
-  .crash--fill .crash__main {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-
   .crash__main--bleed {
     overflow-y: visible;
   }
+
+  html.app--bet-scroll .bet-cards--puzzle .puzzle {
+    touch-action: pan-y;
+  }
+}
+
+/* Экран ставки: контент в потоке документа, без height:100% / overflow:hidden */
+html.app--bet-scroll .crash__sidebar {
+  min-height: 0;
+  max-height: none;
+}
+
+html.app--bet-scroll .crash__main,
+html.app--bet-scroll .crash--rail .crash__main {
+  height: auto;
+  min-height: 0;
+  align-self: start;
+  overflow: visible;
+}
+
+html.app--bet-scroll .crash__stage {
+  height: auto;
+  min-height: 0;
 }
 
 @media (max-width: 520px) {

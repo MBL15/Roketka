@@ -92,8 +92,10 @@ export function PuzzleShell({
         style={{ zIndex: selected ? stackOrder + 10 : stackOrder }}
         onClick={onClick}
         onKeyDown={onKeyDown}
-        role="group"
+        role={onClick ? 'button' : 'group'}
+        tabIndex={onClick && !locked ? 0 : undefined}
         aria-label={ariaLabel}
+        aria-pressed={ariaPressed}
       >
         {content}
       </div>

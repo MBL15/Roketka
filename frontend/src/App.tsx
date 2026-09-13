@@ -49,6 +49,11 @@ export function App(): JSX.Element {
   }, [theme]);
 
   useEffect(() => {
+    document.documentElement.classList.toggle('app--bet-scroll', phase === 'bet');
+    return () => document.documentElement.classList.remove('app--bet-scroll');
+  }, [phase]);
+
+  useEffect(() => {
     if (!player || !setup) {
       return;
     }
