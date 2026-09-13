@@ -65,8 +65,7 @@ export function FlexibleBetCard({
         onKeyDown={handleCustomKeyDown}
       >
         <span className="puzzle__head">
-          <span className="puzzle__index">Своя сумма</span>
-          <span className="chip puzzle__tier">×1 · без усиления</span>
+          <span className="chip puzzle__tier">Своя сумма</span>
         </span>
 
         <label className="puzzle__cost puzzle__cost--custom" onClick={(event) => event.stopPropagation()}>
@@ -123,13 +122,11 @@ export function FlexibleBetCard({
       onKeyDown={handleFullKeyDown}
     >
       <span className="puzzle__head">
-        <span className="puzzle__index">Весь баланс</span>
-        <span className="chip puzzle__tier">×1 · без усиления</span>
+        <span className="chip puzzle__tier">Весь баланс</span>
       </span>
 
       <span className="puzzle__cost">
         <span className="puzzle__cost-value num">{formatNumber(balance)}</span>
-        <span className="puzzle__cost-unit">бонусных баллов</span>
       </span>
 
       <span className="puzzle__note text-xs">

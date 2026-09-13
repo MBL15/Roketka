@@ -1037,27 +1037,11 @@
     flex-shrink: 0;
   }
 
-  .bet-cards--puzzle .puzzle--flex .puzzle__tier,
-  .bet-cards--puzzle .puzzle--flex .puzzle__cost-unit {
-    display: none;
-  }
-
-  .bet-cards--puzzle .puzzle--flex .puzzle__index {
-    font-size: 0.72em;
-    font-weight: 600;
-    text-transform: none;
-    letter-spacing: 0.02em;
-    line-height: 1.15;
+  .bet-cards--puzzle .puzzle--flex .puzzle__head .chip {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  [data-color-scheme='dark'] .bet-cards--puzzle .puzzle--flex .puzzle__index {
-    color: rgba(255, 255, 255, 0.62);
-    font-weight: 600;
-    text-shadow: none;
   }
 
   .bet-cards--puzzle .puzzle--flex .puzzle__cost {
