@@ -931,27 +931,35 @@
   filter: drop-shadow(0 10px 26px color-mix(in srgb, var(--accent) 35%, rgba(0, 0, 0, 0.5)));
 }
 
-@media (max-width: 768px) {
+@media (max-width: 820px) {
   .bet-cards--puzzle .puzzle {
     min-height: 0;
     aspect-ratio: 1 / 1;
+    max-height: 132px;
   }
 
   .bet-cards--puzzle .puzzle__content {
     min-height: 0;
-    /* %-padding считается от ширины — на узкой сетке уменьшаем отступы */
-    padding: 16% !important;
+    padding: 12% !important;
     justify-content: center;
-    gap: 3px;
+    gap: 2px;
+    transform: none !important;
   }
 
   .bet-cards--puzzle .puzzle__cost-value {
-    font-size: 20px;
+    font-size: clamp(15px, 4.2vw, 18px);
+    line-height: 1.05;
+  }
+
+  .bet-cards--puzzle .puzzle__cost-unit {
+    font-size: 9px;
+    line-height: 1.2;
   }
 
   .bet-cards--puzzle .puzzle__custom-input {
-    min-height: 36px;
-    font-size: 17px;
+    min-height: 30px;
+    font-size: 15px;
+    padding: 0 6px;
   }
 
   .bet-cards--puzzle .puzzle__note {
@@ -959,98 +967,50 @@
   }
 
   .bet-cards--puzzle .puzzle__foot {
-    margin-top: 4px;
+    margin-top: 2px;
   }
 
-  .bet-cards--puzzle .puzzle--shape-1 .puzzle__content {
-    transform: none !important;
+  .bet-cards--puzzle .puzzle__tier {
+    font-size: 9px;
+    padding: 2px 6px;
   }
 
-  /* Нижний ряд: tab↑ — больше отступ сверху; tab← / slot→ — асимметрия по X */
-  .bet-cards--puzzle .puzzle--shape-3 .puzzle__content {
-    padding: 24% 20% 13% 16% !important;
-  }
-
-  /* «Своя сумма»: tab↑ tab← slot→ — симметричные отступы, без сдвига */
-  .bet-cards--puzzle .puzzle--custom .puzzle__content {
-    padding: 26% 28% 14% 28% !important;
-    transform: none !important;
-  }
-
-  .bet-cards--puzzle .puzzle--custom .puzzle__head,
-  .bet-cards--puzzle .puzzle--custom .puzzle__custom-field,
-  .bet-cards--puzzle .puzzle--custom .puzzle__foot {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
-
-  .bet-cards--puzzle .puzzle--custom .puzzle__tier {
-    display: none;
-  }
-
-  .bet-cards--puzzle .puzzle--shape-5 .puzzle__content {
-    padding: 24% 14% 12% 20% !important;
-    transform: translateX(4px) !important;
-  }
-
-  /* «Своя сумма» / «Весь баланс» — компактнее, без лишних подписей */
   .bet-cards--puzzle .puzzle--flex .puzzle__head {
     gap: 2px;
   }
 
   .bet-cards--puzzle .puzzle--flex .puzzle__index {
-    font-size: 9px;
-    letter-spacing: 0.07em;
+    font-size: 8px;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
   }
 
-  .bet-cards--puzzle .puzzle--custom .puzzle__custom-field .puzzle__cost-unit {
+  .bet-cards--puzzle .puzzle--custom .puzzle__tier,
+  .bet-cards--puzzle .puzzle--custom .puzzle__cost-unit {
     display: none;
   }
 
-  .bet-cards--puzzle .puzzle--flex .puzzle__custom-input {
-    min-height: 32px;
-    font-size: 16px;
+  .bet-cards--puzzle .puzzle--flex .puzzle__cost-value {
+    font-size: clamp(13px, 3.8vw, 16px);
   }
 
-  .bet-cards--puzzle .puzzle--flex .puzzle__cost-value {
-    font-size: 18px;
+  .bet-cards--puzzle .chip {
+    font-size: 9px;
+    padding: 2px 6px;
   }
 }
 
 @media (max-width: 420px) {
-  .bet-cards--puzzle .puzzle:not(.puzzle--shape-3):not(.puzzle--shape-4):not(.puzzle--shape-5) .puzzle__content {
-    padding: 14% !important;
+  .bet-cards--puzzle .puzzle {
+    max-height: 118px;
   }
 
-  .bet-cards--puzzle .puzzle--shape-3 .puzzle__content {
-    padding: 22% 18% 12% 14% !important;
-  }
-
-  .bet-cards--puzzle .puzzle--custom .puzzle__content {
-    padding: 24% 26% 12% 26% !important;
-    transform: none !important;
-  }
-
-  .bet-cards--puzzle .puzzle--shape-5 .puzzle__content {
-    padding: 22% 12% 11% 18% !important;
+  .bet-cards--puzzle .puzzle__content {
+    padding: 10% !important;
   }
 
   .bet-cards--puzzle .puzzle__cost-value {
-    font-size: 20px;
-  }
-
-  .bet-cards--puzzle .puzzle--flex .puzzle__cost-value {
-    font-size: 18px;
-  }
-
-  .bet-cards--puzzle .puzzle--flex .puzzle__index {
-    font-size: 9px;
-  }
-
-  .bet-cards--puzzle .chip {
-    font-size: 10px;
-    padding: 3px 8px;
+    font-size: clamp(14px, 4vw, 17px);
   }
 }
 
