@@ -233,6 +233,13 @@ public final class GameDtos {
                                           long bonusAwarded) {
     }
 
+    public record DemoAccountResetResultDto(List<DemoAccountResetEntryDto> accounts) {
+    }
+
+    public record DemoAccountResetEntryDto(String nickname, String accountKind, long bonusBalance,
+                                           int roundsRemoved) {
+    }
+
     // ---------------------------------------------------------- проверяемость
 
     public record FairnessVerificationDto(boolean matches, double expectedCrashMultiplier,

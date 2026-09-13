@@ -138,6 +138,13 @@ export const ADMIN_SEARCH_INDEX: AdminSearchEntry[] = [
   entry('interface', 'Интерфейс и демо', 'Раундов в истории', 'session.historySize', 'historySize', ['история', 'лента']),
   entry('interface', 'Интерфейс и демо', 'Стартовый баланс демо-игроков', 'session.demoBonusBalance', 'demoBonusBalance', ['демо', 'баланс']),
   entry('interface', 'Интерфейс и демо', 'Стартовый баланс новых игроков', 'session.playerStartingBalance', 'playerStartingBalance', ['регистрация', 'баланс', 'игрок']),
+  entry('interface', 'Интерфейс и демо', 'Сброс demo, judge и expert', 'session.demoReset', undefined, [
+    'сброс',
+    'демо',
+    'заводские',
+    'expert',
+    'judge',
+  ]),
   entry('sim', 'Симулятор RTP', 'Параметры прогона симуляции', 'sim.run', undefined, ['monte carlo', 'rtp', 'симулятор', 'прогон']),
 ];
 

@@ -13,6 +13,7 @@ import ru.stoloto.balloon.config.GameConfigService;
 import ru.stoloto.balloon.game.RoundEngine;
 import ru.stoloto.balloon.repo.GameRoundRepository;
 import ru.stoloto.balloon.repo.UserAccountRepository;
+import ru.stoloto.balloon.service.DemoAccountResetService;
 import ru.stoloto.balloon.service.RtpSimulator;
 import ru.stoloto.balloon.service.TournamentService;
 
@@ -42,19 +43,22 @@ public class AdminController {
     private final GameRoundRepository rounds;
     private final UserAccountRepository users;
     private final TournamentService tournamentService;
+    private final DemoAccountResetService demoAccountResetService;
 
     public AdminController(GameConfigService configService,
                            RtpSimulator simulator,
                            RoundEngine engine,
                            GameRoundRepository rounds,
                            UserAccountRepository users,
-                           TournamentService tournamentService) {
+                           TournamentService tournamentService,
+                           DemoAccountResetService demoAccountResetService) {
         this.configService = configService;
         this.simulator = simulator;
         this.engine = engine;
         this.rounds = rounds;
         this.users = users;
         this.tournamentService = tournamentService;
+        this.demoAccountResetService = demoAccountResetService;
     }
 
     @GetMapping("/config")
@@ -164,6 +168,22 @@ public class AdminController {
                         .map(entry -> new GameDtos.AdminTournamentLeaderDto(
                                 entry.userId(), entry.nickname(), entry.points(), entry.position()))
                         .toList());
+    }
+
+    @PostMapping("/demo-accounts/reset")
+    @Operation(summary = "Сбросить demo, judge и expert до заводских",
+            description = """
+                    Возвращает служебные аккаунты к стартовым балансам, паролям из balloon.demo-users,
+                    обнуляет турнирные очки, коллекции, достижения и историю раундов. Незакрытые
+                    полёты завершаются перед очисткой.
+                    """)
+    public GameDtos.DemoAccountResetResultDto resetDemoAccounts(AuthContext context) {
+        AdminAccess.requireExpert(context);
+        DemoAccountResetService.ResetResult result = demoAccountResetService.resetServiceAccounts();
+        return new GameDtos.DemoAccountResetResultDto(result.accounts().stream()
+                .map(entry -> new GameDtos.DemoAccountResetEntryDto(
+                        entry.nickname(), entry.accountKind(), entry.bonusBalance(), entry.roundsRemoved()))
+                .toList());
     }
 
     @PostMapping("/tournament/finish")

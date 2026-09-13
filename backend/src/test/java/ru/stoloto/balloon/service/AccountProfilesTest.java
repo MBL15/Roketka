@@ -42,6 +42,14 @@ class AccountProfilesTest {
     }
 
     @Test
+    void serviceAccountsAreDemoJudgeAndAdmin() {
+        assertThat(AccountProfiles.isServiceAccount(AccountProfiles.Kind.DEMO)).isTrue();
+        assertThat(AccountProfiles.isServiceAccount(AccountProfiles.Kind.JUDGE)).isTrue();
+        assertThat(AccountProfiles.isServiceAccount(AccountProfiles.Kind.ADMIN)).isTrue();
+        assertThat(AccountProfiles.isServiceAccount(AccountProfiles.Kind.PLAYER)).isFalse();
+    }
+
+    @Test
     void reservedNicknamesBlockedForRegistration() {
         assertThat(AccountProfiles.isReservedNickname("demo")).isTrue();
         assertThat(AccountProfiles.isReservedNickname("Judge")).isTrue();

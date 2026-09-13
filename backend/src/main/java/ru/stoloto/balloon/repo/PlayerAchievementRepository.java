@@ -17,4 +17,6 @@ public interface PlayerAchievementRepository extends JpaRepository<PlayerAchieve
     List<String> findAchievementIdsByUserId(@Param("userId") Long userId);
 
     List<PlayerAchievement> findByUserIdAndRoundIdOrderByUnlockedAtAsc(Long userId, Long roundId);
+
+    void deleteByUserId(Long userId);
 }

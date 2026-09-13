@@ -8,4 +8,6 @@ import java.util.List;
 public interface CollectionFragmentRepository extends JpaRepository<CollectionFragment, Long> {
 
     List<CollectionFragment> findByUserIdAndCollectionLevel(Long userId, int collectionLevel);
+
+    void deleteByUserId(Long userId);
 }

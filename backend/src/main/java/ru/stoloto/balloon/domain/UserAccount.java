@@ -220,6 +220,26 @@ public class UserAccount {
         this.playerXp = Math.max(0, playerXp);
     }
 
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    /** Возвращает служебный аккаунт к заводским значениям прототипа. */
+    public void applyFactoryDefaults(long bonusBalance, String passwordHash) {
+        this.bonusBalance = bonusBalance;
+        this.passwordHash = passwordHash;
+        this.gamePoints = 0;
+        this.lotteryTickets = 0;
+        this.collectionLevel = 1;
+        this.roundsPlayed = 0;
+        this.roundsWon = 0;
+        this.roundsLost = 0;
+        this.totalBonusEarned = 0;
+        this.onboardingSeen = false;
+        this.playerLevel = 1;
+        this.playerXp = 0;
+    }
+
     /** Баланса не хватает на выбранную ставку. */
     public static class InsufficientBalanceException extends RuntimeException {
         public InsufficientBalanceException(long balance, long required) {

@@ -7,6 +7,7 @@ import type {
   ConfigStatus,
   RuntimeStats,
   SimulationReport,
+  DemoAccountResetResult,
   TournamentFinishResult,
 } from '../api/types';
 import { formatMultiplier, formatNumber, formatPercent } from '../utils/format';
@@ -303,7 +304,9 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
           {tab === 'tournament' && (
             <TournamentEditor config={draft} onChange={setDraft} onMessage={setMessage} />
           )}
-          {tab === 'interface' && <SessionEditor config={draft} onChange={setDraft} />}
+          {tab === 'interface' && (
+            <SessionEditor config={draft} onChange={setDraft} onMessage={setMessage} />
+          )}
           {tab === 'sim' && <Simulator draft={draft} dirty={dirty} />}
         </div>
       </AdminHighlightContext.Provider>
@@ -1015,14 +1018,17 @@ function TournamentFinishPanel({
 function SessionEditor({
   config,
   onChange,
+  onMessage,
 }: {
   config: AdminConfig;
   onChange: (config: AdminConfig) => void;
+  onMessage: (message: string | null) => void;
 }): JSX.Element {
   const patch = useConfigPatch(config, onChange);
 
   return (
     <div className="admin__grid admin__grid--single">
+      <DemoAccountsResetPanel demoBalance={config.session.demoBonusBalance} onMessage={onMessage} />
       <Card title="Интерфейс и демо" hint="Таймауты, подсказки и стартовый баланс для демо-аккаунтов." wide>
         <Num
           fieldId="session.resultIdleTimeoutSeconds"
@@ -1071,6 +1077,76 @@ function SessionEditor({
         />
       </Card>
     </div>
+  );
+}
+
+function DemoAccountsResetPanel({
+  demoBalance,
+  onMessage,
+}: {
+  demoBalance: number;
+  onMessage: (message: string | null) => void;
+}): JSX.Element {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastResult, setLastResult] = useState<DemoAccountResetResult | null>(null);
+
+  const reset = async () => {
+    if (
+      !window.confirm(
+        'Сбросить demo, judge и expert до заводских?\n\nБудут обнулены балансы, очки, коллекции, достижения и история раундов. Пароли вернутся к demo/demo, judge/judge, expert/expert. Активные сессии этих аккаунтов завершатся.',
+      )
+    ) {
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    onMessage(null);
+    try {
+      const result = await api.adminResetDemoAccounts();
+      setLastResult(result);
+      onMessage(`Сброшено аккаунтов: ${result.accounts.length}`);
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Не удалось сбросить демо-аккаунты';
+      setError(message);
+      onMessage(message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Card
+      fieldId="session.demoReset"
+      title="Сброс демо-аккаунтов"
+      hint="Возвращает demo, judge и expert к заводским балансам и паролям."
+      wide
+    >
+      <p className="text-sm muted">
+        demo и expert получат {formatNumber(demoBalance)} б., judge — 500 б. Турнирные очки, коллекции,
+        достижения и раунды будут удалены.
+      </p>
+
+      {error && <p className="text-sm negative">{error}</p>}
+
+      {lastResult && lastResult.accounts.length > 0 && (
+        <ul className="admin__demo-reset-list">
+          {lastResult.accounts.map((entry) => (
+            <li key={entry.nickname}>
+              <strong>{entry.nickname}</strong> ({entry.accountKind}): {formatNumber(entry.bonusBalance)} б.,
+              удалено раундов — {formatNumber(entry.roundsRemoved)}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="admin__tournament-actions">
+        <button type="button" className="btn btn--danger" disabled={busy} onClick={() => void reset()}>
+          {busy ? 'Сбрасываем…' : 'Сбросить demo, judge и expert'}
+        </button>
+      </div>
+    </Card>
   );
 }
 

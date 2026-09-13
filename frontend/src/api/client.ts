@@ -4,6 +4,7 @@ import type {
   AuthResponse,
   CashoutResult,
   ConfigStatus,
+  DemoAccountResetResult,
   GameSetup,
   HistoryEntry,
   PurchaseResult,
@@ -219,4 +220,7 @@ export const api = {
 
   adminFinishTournament: () =>
     request<TournamentFinishResult>('/api/admin/tournament/finish', { method: 'POST' }),
+
+  adminResetDemoAccounts: () =>
+    request<DemoAccountResetResult>('/api/admin/demo-accounts/reset', { method: 'POST' }),
 };

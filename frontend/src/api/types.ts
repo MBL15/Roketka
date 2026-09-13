@@ -475,6 +475,17 @@ export interface TournamentFinishResult {
   nextEndsAt: string;
 }
 
+export interface DemoAccountResetEntry {
+  nickname: string;
+  accountKind: string;
+  bonusBalance: number;
+  roundsRemoved: number;
+}
+
+export interface DemoAccountResetResult {
+  accounts: DemoAccountResetEntry[];
+}
+
 export interface ApiErrorBody {
   error: string;
   message: string;

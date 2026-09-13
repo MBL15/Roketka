@@ -16,6 +16,8 @@ public interface GameRoundRepository extends JpaRepository<GameRound, Long> {
 
     List<GameRound> findByUserIdAndStatusInOrderByFinishedAtDesc(Long userId, List<RoundStatus> statuses, Limit limit);
 
+    List<GameRound> findByUserId(Long userId);
+
     /** Незакрытые раунды: восстанавливаются в игровом движке после перезапуска сервера. */
     List<GameRound> findByStatusIn(List<RoundStatus> statuses);
 

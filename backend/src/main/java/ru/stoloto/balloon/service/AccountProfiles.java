@@ -66,4 +66,9 @@ public final class AccountProfiles {
     public static long startingBonus(Kind kind, long demoBalance) {
         return kind == Kind.JUDGE ? JUDGE_STARTING_BALANCE : demoBalance;
     }
+
+    /** demo, judge, expert — служебные аккаунты прототипа. */
+    public static boolean isServiceAccount(Kind kind) {
+        return kind == Kind.DEMO || kind == Kind.JUDGE || kind == Kind.ADMIN;
+    }
 }
