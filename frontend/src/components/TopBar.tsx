@@ -93,7 +93,12 @@ export function TopBar(): JSX.Element {
           )}
 
           {expert && (
-            <a className="btn btn--icon btn--ghost" href="#admin" title="Настройки" aria-label="Настройки">
+            <a
+              className="btn btn--icon btn--ghost"
+              href="#admin/tournament"
+              title="Админка · турнир"
+              aria-label="Админка · турнир"
+            >
               ⚙
             </a>
           )}

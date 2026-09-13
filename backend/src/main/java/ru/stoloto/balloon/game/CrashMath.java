@@ -159,7 +159,22 @@ public final class CrashMath {
         if (delta <= 0) {
             return value;
         }
-        double steps = Math.floor(value / delta + 1e-9);
+        long steps = multiplierToSteps(value, delta);
+        return multiplierFromSteps(steps, delta);
+    }
+
+    /** Целое число шагов delta в коэффициенте — без ошибок double (1.2 -> 120, не 119). */
+    public static long multiplierToSteps(double value, double delta) {
+        if (delta <= 0) {
+            return 0L;
+        }
+        return (long) Math.floor(value / delta + 1e-9);
+    }
+
+    public static double multiplierFromSteps(long steps, double delta) {
+        if (delta <= 0) {
+            return steps;
+        }
         return Math.round(steps * delta * 1e6) / 1e6;
     }
 }

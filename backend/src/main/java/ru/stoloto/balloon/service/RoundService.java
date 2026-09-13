@@ -179,8 +179,9 @@ public class RoundService {
     // ---------------------------------------------------------------- cashout
 
     @Transactional
-    public GameDtos.CashoutResponse cashout(UserAccount account, long roundId) {
-        ActiveRound.CashoutOutcome outcome = engine.cashout(roundId, account.getId());
+    public GameDtos.CashoutResponse cashout(UserAccount account, long roundId,
+                                            Double targetMultiplier, Integer targetSteps) {
+        ActiveRound.CashoutOutcome outcome = engine.cashout(roundId, account.getId(), targetMultiplier, targetSteps);
         if (!outcome.accepted()) {
             throw new RoundRejectedException(outcome.reason());
         }

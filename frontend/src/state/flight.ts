@@ -104,9 +104,21 @@ export function flightFromState(state: RoundState, points: PointsRules): Flight 
  * исходят из времени старта раунда.
  */
 export function baseMultiplierAt(flight: Flight, nowMillis: number): number {
-  const elapsedSeconds = Math.max(0, nowMillis + flight.clockOffsetMillis - flight.startedAtMillis) / 1000;
+  const elapsedSeconds = elapsedSecondsAt(flight, nowMillis);
   const raw = Math.exp(flight.growthRate * elapsedSeconds) - 1;
   return quantizeDown(Math.min(Math.max(raw, 0), flight.maxMultiplier), flight.delta);
+}
+
+export function elapsedSecondsAt(flight: Flight, nowMillis: number): number {
+  return Math.max(0, nowMillis + flight.clockOffsetMillis - flight.startedAtMillis) / 1000;
+}
+
+/** Секунды полёта, за которые базовый коэффициент достигает {@code multiplier}. */
+export function secondsToReach(multiplier: number, growthRate: number): number {
+  if (multiplier <= 0 || growthRate <= 0) {
+    return 0;
+  }
+  return Math.log(multiplier + 1) / growthRate;
 }
 
 /** Минимальный коэффициент для «Забрать»: с ×1 включительно. */
@@ -122,7 +134,22 @@ export function quantizeDown(value: number, delta: number): number {
   if (delta <= 0) {
     return value;
   }
-  return Math.floor(value / delta + 1e-9) * delta;
+  return multiplierFromSteps(multiplierToSteps(value, delta), delta);
+}
+
+/** Целое число шагов delta — без ошибок double (1.2 -> 120, не 119). */
+export function multiplierToSteps(value: number, delta: number): number {
+  if (delta <= 0) {
+    return 0;
+  }
+  return Math.floor(value / delta + 1e-9);
+}
+
+export function multiplierFromSteps(steps: number, delta: number): number {
+  if (delta <= 0) {
+    return steps;
+  }
+  return Math.round(steps * delta * 1e6) / 1e6;
 }
 
 export function levelsPassedAt(multiplier: number, levels: number[]): number {

@@ -195,8 +195,17 @@ public record GameConfig(
             int durationDays,
             int liveRatingSize,
             boolean anonymizeNames,
+            /** Бонусные баллы за места 1, 2, 3…; боты в призовой таблице не участвуют. */
+            List<Long> prizes,
             SimulationConfig simulation
     ) {
+        @JsonIgnore
+        public List<Long> prizesOrDefault() {
+            if (prizes == null || prizes.isEmpty()) {
+                return List.of(1_000L, 500L, 250L);
+            }
+            return prizes;
+        }
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

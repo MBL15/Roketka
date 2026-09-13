@@ -43,6 +43,7 @@ interface State {
   lastBetOptionId: number | null;
   lastBetAmount: number | null;
   history: HistoryEntry[];
+  myHistory: HistoryEntry[];
   rating: RatingEntry[];
   socketStatus: SocketStatus;
   toasts: Toast[];
@@ -60,6 +61,7 @@ type Action =
   | { type: 'result'; result: RoundResult | null }
   | { type: 'lastBet'; optionId: number | null; amount: number | null }
   | { type: 'history'; history: HistoryEntry[] }
+  | { type: 'myHistory'; myHistory: HistoryEntry[] }
   | { type: 'rating'; rating: RatingEntry[] }
   | { type: 'socket'; status: SocketStatus }
   | { type: 'balance'; balance: number; points?: number }
@@ -88,6 +90,7 @@ const initialState: State = {
   lastBetOptionId: null,
   lastBetAmount: null,
   history: [],
+  myHistory: [],
   rating: [],
   socketStatus: 'closed',
   toasts: [],
@@ -117,6 +120,8 @@ function reducer(state: State, action: Action): State {
       return { ...state, lastBetOptionId: action.optionId, lastBetAmount: action.amount };
     case 'history':
       return { ...state, history: action.history };
+    case 'myHistory':
+      return { ...state, myHistory: action.myHistory };
     case 'rating':
       return { ...state, rating: action.rating };
     case 'socket':
@@ -208,6 +213,8 @@ interface GameContextValue extends State {
   notify: (toast: Omit<Toast, 'id'>) => void;
   dismissToast: (id: number) => void;
   setAutoCashout: (value: number | null) => void;
+  /** Сбрасывает флаг «прокрутить к Забрать» после «Повторить»; true — один раз. */
+  consumeCashoutScroll: () => boolean;
 }
 
 const GameContext = createContext<GameContextValue | null>(null);
@@ -219,6 +226,7 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
   const phaseRef = useRef<Phase>(state.phase);
   phaseRef.current = state.phase;
   const toastedAchievementsRef = useRef<Set<string>>(new Set());
+  const pendingCashoutScrollRef = useRef(false);
 
   const notify = useCallback((toast: Omit<Toast, 'id'>) => {
     toastSequence += 1;
@@ -280,9 +288,15 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
   // ---------------------------------------------------------------- загрузка
 
   const loadSnapshot = useCallback(async (): Promise<void> => {
-    const [setup, history, rating] = await Promise.all([api.setup(), api.history(), api.liveRating()]);
+    const [setup, history, myHistory, rating] = await Promise.all([
+      api.setup(),
+      api.history(),
+      api.myHistory(),
+      api.liveRating(),
+    ]);
     dispatch({ type: 'setup', setup });
     dispatch({ type: 'history', history });
+    dispatch({ type: 'myHistory', myHistory });
     dispatch({ type: 'rating', rating });
     return undefined;
   }, []);
@@ -317,8 +331,9 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
 
   const refreshHistory = useCallback(async () => {
     try {
-      const history = await api.history();
+      const [history, myHistory] = await Promise.all([api.history(), api.myHistory()]);
       dispatch({ type: 'history', history });
+      dispatch({ type: 'myHistory', myHistory });
     } catch {
       /* история не критична: молча оставляем предыдущую */
     }
@@ -697,12 +712,21 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
     [notify, notifyAchievements],
   );
 
+  const consumeCashoutScroll = useCallback(() => {
+    if (!pendingCashoutScrollRef.current) {
+      return false;
+    }
+    pendingCashoutScrollRef.current = false;
+    return true;
+  }, []);
+
   const repeatBet = useCallback(async () => {
     if (state.lastBetOptionId === null && state.lastBetAmount === null) {
       dispatch({ type: 'phase', phase: 'bet' });
       return;
     }
     dispatch({ type: 'result', result: null });
+    pendingCashoutScrollRef.current = true;
     if (state.lastBetOptionId !== null) {
       await startRound({ betOptionId: state.lastBetOptionId });
       return;
@@ -745,11 +769,13 @@ export function GameProvider({ children }: { children: ReactNode }): JSX.Element
       notify,
       dismissToast,
       setAutoCashout,
+      consumeCashoutScroll,
     }),
     [
       applyPurchase,
       applyCashoutProgression,
       chooseTheme,
+      consumeCashoutScroll,
       dismissToast,
       finishRound,
       goTo,

@@ -7,6 +7,7 @@
 # Внутрь контейнеров эти файлы попадают как есть — только LF.
 Dockerfile text eol=lf
 *.conf text eol=lf
+*.sh text eol=lf
 
 *.java text
 *.ts text

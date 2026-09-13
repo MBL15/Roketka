@@ -20,7 +20,7 @@ export function CrashShell({
   bleed = false,
   fill = false,
 }: CrashShellProps): JSX.Element {
-  const { history, setup } = useGame();
+  const { history, myHistory } = useGame();
   const stageRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
@@ -83,10 +83,10 @@ export function CrashShell({
         <aside className="crash__sidebar" ref={sidebarRef}>
           <div className="crash__sidebar-head">
             <span className="crash__sidebar-title">Раунды</span>
-            <span className="crash__sidebar-meta text-xs muted">{setup?.session.historySize ?? 0}</span>
+            <span className="crash__sidebar-meta text-xs muted">{myHistory.length}</span>
           </div>
           <div className="crash__sidebar-feed">
-            <HistoryFeed entries={history} />
+            <HistoryFeed entries={myHistory} />
           </div>
         </aside>
       )}

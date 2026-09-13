@@ -1,5 +1,6 @@
 import type {
   AdminConfig,
+  AdminTournamentStatus,
   AuthResponse,
   CashoutResult,
   ConfigStatus,
@@ -13,6 +14,7 @@ import type {
   SimulationReport,
   StartedRound,
   ThemeKey,
+  TournamentFinishResult,
   TournamentTable,
 } from './types';
 
@@ -168,8 +170,11 @@ export const api = {
 
   roundState: (roundId: number) => request<RoundState>(`/api/rounds/${roundId}/state`),
 
-  cashout: (roundId: number) =>
-    request<CashoutResult>(`/api/rounds/${roundId}/cashout`, { method: 'POST' }),
+  cashout: (roundId: number, targetSteps?: number) =>
+    request<CashoutResult>(`/api/rounds/${roundId}/cashout`, {
+      method: 'POST',
+      body: targetSteps === undefined ? undefined : { targetSteps },
+    }),
 
   roundResult: (roundId: number) => request<RoundResult>(`/api/rounds/${roundId}/result`),
 
@@ -209,4 +214,9 @@ export const api = {
   }) => request<SimulationReport>('/api/admin/simulate', { method: 'POST', body: payload }),
 
   adminStats: () => request<RuntimeStats>('/api/admin/stats'),
+
+  adminTournamentStatus: () => request<AdminTournamentStatus>('/api/admin/tournament'),
+
+  adminFinishTournament: () =>
+    request<TournamentFinishResult>('/api/admin/tournament/finish', { method: 'POST' }),
 };

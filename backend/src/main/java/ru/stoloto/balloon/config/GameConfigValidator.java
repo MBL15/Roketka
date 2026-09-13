@@ -249,6 +249,14 @@ public class GameConfigValidator {
         if (isBlank(tournament.name())) {
             errors.add("tournament.name: не должно быть пустым");
         }
+        if (tournament.prizes() != null) {
+            if (tournament.prizes().size() > 20) {
+                errors.add("tournament.prizes: не более 20 призовых мест");
+            }
+            for (int i = 0; i < tournament.prizes().size(); i++) {
+                inRange("tournament.prizes[" + i + "]", tournament.prizes().get(i), 0, 1_000_000, errors);
+            }
+        }
         GameConfig.SimulationConfig simulation = tournament.simulation();
         if (simulation == null) {
             errors.add("tournament.simulation: раздел обязателен");

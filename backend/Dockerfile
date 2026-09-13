@@ -33,7 +33,7 @@ COPY --from=build /build/target/balloon-backend.jar /app/balloon-backend.jar
 # Конфигурация по умолчанию: подменяется монтированием каталога config/.
 COPY --chown=balloon:balloon config/game-config.yaml /app/config/game-config.yaml
 COPY backend/docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+RUN sed -i 's/\r$//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh
 
 ENV BALLOON_CONFIG_PATH=/app/config/game-config.yaml \
     BALLOON_DATA_DIR=/app/data \

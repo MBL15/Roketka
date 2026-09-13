@@ -753,7 +753,7 @@
   margin-top: calc(-1 * var(--puzzle-overlap-y));
 }
 
-/* Планшет / мобильный: две колонки, без налезания — читаемость важнее стыковки */
+/* Планшет / мобильный: 3 ряда × 2 колонки, без налезания */
 @media (max-width: 768px) {
   .bet-cards.bet-cards--six.bet-cards--puzzle {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -775,11 +775,9 @@
   }
 }
 
-/* Узкий экран: один столбец на всю ширину */
 @media (max-width: 420px) {
   .bet-cards.bet-cards--six.bet-cards--puzzle {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
+    gap: 8px;
     padding: 8px 6px 12px;
   }
 }
@@ -869,6 +867,16 @@
 
   .crash-header__stats {
     display: none;
+  }
+
+  .crash--fill .crash__main {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .crash__main--bleed {
+    overflow-y: visible;
   }
 }
 

@@ -52,6 +52,12 @@ public class Tournament {
         this.endsAt = endsAt;
     }
 
+    /** Досрочное завершение: закрывает окно и снимает признак активности. */
+    public void finish(Instant now) {
+        this.endsAt = now;
+        this.active = false;
+    }
+
     public void setActive(boolean active) {
         this.active = active;
     }

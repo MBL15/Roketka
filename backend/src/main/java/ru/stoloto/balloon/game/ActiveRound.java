@@ -146,6 +146,14 @@ public final class ActiveRound {
      * @return результат фиксации либо причина отказа
      */
     public synchronized CashoutOutcome cashout(long nowMillis) {
+        return cashout(nowMillis, null, null);
+    }
+
+    /**
+     * @param targetMultiplier устаревший способ передать цель автозабора
+     * @param targetSteps    точная цель в шагах delta (предпочтительно для автозабора)
+     */
+    public synchronized CashoutOutcome cashout(long nowMillis, Double targetMultiplier, Integer targetSteps) {
         if (cashoutMultiplier != null) {
             return CashoutOutcome.rejected("Выигрыш по этому раунду уже зафиксирован");
         }
@@ -157,7 +165,25 @@ public final class ActiveRound {
             return CashoutOutcome.rejected("«Забрать» доступно с коэффициента ×1");
         }
 
-        double multiplier = displayedMultiplier(base, boostApplied);
+        double baseForCashout = base;
+        if (targetSteps != null) {
+            if (targetSteps < 0) {
+                return CashoutOutcome.rejected("Некорректная цель автозабора");
+            }
+            double capped = CrashMath.multiplierFromSteps(targetSteps, delta);
+            if (base + 1e-9 < capped) {
+                return CashoutOutcome.rejected("Коэффициент автозабора ещё не достигнут");
+            }
+            baseForCashout = capped;
+        } else if (targetMultiplier != null) {
+            double capped = CrashMath.quantizeDown(targetMultiplier, delta);
+            if (base + 1e-9 < capped) {
+                return CashoutOutcome.rejected("Коэффициент автозабора ещё не достигнут");
+            }
+            baseForCashout = capped;
+        }
+
+        double multiplier = displayedMultiplier(baseForCashout, boostApplied);
         cashoutMultiplier = multiplier;
         payout = Math.round(betAmount * multiplier);
         points += pointsCashoutBonus;

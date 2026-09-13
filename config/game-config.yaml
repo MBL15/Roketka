@@ -249,6 +249,7 @@ tournament:
   durationDays: 20
   liveRatingSize: 12              # элементов в строке рейтинга над игрой
   anonymizeNames: true            # маскировать первые 3 символа чужих имён
+  prizes: [1000, 500, 250]        # бонусные баллы за 1–3 места (боты не получают)
   simulation:
     enabled: true                 # живые соперники-боты
     botCount: 24

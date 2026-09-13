@@ -18,6 +18,8 @@ import ru.stoloto.balloon.service.TournamentService;
 
 import java.util.List;
 
+import ru.stoloto.balloon.web.dto.GameDtos;
+
 /**
  * Административное API: управление игровыми параметрами без правки кода.
  *
@@ -147,6 +149,41 @@ public class AdminController {
                 tournamentService.simulationTickCount(),
                 configService.status().appliedRevisions(),
                 configService.configPath().toString());
+    }
+
+    @GetMapping("/tournament")
+    @Operation(summary = "Состояние текущего турнира",
+            description = "Таблица лидеров среди реальных игроков и настроенные призы для админ-панели")
+    public GameDtos.AdminTournamentStatusDto tournamentStatus(AuthContext context) {
+        AdminAccess.requireExpert(context);
+        TournamentService.AdminTournamentStatus status = tournamentService.adminStatus();
+        return new GameDtos.AdminTournamentStatusDto(
+                status.enabled(), status.active(), status.name(), status.tournamentId(),
+                status.endsAt(), status.secondsLeft(), status.participants(), status.prizes(),
+                status.leaders().stream()
+                        .map(entry -> new GameDtos.AdminTournamentLeaderDto(
+                                entry.userId(), entry.nickname(), entry.points(), entry.position()))
+                        .toList());
+    }
+
+    @PostMapping("/tournament/finish")
+    @Operation(summary = "Досрочно завершить турнир и выдать призы",
+            description = """
+                    Фиксирует текущую таблицу, начисляет бонусные баллы победителям по списку
+                    `tournament.prizes` (боты не участвуют), обнуляет игровые очки и открывает
+                    новый турнир с длительностью из конфигурации.
+                    """)
+    public GameDtos.TournamentFinishResultDto finishTournament(AuthContext context) {
+        AdminAccess.requireExpert(context);
+        TournamentService.FinishResult result = tournamentService.finishTournamentNow();
+        return new GameDtos.TournamentFinishResultDto(
+                result.finishedTournamentId(), result.finishedTournamentName(), result.finishedAt(),
+                result.awards().stream()
+                        .map(award -> new GameDtos.TournamentPrizeAwardDto(
+                                award.userId(), award.nickname(), award.position(),
+                                award.points(), award.bonusAwarded()))
+                        .toList(),
+                result.nextTournamentId(), result.nextTournamentName(), result.nextEndsAt());
     }
 
     public record ValidationResponse(boolean valid, List<String> errors) {

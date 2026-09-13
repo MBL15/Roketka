@@ -133,6 +133,13 @@ class CrashMathTest {
     }
 
     @Test
+    @DisplayName("120 шагов по 0.01 дают ровно 1.20, а не 1.19 из-за double")
+    void multiplierFromStepsAvoidsFloatDrift() {
+        assertThat(CrashMath.multiplierFromSteps(120, DELTA)).isEqualTo(1.2);
+        assertThat(CrashMath.multiplierToSteps(1.2, DELTA)).isEqualTo(120L);
+    }
+
+    @Test
     @DisplayName("Уровень считается пройденным по достижении его границы")
     void levelsPassedCountsReachedThresholds() {
         List<Double> levels = List.of(1.20, 1.50, 1.90, 2.40);

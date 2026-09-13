@@ -1037,7 +1037,15 @@
   }
 
   .bet-cards--puzzle .puzzle__cost-value {
-    font-size: 22px;
+    font-size: 20px;
+  }
+
+  .bet-cards--puzzle .puzzle--flex .puzzle__cost-value {
+    font-size: 18px;
+  }
+
+  .bet-cards--puzzle .puzzle--flex .puzzle__index {
+    font-size: 9px;
   }
 
   .bet-cards--puzzle .chip {

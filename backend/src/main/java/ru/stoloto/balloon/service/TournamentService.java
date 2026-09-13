@@ -14,8 +14,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 import ru.stoloto.balloon.config.GameConfig;
 import ru.stoloto.balloon.config.GameConfigService;
 import ru.stoloto.balloon.domain.Tournament;
+import ru.stoloto.balloon.domain.TournamentPrizeAward;
 import ru.stoloto.balloon.domain.UserAccount;
 import ru.stoloto.balloon.game.event.GameEvents;
+import ru.stoloto.balloon.repo.TournamentPrizeAwardRepository;
 import ru.stoloto.balloon.repo.TournamentRepository;
 import ru.stoloto.balloon.repo.UserAccountRepository;
 
@@ -51,6 +53,7 @@ public class TournamentService {
 
     private final UserAccountRepository users;
     private final TournamentRepository tournaments;
+    private final TournamentPrizeAwardRepository prizeAwards;
     private final GameConfigService configService;
     private final ApplicationEventPublisher events;
 
@@ -75,11 +78,13 @@ public class TournamentService {
 
     public TournamentService(UserAccountRepository users,
                              TournamentRepository tournaments,
+                             TournamentPrizeAwardRepository prizeAwards,
                              GameConfigService configService,
                              ApplicationEventPublisher events,
                              PlatformTransactionManager transactionManager) {
         this.users = users;
         this.tournaments = tournaments;
+        this.prizeAwards = prizeAwards;
         this.configService = configService;
         this.events = events;
         this.transactions = new TransactionTemplate(transactionManager);
@@ -276,6 +281,110 @@ public class TournamentService {
         return tournaments.save(created);
     }
 
+    /** Состояние турнира для админ-панели: таблица и настроенные призы. */
+    @Transactional(readOnly = true)
+    public AdminTournamentStatus adminStatus() {
+        GameConfig.TournamentConfig config = configService.current().tournament();
+        TournamentInfo info = info();
+        Optional<Tournament> tournament = tournaments.findFirstByActiveTrueOrderByStartsAtDesc();
+        List<AdminLeaderEntry> leaders = fullRating(null).stream()
+                .filter(entry -> !entry.bot())
+                .limit(Math.max(3, config.prizesOrDefault().size()))
+                .map(entry -> new AdminLeaderEntry(
+                        entry.userId(), entry.displayName(), entry.points(), entry.position()))
+                .toList();
+        return new AdminTournamentStatus(
+                config.enabled(),
+                info.active(),
+                info.name(),
+                tournament.map(Tournament::getId).orElse(null),
+                info.endsAt(),
+                info.secondsLeft(),
+                info.participants(),
+                config.prizesOrDefault(),
+                leaders);
+    }
+
+    /**
+     * Досрочно завершает текущий турнир: фиксирует таблицу, начисляет призы
+     * реальным игрокам, обнуляет очки и открывает новый турнир.
+     */
+    @Transactional
+    public FinishResult finishTournamentNow() {
+        GameConfig.TournamentConfig config = configService.current().tournament();
+        if (!config.enabled()) {
+            throw new IllegalStateException("Турнир отключён в конфигурации");
+        }
+
+        persistAllScores();
+
+        Tournament tournament = tournaments.findFirstByActiveTrueOrderByStartsAtDesc()
+                .orElseThrow(() -> new IllegalStateException("Нет активного турнира для завершения"));
+
+        Instant now = Instant.now();
+        List<Long> prizeAmounts = config.prizesOrDefault();
+        List<GameEvents.RatingEntry> humanLeaders = fullRating(null).stream()
+                .filter(entry -> !entry.bot())
+                .toList();
+
+        List<PrizeAward> awards = new ArrayList<>();
+        for (int place = 0; place < prizeAmounts.size() && place < humanLeaders.size(); place++) {
+            long bonus = prizeAmounts.get(place);
+            if (bonus <= 0) {
+                continue;
+            }
+            GameEvents.RatingEntry leader = humanLeaders.get(place);
+            UserAccount user = users.findById(leader.userId())
+                    .orElseThrow(() -> new IllegalStateException("Игрок " + leader.userId() + " не найден"));
+            user.creditBonus(bonus);
+            user.recordBonusEarned(bonus);
+
+            int position = place + 1;
+            prizeAwards.save(new TournamentPrizeAward(
+                    tournament.getId(), user.getId(), user.getNickname(), position,
+                    leader.points(), bonus, now));
+            awards.add(new PrizeAward(
+                    user.getId(), user.getNickname(), position, leader.points(), bonus));
+        }
+
+        long finishedTournamentId = tournament.getId();
+        String finishedName = tournament.getName();
+        tournament.finish(now);
+
+        resetAllScores();
+
+        Tournament next = new Tournament(config.name(), now, now.plus(Duration.ofDays(config.durationDays())));
+        tournaments.save(next);
+
+        ratingChanged = true;
+        events.publishEvent(new GameEvents.RatingUpdated(liveRating(null)));
+
+        return new FinishResult(
+                finishedTournamentId, finishedName, now, awards, next.getId(), next.getName(), next.getEndsAt());
+    }
+
+    /** Сбрасывает все накопленные очки перед новым турниром. */
+    private void resetAllScores() {
+        for (Map.Entry<Long, AtomicLong> entry : livePoints.entrySet()) {
+            entry.getValue().set(0);
+            dirty.add(entry.getKey());
+        }
+        for (UserAccount user : users.findAll()) {
+            user.setGamePoints(0);
+        }
+        dirty.clear();
+    }
+
+    /** Синхронно записывает актуальные очки всех участников перед подведением итогов. */
+    private void persistAllScores() {
+        for (Map.Entry<Long, AtomicLong> entry : livePoints.entrySet()) {
+            long userId = entry.getKey();
+            long points = entry.getValue().get();
+            users.findById(userId).ifPresent(user -> user.setGamePoints(points));
+        }
+        dirty.clear();
+    }
+
     @Transactional(readOnly = true)
     public TournamentInfo info() {
         GameConfig.TournamentConfig config = configService.current().tournament();
@@ -330,5 +439,21 @@ public class TournamentService {
 
     public record TournamentInfo(boolean active, String name, Instant endsAt,
                                  long secondsLeft, int participants) {
+    }
+
+    public record AdminLeaderEntry(long userId, String nickname, long points, int position) {
+    }
+
+    public record AdminTournamentStatus(boolean enabled, boolean active, String name, Long tournamentId,
+                                        Instant endsAt, long secondsLeft, int participants,
+                                        List<Long> prizes, List<AdminLeaderEntry> leaders) {
+    }
+
+    public record PrizeAward(long userId, String nickname, int position, long points, long bonusAwarded) {
+    }
+
+    public record FinishResult(long finishedTournamentId, String finishedTournamentName, Instant finishedAt,
+                               List<PrizeAward> awards, long nextTournamentId, String nextTournamentName,
+                               Instant nextEndsAt) {
     }
 }

@@ -19,7 +19,7 @@ import { isLoginRulesDismissed } from './utils/loginRules';
 export function App(): JSX.Element {
   const { phase, theme, player, notify, setup, themeOf } = useGame();
   const { isLight } = useColorScheme();
-  const [adminOpen, setAdminOpen] = useState(() => window.location.hash === '#admin');
+  const [adminOpen, setAdminOpen] = useState(() => window.location.hash.startsWith('#admin'));
   const [loginRulesOpen, setLoginRulesOpen] = useState(false);
   const [skySeed, setSkySeed] = useState(() => Date.now());
   const loginRulesShownForRef = useRef<number | null>(null);
@@ -39,7 +39,7 @@ export function App(): JSX.Element {
   }, [phase]);
 
   useEffect(() => {
-    const onHashChange = () => setAdminOpen(window.location.hash === '#admin');
+    const onHashChange = () => setAdminOpen(window.location.hash.startsWith('#admin'));
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);

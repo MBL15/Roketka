@@ -68,11 +68,17 @@ public class RoundController {
     @Operation(summary = "Забрать выигрыш",
             description = """
                     Коэффициент берётся из серверного времени на момент обработки запроса, а не из
-                    тела запроса. Доступно с ×1 и до краха. Шар после
-                    фиксации продолжает лететь, но сумма выигрыша больше не меняется.
+                    тела запроса. Для автозабора можно передать `targetMultiplier`: если цель уже
+                    достигнута, выплата фиксируется по ней, а не по текущему коэффициенту.
+                    Доступно с ×1 и до краха. Шар после фиксации продолжает лететь, но сумма
+                    выигрыша больше не меняется.
                     """)
-    public GameDtos.CashoutResponse cashout(AuthContext context, @PathVariable long roundId) {
-        return roundService.cashout(context.user(), roundId);
+    public GameDtos.CashoutResponse cashout(AuthContext context,
+                                            @PathVariable long roundId,
+                                            @RequestBody(required = false) GameDtos.CashoutRequest request) {
+        Double target = request == null ? null : request.targetMultiplier();
+        Integer targetSteps = request == null ? null : request.targetSteps();
+        return roundService.cashout(context.user(), roundId, target, targetSteps);
     }
 
     @GetMapping("/{roundId}/result")

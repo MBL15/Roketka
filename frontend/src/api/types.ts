@@ -371,6 +371,7 @@ export interface AdminConfig {
     durationDays: number;
     liveRatingSize: number;
     anonymizeNames: boolean;
+    prizes?: number[];
     simulation: {
       enabled: boolean;
       botCount: number;
@@ -435,6 +436,43 @@ export interface RuntimeStats {
   simulationTicks: number;
   configRevision: number;
   configPath: string;
+}
+
+export interface AdminTournamentLeader {
+  userId: number;
+  nickname: string;
+  points: number;
+  position: number;
+}
+
+export interface AdminTournamentStatus {
+  enabled: boolean;
+  active: boolean;
+  name: string;
+  tournamentId: number | null;
+  endsAt: string | null;
+  secondsLeft: number;
+  participants: number;
+  prizes: number[];
+  leaders: AdminTournamentLeader[];
+}
+
+export interface TournamentPrizeAward {
+  userId: number;
+  nickname: string;
+  position: number;
+  points: number;
+  bonusAwarded: number;
+}
+
+export interface TournamentFinishResult {
+  finishedTournamentId: number;
+  finishedTournamentName: string;
+  finishedAt: string;
+  awards: TournamentPrizeAward[];
+  nextTournamentId: number;
+  nextTournamentName: string;
+  nextEndsAt: string;
 }
 
 export interface ApiErrorBody {

@@ -262,6 +262,8 @@ public class GameConfigYamlWriter {
                 "элементов в строке рейтинга над игрой");
         line(out, "  ", "anonymizeNames", String.valueOf(tournament.anonymizeNames()),
                 "маскировать первые 3 символа чужих имён");
+        line(out, "  ", "prizes", formatLongList(tournament.prizesOrDefault()),
+                "бонусные баллы за 1–3 места (боты не получают)");
         GameConfig.SimulationConfig simulation = tournament.simulation();
         out.append("  simulation:\n");
         line(out, "    ", "enabled", String.valueOf(simulation.enabled()),
@@ -324,6 +326,17 @@ public class GameConfigYamlWriter {
     }
 
     private static String ints(List<Integer> values) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < values.size(); i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(values.get(i));
+        }
+        return sb.append(']').toString();
+    }
+
+    private static String formatLongList(List<Long> values) {
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < values.size(); i++) {
             if (i > 0) {

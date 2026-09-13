@@ -139,6 +139,10 @@ public final class GameDtos {
                                 double maxMultiplier, List<Double> levelMultipliers) {
     }
 
+    /** Необязательное тело cashout: цель автозабора (targetSteps точнее targetMultiplier). */
+    public record CashoutRequest(Double targetMultiplier, Integer targetSteps) {
+    }
+
     public record CashoutResponse(long roundId, double multiplier, long payout,
                                   long balance, int pointsAwarded, int totalPoints,
                                   String message,
@@ -209,6 +213,24 @@ public final class GameDtos {
 
     public record TournamentTableDto(TournamentHeaderDto header, List<RatingEntryDto> top,
                                      List<RatingEntryDto> rest, RatingEntryDto current) {
+    }
+
+    public record AdminTournamentStatusDto(boolean enabled, boolean active, String name, Long tournamentId,
+                                           Instant endsAt, long secondsLeft, int participants,
+                                           List<Long> prizes, List<AdminTournamentLeaderDto> leaders) {
+    }
+
+    public record AdminTournamentLeaderDto(long userId, String nickname, long points, int position) {
+    }
+
+    public record TournamentFinishResultDto(long finishedTournamentId, String finishedTournamentName,
+                                            Instant finishedAt, List<TournamentPrizeAwardDto> awards,
+                                            long nextTournamentId, String nextTournamentName,
+                                            Instant nextEndsAt) {
+    }
+
+    public record TournamentPrizeAwardDto(long userId, String nickname, int position, long points,
+                                          long bonusAwarded) {
     }
 
     // ---------------------------------------------------------- проверяемость

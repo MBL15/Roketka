@@ -3,7 +3,15 @@ import { api } from '../api/client';
 import type { CashoutResult } from '../api/types';
 import { gameSocket } from '../api/socket';
 import { audio } from '../audio/AudioEngine';
-import { baseMultiplierAt, cashoutUnlocked, levelsPassedAt, quantizeDown, type Flight } from './flight';
+import {
+  baseMultiplierAt,
+  cashoutUnlocked,
+  levelsPassedAt,
+  multiplierFromSteps,
+  multiplierToSteps,
+  quantizeDown,
+  type Flight,
+} from './flight';
 
 /**
  * Состояние летящего шара.
@@ -55,11 +63,16 @@ export function useFlight(
   onFinished: () => void,
   autoCashoutMultiplier: number | null = null,
   onCashout?: (result: CashoutResult) => void,
-): FlightState & { cashout: () => void } {
+): FlightState & { cashout: (targetSteps?: number) => void } {
   const [state, setState] = useState<FlightState>(() => initialState(flight));
 
   const finishedRef = useRef(false);
   const popupSeq = useRef(0);
+  const autoTriggered = useRef(false);
+  const autoTargetStepsRef = useRef<number | null>(
+    autoCashoutMultiplier === null ? null : multiplierToSteps(quantizeDown(autoCashoutMultiplier, flight.delta), flight.delta),
+  );
+  const cashoutRef = useRef<(targetSteps?: number) => void>(() => undefined);
   // Сколько уровней уже озвучено локально: не даёт повторить звук на том же
   // уровне, когда серверный тик и локальная экстраполяция расходятся на кадр.
   const announcedLevel = useRef(flight.initialLevelsPassed);
@@ -86,11 +99,25 @@ export function useFlight(
     let frame = 0;
 
     const render = () => {
+      const now = Date.now();
+      const base = baseMultiplierAt(flight, now);
+      const targetSteps = autoTargetStepsRef.current;
+
+      if (
+        targetSteps !== null
+        && !autoTriggered.current
+        && !finishedRef.current
+        && cashoutUnlocked(base)
+        && base + 1e-9 >= multiplierFromSteps(targetSteps, flight.delta)
+      ) {
+        autoTriggered.current = true;
+        cashoutRef.current(targetSteps);
+      }
+
       setState((current) => {
         if (current.crashed) {
           return current;
         }
-        const base = baseMultiplierAt(flight, Date.now());
         const displayed = current.boostApplied
           ? quantizeDown(base * flight.boostValue, flight.delta)
           : base;
@@ -242,9 +269,7 @@ export function useFlight(
     return () => window.clearTimeout(timer);
   }, [flight, finish]);
 
-  const autoTriggered = useRef(false);
-
-  const cashout = useCallback(() => {
+  const cashout = useCallback((targetSteps?: number) => {
     setState((current) => {
       if (current.cashedOut || current.crashed) {
         return current;
@@ -255,7 +280,7 @@ export function useFlight(
     });
 
     void api
-      .cashout(flight.roundId)
+      .cashout(flight.roundId, targetSteps)
       .then((result) => {
         audio.cashout();
         onCashout?.(result);
@@ -274,26 +299,7 @@ export function useFlight(
       });
   }, [flight.roundId, onCashout]);
 
-  // Автозабор: срабатывает с ×1, когда коэффициент достиг цели.
-  useEffect(() => {
-    if (autoCashoutMultiplier === null || autoTriggered.current) {
-      return;
-    }
-    if (state.cashedOut || state.crashed || !cashoutUnlocked(state.baseMultiplier)) {
-      return;
-    }
-    if (state.multiplier >= autoCashoutMultiplier) {
-      autoTriggered.current = true;
-      cashout();
-    }
-  }, [
-    autoCashoutMultiplier,
-    cashout,
-    state.cashedOut,
-    state.crashed,
-    state.baseMultiplier,
-    state.multiplier,
-  ]);
+  cashoutRef.current = cashout;
 
   return { ...state, cashout };
 }

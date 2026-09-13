@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCountdown } from '../hooks/useCountdown';
 import { Balloon } from '../components/Balloon';
 import { CrashShell } from '../components/CrashShell';
@@ -40,6 +40,7 @@ export function BetSelectScreen(): JSX.Element {
   const [rulesOpen, setRulesOpen] = useState(false);
   const [tournamentOpen, setTournamentOpen] = useState(false);
   const [autoValue, setAutoValue] = useState(() => autoCashoutMultiplier?.toFixed(2) ?? '');
+  const betPanelRef = useRef<HTMLDivElement>(null);
 
   const tournamentActive = Boolean(setup?.tournament.active);
   const tournamentSecondsLeft = useCountdown(setup?.tournament.secondsLeft ?? 0, tournamentActive);
@@ -98,6 +99,25 @@ export function BetSelectScreen(): JSX.Element {
     theme,
     unlockMultiplier,
   ]);
+
+  const selectedKey =
+    selected?.kind === 'preset'
+      ? `preset-${selected.optionId}`
+      : selected?.kind === 'custom'
+        ? 'custom'
+        : selected?.kind === 'full'
+          ? 'full'
+          : null;
+
+  useEffect(() => {
+    if (!selectedKey) {
+      return undefined;
+    }
+    const frame = window.requestAnimationFrame(() => {
+      betPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [selectedKey]);
 
   if (!setup || !player || !theme) {
     return <></>;
@@ -292,7 +312,7 @@ export function BetSelectScreen(): JSX.Element {
           />
         </div>
 
-        <div className="bet-panel">
+        <div className="bet-panel" ref={betPanelRef}>
           <div className="bet-panel__fields">
             <div className="bet-panel__field">
               <span className="bet-panel__label">Ставка</span>

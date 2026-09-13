@@ -150,7 +150,7 @@ public class RoundEngine {
      * Фиксация выигрыша по авторитетному серверному коэффициенту.
      * Клиент не передаёт коэффициент — он его только показывает.
      */
-    public ActiveRound.CashoutOutcome cashout(long roundId, long userId) {
+    public ActiveRound.CashoutOutcome cashout(long roundId, long userId, Double targetMultiplier, Integer targetSteps) {
         ActiveRound round = active.get(roundId);
         if (round == null) {
             return ActiveRound.CashoutOutcome.rejected("Раунд не найден среди активных");
@@ -158,7 +158,7 @@ public class RoundEngine {
         if (round.userId() != userId) {
             return ActiveRound.CashoutOutcome.rejected("Раунд принадлежит другому игроку");
         }
-        return round.cashout(System.currentTimeMillis());
+        return round.cashout(System.currentTimeMillis(), targetMultiplier, targetSteps);
     }
 
     /**

@@ -39,13 +39,24 @@ interface FlyingProps {
 }
 
 function Flying({ flight, setup, player, rating, onFinished }: FlyingProps): JSX.Element {
-  const { autoCashoutMultiplier, applyCashoutProgression } = useGame();
+  const { autoCashoutMultiplier, applyCashoutProgression, consumeCashoutScroll } = useGame();
   const { isLight } = useColorScheme();
   const [hintVisible, setHintVisible] = useState(false);
   const state = useFlight(flight, onFinished, autoCashoutMultiplier, applyCashoutProgression);
+  const cashoutRef = useRef<HTMLDivElement>(null);
 
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  useEffect(() => {
+    if (!consumeCashoutScroll()) {
+      return undefined;
+    }
+    const frame = window.requestAnimationFrame(() => {
+      cashoutRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [consumeCashoutScroll, flight.roundId]);
 
   const unlocked = cashoutUnlocked(state.baseMultiplier);
   const stage = multiplierStage(state.levelsPassed);
@@ -131,7 +142,7 @@ function Flying({ flight, setup, player, rating, onFinished }: FlyingProps): JSX
             </div>
           </div>
 
-          <div className="game__action">
+          <div className="game__action" ref={cashoutRef}>
             {state.cashedOut ? (
               <div className="cashed panel panel--pad">
                 <span className="eyebrow">Выигрыш зафиксирован</span>
@@ -146,7 +157,7 @@ function Flying({ flight, setup, player, rating, onFinished }: FlyingProps): JSX
                   type="button"
                   className={`cashout btn--lg${unlocked ? ' cashout--live' : ''}`}
                   disabled={!unlocked || state.crashed}
-                  onClick={state.cashout}
+                  onClick={() => state.cashout()}
                 >
                   <span className="cashout__label">Забрать</span>
                   <span className="cashout__amount num">

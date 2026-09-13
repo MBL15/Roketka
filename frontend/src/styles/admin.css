@@ -985,3 +985,56 @@
     padding-bottom: 140px;
   }
 }
+
+.admin__tournament-status {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.admin__tournament-leaders {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.admin__tournament-leader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+  background: var(--admin-elevated);
+}
+
+.admin__tournament-leader-place {
+  width: 1.6rem;
+  font-weight: 700;
+  color: var(--admin-accent);
+}
+
+.admin__tournament-leader-prize {
+  color: var(--admin-green);
+  font-weight: 600;
+}
+
+.admin__tournament-result {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-left: 3px solid var(--admin-accent);
+  background: var(--admin-accent-dim);
+}
+
+.admin__tournament-awards {
+  margin: 8px 0 0;
+  padding-left: 1.1rem;
+}
+
+.admin__tournament-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

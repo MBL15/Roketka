@@ -1,10 +1,18 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { ApiError, api } from '../api/client';
-import type { AdminConfig, AdminTheme, ConfigStatus, RuntimeStats, SimulationReport } from '../api/types';
+import type {
+  AdminConfig,
+  AdminTheme,
+  AdminTournamentStatus,
+  ConfigStatus,
+  RuntimeStats,
+  SimulationReport,
+  TournamentFinishResult,
+} from '../api/types';
 import { formatMultiplier, formatNumber, formatPercent } from '../utils/format';
 import { AdminSearch } from './AdminSearch';
 import { AdminTopMenu } from './AdminTopMenu';
-import { adminTabLabel, type AdminSearchEntry, type AdminTab } from './adminSettingsSearch';
+import { adminTabLabel, type AdminSearchEntry, type AdminTab, parseAdminHashTab } from './adminSettingsSearch';
 
 type ThemeSectionKind = 'general' | 'levels' | 'economy';
 
@@ -67,7 +75,7 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
   const [errors, setErrors] = useState<string[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [tab, setTab] = useState<AdminTab>('green-general');
+  const [tab, setTab] = useState<AdminTab>(() => parseAdminHashTab(window.location.hash));
   const [highlightFieldId, setHighlightFieldId] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
@@ -86,6 +94,12 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
   useEffect(() => {
     void reload().catch(() => setMessage('Не удалось загрузить конфигурацию'));
   }, [reload]);
+
+  useEffect(() => {
+    const onHashChange = () => setTab(parseAdminHashTab(window.location.hash));
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   const dirty = draft !== null && saved !== null && JSON.stringify(draft) !== JSON.stringify(saved);
 
@@ -286,7 +300,9 @@ export function AdminScreen({ onExit }: { onExit: () => void }): JSX.Element {
 
           {tab === 'rewards' && <RewardEditor config={draft} onChange={setDraft} />}
           {tab === 'upsell' && <UpsellEditor config={draft} onChange={setDraft} />}
-          {tab === 'tournament' && <TournamentEditor config={draft} onChange={setDraft} />}
+          {tab === 'tournament' && (
+            <TournamentEditor config={draft} onChange={setDraft} onMessage={setMessage} />
+          )}
           {tab === 'interface' && <SessionEditor config={draft} onChange={setDraft} />}
           {tab === 'sim' && <Simulator draft={draft} dirty={dirty} />}
         </div>
@@ -762,17 +778,25 @@ function UpsellEditor({
   );
 }
 
+const DEFAULT_TOURNAMENT_PRIZES = [1000, 500, 250];
+
 function TournamentEditor({
   config,
   onChange,
+  onMessage,
 }: {
   config: AdminConfig;
   onChange: (config: AdminConfig) => void;
+  onMessage: (message: string | null) => void;
 }): JSX.Element {
   const patch = useConfigPatch(config, onChange);
+  const prizes = config.tournament.prizes?.length
+    ? config.tournament.prizes
+    : DEFAULT_TOURNAMENT_PRIZES;
 
   return (
     <div className="admin__grid admin__grid--single">
+      <TournamentFinishPanel onMessage={onMessage} configuredPrizes={prizes} />
       <Card title="Турнир" hint="Живой рейтинг над игровым экраном и таблица лидеров." wide>
         <Toggle
           fieldId="tournament.enabled"
@@ -836,8 +860,155 @@ function TournamentEditor({
             })
           }
         />
+        <label className="field">
+          <span className="field__label">Призы за места (бонусные баллы)</span>
+          <span className="text-xs muted field__hint">
+            Боты в призовую таблицу не попадают. Сначала сохраните конфигурацию, затем завершите турнир.
+          </span>
+          <NumberList
+            fieldId="tournament.prizes"
+            values={prizes}
+            step={50}
+            suffix="б."
+            onChange={(values) =>
+              patch('tournament', {
+                ...config.tournament,
+                prizes: values,
+              })
+            }
+          />
+        </label>
       </Card>
     </div>
+  );
+}
+
+function TournamentFinishPanel({
+  onMessage,
+  configuredPrizes,
+}: {
+  onMessage: (message: string | null) => void;
+  configuredPrizes: number[];
+}): JSX.Element {
+  const [status, setStatus] = useState<AdminTournamentStatus | null>(null);
+  const [lastResult, setLastResult] = useState<TournamentFinishResult | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadStatus = useCallback(async () => {
+    try {
+      const data = await api.adminTournamentStatus();
+      setStatus(data);
+      setError(null);
+    } catch {
+      setError('Не удалось загрузить состояние турнира');
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadStatus();
+  }, [loadStatus]);
+
+  const finish = async () => {
+    const activePrizes = status?.prizes?.length ? status.prizes : configuredPrizes;
+    const prizeSummary = activePrizes
+      .map((amount, index) => `${index + 1} место — ${formatNumber(amount)} б.`)
+      .join(', ');
+    if (
+      !window.confirm(
+        `Завершить «${status?.name ?? 'турнир'}» сейчас?\n\nПризы (из сохранённой конфигурации): ${prizeSummary}.\n\nОчки всех участников обнулятся, откроется новый турнир.`,
+      )
+    ) {
+      return;
+    }
+
+    setBusy(true);
+    setError(null);
+    onMessage(null);
+    try {
+      const result = await api.adminFinishTournament();
+      setLastResult(result);
+      onMessage(`Турнир «${result.finishedTournamentName}» завершён, призы выданы`);
+      await loadStatus();
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : 'Не удалось завершить турнир';
+      setError(message);
+      onMessage(message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <Card
+      fieldId="tournament.finish"
+      title="Завершение турнира"
+      hint="Досрочно закрывает текущий турнир, начисляет призы победителям и запускает новый."
+      wide
+    >
+      {error && <p className="text-sm negative">{error}</p>}
+
+      {status && (
+        <div className="admin__tournament-status">
+          <p className="text-sm">
+            <strong>{status.name}</strong>
+            {status.active ? ' · идёт' : ' · завершён'}
+            {status.endsAt && status.active && (
+              <span className="muted"> · до конца ~{formatNumber(status.secondsLeft)} с</span>
+            )}
+          </p>
+          <p className="text-xs muted">
+            Участников в рейтинге: {formatNumber(status.participants)} · призовых мест:{' '}
+            {formatNumber(status.prizes.length)}
+          </p>
+
+          {status.leaders.length > 0 ? (
+            <ol className="admin__tournament-leaders">
+              {status.leaders.map((leader, index) => (
+                <li key={leader.userId} className="admin__tournament-leader">
+                  <span className="num admin__tournament-leader-place">{leader.position}</span>
+                  <span className="grow">{leader.nickname}</span>
+                  <span className="num muted">{formatNumber(leader.points)} очк.</span>
+                  <span className="num admin__tournament-leader-prize">
+                    +{formatNumber(status.prizes[index] ?? configuredPrizes[index] ?? 0)} б.
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="text-sm muted">Пока нет реальных игроков в таблице.</p>
+          )}
+        </div>
+      )}
+
+      {lastResult && lastResult.awards.length > 0 && (
+        <div className="admin__tournament-result">
+          <p className="eyebrow">Последняя выдача призов</p>
+          <ul className="admin__tournament-awards">
+            {lastResult.awards.map((award) => (
+              <li key={`${award.userId}-${award.position}`}>
+                #{award.position} {award.nickname}: +{formatNumber(award.bonusAwarded)} б. (
+                {formatNumber(award.points)} очк.)
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="admin__tournament-actions">
+        <button
+          type="button"
+          className="btn btn--accent"
+          disabled={busy || !status?.enabled || !status.active}
+          onClick={() => void finish()}
+        >
+          {busy ? 'Завершаем…' : 'Завершить турнир и выдать призы'}
+        </button>
+        <button type="button" className="btn btn--ghost" disabled={busy} onClick={() => void loadStatus()}>
+          Обновить таблицу
+        </button>
+      </div>
+    </Card>
   );
 }
 

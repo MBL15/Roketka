@@ -126,6 +126,13 @@ export const ADMIN_SEARCH_INDEX: AdminSearchEntry[] = [
   entry('tournament', 'Турнир', 'Скрывать имена соперников', 'tournament.anonymizeNames', 'anonymizeNames', ['аноним', 'маска']),
   entry('tournament', 'Турнир', 'Добавлять ботов в таблицу', 'tournament.simulation.enabled', 'simulation.enabled', ['боты']),
   entry('tournament', 'Турнир', 'Количество ботов', 'tournament.botCount', 'botCount', ['боты']),
+  entry('tournament', 'Турнир', 'Призы за места', 'tournament.prizes', 'prizes', ['награда', 'приз', 'бонус']),
+  entry('tournament', 'Турнир', 'Завершить турнир и выдать призы', 'tournament.finish', undefined, [
+    'завершить',
+    'закрыть',
+    'призы',
+    'финиш',
+  ]),
   entry('interface', 'Интерфейс и демо', 'Автовозврат с экрана результата', 'session.resultIdleTimeoutSeconds', 'resultIdleTimeoutSeconds', ['таймаут', 'результат']),
   entry('interface', 'Интерфейс и демо', 'Длительность подсказки новичку', 'session.onboardingHintSeconds', 'onboardingHintSeconds', ['подсказка', 'онбординг']),
   entry('interface', 'Интерфейс и демо', 'Раундов в истории', 'session.historySize', 'historySize', ['история', 'лента']),
@@ -167,6 +174,30 @@ export function searchAdminSettings(query: string, limit = 10): AdminSearchEntry
   return ADMIN_SEARCH_INDEX.filter((item) => scoreEntry(item, tokens) > 0)
     .sort((left, right) => scoreEntry(right, tokens) - scoreEntry(left, tokens))
     .slice(0, limit);
+}
+
+const ADMIN_TABS = new Set<AdminTab>([
+  'green-general',
+  'green-levels',
+  'green-economy',
+  'red-general',
+  'red-levels',
+  'red-economy',
+  'rewards',
+  'upsell',
+  'tournament',
+  'interface',
+  'sim',
+]);
+
+/** `#admin` или `#admin/tournament` открывает нужную вкладку админки. */
+export function parseAdminHashTab(hash: string): AdminTab {
+  const match = hash.match(/^#admin(?:\/([a-z-]+))?$/);
+  const candidate = match?.[1] as AdminTab | undefined;
+  if (candidate && ADMIN_TABS.has(candidate)) {
+    return candidate;
+  }
+  return 'green-general';
 }
 
 export function adminTabLabel(tab: AdminTab): string {

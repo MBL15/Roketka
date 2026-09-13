@@ -8,6 +8,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import ru.stoloto.balloon.config.GameConfigService;
 import ru.stoloto.balloon.config.TestConfigs;
 import ru.stoloto.balloon.game.event.GameEvents;
+import ru.stoloto.balloon.repo.TournamentPrizeAwardRepository;
 import ru.stoloto.balloon.repo.TournamentRepository;
 import ru.stoloto.balloon.repo.UserAccountRepository;
 
@@ -41,6 +42,7 @@ class TournamentServiceTest {
         service = new TournamentService(
                 mock(UserAccountRepository.class),
                 mock(TournamentRepository.class),
+                mock(TournamentPrizeAwardRepository.class),
                 configService,
                 events,
                 mock(PlatformTransactionManager.class));
