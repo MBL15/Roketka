@@ -1013,15 +1013,16 @@
   .bet-cards--puzzle .puzzle__content {
     min-height: 0;
     height: 100%;
-    padding: 18% 16% 14% !important;
-    justify-content: space-between;
-    gap: 0.1em;
+    padding: 16% 14% 14% !important;
+    justify-content: center;
+    gap: 0.15em;
     transform: none !important;
   }
 
-  .bet-cards--puzzle .puzzle:not(.puzzle--flex) .puzzle__content {
+  .bet-cards--puzzle .puzzle--flex .puzzle__content {
     justify-content: center;
-    gap: 0.15em;
+    gap: 0.28em;
+    padding: 14% 14% 12% !important;
   }
 
   .bet-cards--puzzle .puzzle__note {
@@ -1049,8 +1050,7 @@
   }
 
   .bet-cards--puzzle .puzzle--flex .puzzle__cost {
-    flex: 1;
-    min-height: 0;
+    flex: 0 0 auto;
     justify-content: center;
   }
 
@@ -1064,17 +1064,17 @@
 
   /* tab↑ tab← slot→ flat↓ */
   .bet-cards--puzzle .puzzle--custom.puzzle--shape-4 .puzzle__content {
-    padding: 22% 18% 12% 20% !important;
+    padding: 15% 16% 11% 17% !important;
   }
 
   /* tab↑ tab← flat→ flat↓ */
   .bet-cards--puzzle .puzzle--flex.puzzle--shape-5 .puzzle__content {
-    padding: 22% 16% 12% 20% !important;
+    padding: 15% 14% 11% 17% !important;
   }
 
   .bet-cards--puzzle .puzzle--flex .puzzle__foot {
     flex-shrink: 0;
-    margin-top: 0.08em;
+    margin-top: 0;
   }
 
   /* Декоративный orb бустера не должен перекрывать текст */
